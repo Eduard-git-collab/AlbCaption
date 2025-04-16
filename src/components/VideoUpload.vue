@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { supabase } from '../supabaseClient.js';
+import { supabase } from '../lib/supabase/supabaseClient';
 
 // Reactive variables
 const selectedFile = ref(null);
