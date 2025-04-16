@@ -1,4 +1,5 @@
 <script setup>
+/*
 import { ref } from 'vue';
 import { supabase } from '../lib/supabase/supabaseClient';
 
@@ -128,6 +129,8 @@ function resetFileInput() {
         fileInputRef.value.value = null;
     }
 }
+
+*/
 </script>
 
 <template>

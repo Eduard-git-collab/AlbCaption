@@ -1,7 +1,9 @@
 <script setup>
 
 import VideoUpload from './components/VideoUpload.vue'
-import supabaseTest from './components/supabaseTest.vue';
+import NavBar from './components/NavBar.vue'
+import HeroSection from './components/HeroSection.vue'
+import Videoupld from './components/Videoupld.vue'
 
 
 </script>
@@ -24,7 +26,37 @@ import supabaseTest from './components/supabaseTest.vue';
       Footer Area Placeholder
     </footer>
   </div>
-  
-  <supabaseTest />
+
+
+  <div class="h-fit w-screen overflow-hidden scroll-smooth">
+    
+    <NavBar/>
+    <HeroSection/>
+    <Videoupld />
+
+    <div class="w-screen h-fit">
+      <div class="w-full h-full p-2 hidden">
+        <div class="flex flex-col gap-3 justify-center items-center">
+          <div>
+            <h1 class="text-6xl">Upload your video</h1>
+            <p class="text-xl text-center font-medium">
+              A maximum limit of 50mb (free tier)
+            </p>
+          </div>
+          <input type="file" accept="video/*" @change="handleFileChange" />
+          <button
+            @click="uploadVideo"
+            class="px-4 py-2 bg-violet-500 text-white rounded"
+            :disabled="!videoFile"
+          >
+            Upload Video
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
 
 </template>
+
