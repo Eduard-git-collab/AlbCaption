@@ -3,7 +3,7 @@
 import VideoUpload from './components/VideoUpload.vue'
 import NavBar from './components/NavBar.vue'
 import HeroSection from './components/HeroSection.vue'
-import Videoupld from './components/Videoupld.vue'
+import Upload from './components/Upload.vue'
 
 
 </script>
@@ -32,7 +32,7 @@ import Videoupld from './components/Videoupld.vue'
     
     <NavBar/>
     <HeroSection/>
-    <Videoupld />
+    <Upload />
 
     <div class="w-screen h-fit">
       <div class="w-full h-full p-2 hidden">
