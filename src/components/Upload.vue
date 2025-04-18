@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center gap-4 mt-8 h-full justify-center">
+  <div class="flex flex-col items-center gap-4 mt-8 min-h-screen justify-center">
     <input
       ref="fileInput"
       type="file"

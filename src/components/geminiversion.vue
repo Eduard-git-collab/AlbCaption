@@ -1,4 +1,4 @@
-<script setup>
+<!-- <script setup>
 /*
 import { ref } from 'vue';
 import { supabase } from '../lib/supabase/supabaseClient';
@@ -247,4 +247,4 @@ function resetFileInput() {
 .btn-secondary { background-color: #f8f9fa; color: #333; border-color: #dee2e6;}
 .btn-secondary:hover:not(:disabled) { background-color: #e9ecef; }
 .btn-large { padding: 15px 30px; font-size: 1.1rem;}
-</style>
+</style> -->

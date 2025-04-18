@@ -1,6 +1,6 @@
 <template>
     <div class="p-4">
-        <div class="w-full h-screen bg-[#060a23] rounded-3xl">
+        <div class="w-full h-screen bg-[#060A23] bg-gradient-to-br from-[rgba(166,132,255,0.2)] via-transparent via-60% rounded-3xl">
           <div class="flex flex-col justify-center items-center h-full">
             <div class="flex flex-col gap-2 my-10">
               <h1 class="text-6xl font-bold text-white text-center">
