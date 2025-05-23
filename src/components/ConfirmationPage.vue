@@ -6,18 +6,14 @@ const route = useRoute();
 const router = useRouter();
 const email = ref('');
 
-// Initialize on mount
 onMounted(() => {
-  // Get email from route params or query
   email.value = route.params.email || route.query.email || '';
   
   if (!email.value) {
-    // If no email is provided, redirect to signup
     router.push('/signup');
   }
 });
 
-// Function to get email provider details based on domain
 const getEmailProvider = computed(() => {
   if (!email.value) return null;
   
@@ -30,7 +26,6 @@ const getEmailProvider = computed(() => {
     known: false
   };
   
-  // Common email providers
   const providers = {
     'gmail.com': {
       name: 'Gmail',
@@ -76,14 +71,12 @@ const getEmailProvider = computed(() => {
     }
   };
   
-  // Check if domain is a known provider
   for (const [providerDomain, provider] of Object.entries(providers)) {
     if (domain.includes(providerDomain)) {
       return provider;
     }
   }
   
-  // Unknown provider
   return {
     name: domain,
     url: `https://${domain}`,
@@ -92,7 +85,6 @@ const getEmailProvider = computed(() => {
   };
 });
 
-// Go back to home page
 const goToHome = () => {
   router.push('/');
 };
@@ -151,8 +143,6 @@ const goToHome = () => {
 </template>
 
 <style scoped>
-/* Add this file to your project if needed */
-
 .email-logo {
   max-height: 40px;
   max-width: 120px;

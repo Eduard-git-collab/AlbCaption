@@ -1,4 +1,21 @@
+<script setup>
+import ModalDialog from './items/ModalDialog.vue'
+</script>
+
 <template>
+  <ModalDialog 
+    v-if="modalVisible" 
+    title="Sign In Required"
+    :message="modalMessage"
+    icon="info"
+    confirm-text="Sign Up"
+    cancel-text="Log In"
+    confirm-variant="primary"
+    size="md"
+    @confirm="handleSignUp"
+    @cancel="handleLogin"
+    @close="modalVisible = false"
+  />
   <div class="min-h-screen bg-gray-50">
     <div class="container mx-auto px-4 py-6">
       
@@ -40,7 +57,7 @@
 
         <div v-if="file && (!processingState || processingState === 'error')" class="w-full">
           <button
-            @click="uploadFile"
+            @click="checkAuthAndUpload"
             :disabled="isUploading || processingState === 'complete'"
             class="w-full py-2 px-4 rounded-md font-medium text-white transition-colors"
             :class="[
@@ -216,7 +233,7 @@
             </div>
           </div>
 
-          <!-- Video Panel - Now takes 2/5 of the width -->
+          <!-- Video Panel -->
           <div class="lg:col-span-2 bg-white rounded-lg shadow-md overflow-hidden">
             <div class="bg-gray-100 border-b border-gray-200 px-4 py-3">
               <h2 class="text-lg font-semibold text-gray-800">Video Preview</h2>
@@ -369,7 +386,15 @@ export default {
       processingState: null, 
       processingStep: null, 
       errorMessage: null,
-      apiUrl: 'https://albcaptions-api.onrender.com',
+      apiUrl: 'http://localhost:3000',
+      
+      //User data
+      userId: null,
+      userName: 'No User',
+
+      //Modal dialog properties
+      modalVisible: false,
+      modalMessage: "You need to log in to upload videos",
       
       // Transcription related properties
       transcript: null,
@@ -392,8 +417,8 @@ export default {
       // New properties for the combined view
       transcriptSegments: [],
       currentSegmentIndex: -1,
-      maxWordsPerSegment: 15, // Can be adjusted to fit requirements
-      segmentOverlapThreshold: 1.5, // seconds of overlap to consider a word part of the current segment
+      maxWordsPerSegment: 15, 
+      segmentOverlapThreshold: 1.5, 
       hasOriginalTranscription: false,
     }
   },
@@ -457,12 +482,46 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
+      this.getCurrentUser();
       if (this.$refs.videoPlayer) {
         this.setupVideoEvents();
       }
     });
   },
   methods: {
+    async getCurrentUser() {
+      try {
+        // Import the supabase client (ensure this is accessible in your component)
+        const { supabase } = await import('../lib/supabaseClient');
+        
+        // Get current session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          return null;
+        }
+        
+        if (!session) {
+          console.log("No active session found");
+          return null;
+        }
+        
+        // Get user from session
+        const user = session.user;
+        console.log("User found:", user.id);
+        
+        // Update component data
+        this.userId = user.id;
+        this.userName = user.user_metadata?.name || user.email?.split('@')[0] || 'Anonymous';
+        
+        return user.id;
+      } catch (error) {
+        console.error("Error getting current user:", error);
+        return null;
+      }
+    },
+    
     // ===== FILE UPLOAD METHODS =====
     triggerFileInput() {
       this.$refs.fileInput.click();
@@ -518,6 +577,18 @@ export default {
     },
     
     // ===== VIDEO UPLOAD AND PROCESSING =====
+    async checkAuthAndUpload() {
+      if (!this.file) return;
+      
+      const userId = await this.getCurrentUser();
+      if (!userId) {
+        this.modalVisible = true;
+        return;
+      }
+      
+      this.uploadFile();
+    },
+
     async uploadFile() {
       if (!this.file || this.isUploading) return;
       
@@ -530,9 +601,13 @@ export default {
         const formData = new FormData();
         formData.append('video', this.file);
         
+        // Add user ID to the form data
+        formData.append('userId', this.userId || 'no-user-id');
+        formData.append('userName', this.userName);
+            
         // Uploading with progress tracking
         const xhr = new XMLHttpRequest();
-        
+    
         xhr.upload.addEventListener('progress', (event) => {
           if (event.lengthComputable) {
             this.uploadProgress = Math.round((event.loaded / event.total) * 100);
@@ -579,7 +654,8 @@ export default {
         console.error('Upload error:', error);
         this.errorMessage = `Upload failed: ${error.message || 'Unknown error'}`;
         this.processingState = 'error';
-      } finally {
+      } 
+      finally {
         this.isUploading = false;
       }
     },
@@ -644,6 +720,84 @@ export default {
         }
       } catch (error) {
         console.error('Error fetching transcription JSON:', error);
+      }
+    },
+
+    async downloadSRT() {
+    if (!this.processingId) {
+      this.errorMessage = 'Processing ID not found. Cannot download SRT file.';
+      return;
+    }
+
+    // If there are unsaved changes, block download and prompt user
+    if (this.hasUnsavedChanges) {
+      this.saveStatus = {
+        type: 'text-red-600',
+        message: 'Please save all transcript edits before downloading the SRT file.'
+      };
+      setTimeout(() => { this.saveStatus = null }, 2500);
+      return;
+    }
+
+    this.isDownloadingSRT = true;
+    try {
+      // Add a cache-busting query param to avoid browser caching
+      const downloadUrl = `${this.apiUrl}/download-srt/${this.processingId}?t=${Date.now()}`;
+      // Initiate download
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${this.file ? this.file.name.replace(/\.[^/.]+$/, '') : 'transcript'}.srt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('SRT download error:', error);
+      this.errorMessage = `Failed to download SRT file: ${error.message || 'Unknown error'}`;
+    } finally {
+      this.isDownloadingSRT = false;
+    }
+    },
+    
+    async saveAllSegments() {
+      if (!this.processingId) return;
+      this.isSavingTranscript = true;
+      this.saveStatus = null;
+      try {
+        this.transcriptSegments.forEach((segment, idx) => {
+          if (segment.isEditing) this.finishEditing(idx, true);
+        });
+        const fullText = this.transcriptSegments.map(segment => segment.text).join(' ');
+        const updatedTranscriptionJson = this.createUpdatedTranscriptionJsonFromSegments();
+        
+        const response = await fetch(`${this.apiUrl}/update-transcript/${this.processingId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: fullText,
+            transcription_json: updatedTranscriptionJson
+          }),
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to save transcript');
+        }
+        // Update our local transcript
+        this.transcript = fullText;
+        this.originalTranscriptionJson = updatedTranscriptionJson;
+        // Mark all as saved
+        this.transcriptSegments.forEach(segment => {
+          segment.originalText = segment.text;
+        });
+        this.saveStatus = { type: 'text-green-600', message: 'All segments saved successfully' };
+        setTimeout(() => { this.saveStatus = null }, 3000);
+      } catch (error) {
+        console.error('Error saving transcript:', error);
+        this.saveStatus = {
+          type: 'text-red-600',
+          message: `Failed to save transcript: ${error.message}`
+        };
+      } finally {
+        this.isSavingTranscript = false;
       }
     },
     
@@ -1180,7 +1334,6 @@ export default {
         return;
       }
       
-      // If there are unsaved changes, warn the user
       if (this.hasUnsavedChanges) {
         alert('Please save your changes before downloading the SRT file.');
         return;
@@ -1189,15 +1342,12 @@ export default {
       try {
         this.isDownloadingSRT = true;
         
-        // Create a URL to the download endpoint
         const downloadUrl = `${this.apiUrl}/download-srt/${this.processingId}`;
         
-        // Create a temporary link element to trigger the download
         const link = document.createElement('a');
         link.href = downloadUrl;
         link.download = `${this.file ? this.file.name.replace(/\.[^/.]+$/, '') : 'transcript'}.srt`;
         
-        // Append to the document, click it, then remove it
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -1210,19 +1360,15 @@ export default {
     },
     
     exportTranscript() {
-      // Check for unsaved changes
       if (this.hasUnsavedChanges) {
         if (confirm('You have unsaved changes. Save changes before exporting?')) {
           this.saveAllSegments().then(() => {
-            // Trigger download export options
             alert('Export options would appear here (SRT, TXT, etc.)');
           });
         } else {
-          // Export without saving
           alert('Export options would appear here (SRT, TXT, etc.)');
         }
       } else {
-        // No unsaved changes, proceed with export
         alert('Export options would appear here (SRT, TXT, etc.)');
       }
     }
@@ -1231,14 +1377,12 @@ export default {
 </script>
 
 <style scoped>
-/* Optional: Add custom styles for the karaoke effect */
 .transition-colors {
   transition-property: background-color, color;
   transition-duration: 200ms;
   transition-timing-function: ease-in-out;
 }
 
-/* Custom range input styling */
 input[type="range"] {
   -webkit-appearance: none;
   height: 8px;
@@ -1267,8 +1411,6 @@ input[type="range"]::-moz-range-thumb {
   border: 2px solid white;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
-
-/* Segment transition effects */
 .mb-4.border.border-gray-200.rounded-md {
   transition: all 0.3s ease;
 }

@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router';
 import { supabase } from '../lib/supabaseClient.js';
 import google from './svg/google.vue';
 
-// Get props from router
 const props = defineProps({
   isLogin: {
     type: Boolean,
@@ -14,7 +13,6 @@ const props = defineProps({
 
 const router = useRouter();
 
-// Form data
 const formData = ref({
   name: '',
   surname: '',
@@ -24,27 +22,23 @@ const formData = ref({
   terms: false
 });
 
-// Error and success states
 const loading = ref(false);
 const error = ref(null);
 const success = ref(null);
 const showLogin = ref(props.isLogin);
 
-// Handle sign up with simplified approach
 const handleSignUp = async (e) => {
   e.preventDefault();
   loading.value = true;
   error.value = null;
   
   try {
-    // Validate required fields
     if (!formData.value.email || !formData.value.password || 
         !formData.value.name || !formData.value.surname || 
         !formData.value.username || !formData.value.terms) {
       throw new Error("Please fill out all fields and accept the terms");
     }
     
-    // Step 1: Register user with Supabase Auth
     const { data, error: authError } = await supabase.auth.signUp({
       email: formData.value.email,
       password: formData.value.password,
@@ -53,7 +47,7 @@ const handleSignUp = async (e) => {
           name: formData.value.name,
           surname: formData.value.surname,
           username: formData.value.username,
-          role: 'free'
+          role: 'admin'
         }
       }
     });
@@ -64,7 +58,6 @@ const handleSignUp = async (e) => {
       throw new Error("Registration failed: No user data returned");
     }
     
-    // Successfully created - redirect to confirmation page
     router.push({
       name: 'ConfirmEmail',
       query: { email: formData.value.email }
@@ -78,7 +71,6 @@ const handleSignUp = async (e) => {
   }
 };
 
-// Handle sign in
 const handleSignIn = async (e) => {
   e.preventDefault();
   loading.value = true;
@@ -94,7 +86,6 @@ const handleSignIn = async (e) => {
     
     success.value = "Signed in successfully!";
     
-    // Redirect to dashboard after successful login
     setTimeout(() => {
       router.push('/dashboard');
     }, 500);
@@ -107,16 +98,18 @@ const handleSignIn = async (e) => {
   }
 };
 
-// Toggle between sign up and sign in forms
 const toggleForm = () => {
   if (showLogin.value) {
-    router.push('/signup');
+    router.push('/signup').then(() => {
+      window.location.reload();
+    });
   } else {
-    router.push('/signin');
+    router.push('/signin').then(() => {
+      window.location.reload();
+    });
   }
 };
 
-// Update showLogin based on route changes
 onMounted(() => {
   showLogin.value = props.isLogin;
 });
@@ -124,14 +117,14 @@ onMounted(() => {
 
 
 <template>
-    <div class="w-screen h-screen px-60 bg-[#0f172a] font-poppins">
+    <div class="w-screen min-h-screen px-60 bg-[#0f172a] font-poppins">
         <div class="w-full h-full flex gap-36 flex-row">
-            <div class="w-full h-full flex flex-col justify-center items-center">
+            <!-- <div class="w-full h-full flex flex-col justify-center items-center">
                 <h1 class="inline-block text-center text-transparent bg-clip-text h-fit w-fit bg-gradient-to-tl from-[#a784ffd4] outline outline-whtie to-white text-6xl my-2">
                     Authentication Section
                 </h1>
                 
-            </div>
+            </div> -->
             <div class="w-full h-full flex justify-center p-10">
                 <div class="w-full h-full flex flex-col">
                     <h1 class="text-white text-6xl font-medium mb-10">

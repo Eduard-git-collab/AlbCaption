@@ -7,6 +7,7 @@ const router = useRouter();
 const loading = ref(true);
 const userData = ref(null);
 const authError = ref(null);
+const userTrans = ref([]);
 
 // Function to load user data with debugging
 const loadUserData = async () => {
@@ -36,11 +37,9 @@ const loadUserData = async () => {
     const user = session.user;
     console.log("User found:", user.id);
     
-    // Verify user metadata exists
     if (!user.user_metadata) {
       console.warn("User metadata is missing");
       
-      // Fallback approach: try to get user directly
       const { data: userData, error: userError } = await supabase.auth.getUser();
       
       if (userError) {
@@ -74,25 +73,59 @@ const loadUserData = async () => {
   }
 };
 
-// Set up initialization and auth listeners
+// Function to get user transcripts
+async function getTranscripts() {
+  try {
+    if (!userData.value?.id) {
+      console.warn("User ID is not available. Cannot fetch transcripts.");
+      return;
+    }
+
+    console.log("Fetching transcripts and video URLs for user:", userData.value.id);
+
+    // Fetch transactions with video_url from the related videos table
+    const { data, error } = await supabase
+      .from('transactions')
+      .select(`
+        *,
+        videos (id, video_url)
+      `)
+      .eq('user_id', userData.value.id);
+
+    if (error) {
+      console.error("Error fetching transcripts:", error);
+      return;
+    }
+    
+    userTrans.value = data.map(transaction => ({
+      ...transaction,
+      video_url: transaction.videos?.video_url || null,
+    }));
+
+    console.log("Transcripts with video URLs fetched successfully:", userTrans.value);
+  } catch (error) {
+    console.error("Error in getTranscripts:", error);
+  }
+}
+
 onMounted(async () => {
-  // Initial load
   await loadUserData();
+  await getTranscripts();
   
-  // Set up auth state change listener
   const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
     console.log("Auth state changed:", event);
     
     if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-      // Refresh user data when signed in or token refreshed
       loadUserData();
+      getTranscripts();
     } else if (event === 'SIGNED_OUT') {
-      // Clear user data and redirect
       userData.value = null;
+      userTrans.value = [];
       router.push('/');
     }
   });
 });
+
 </script>
 
 <template>
@@ -128,6 +161,32 @@ onMounted(async () => {
         </div>
         
         <!-- Dashboard content -->
+        <h2 class="text-2xl font-semibold mb-4">Your Transcripts</h2>
+        
+        <!-- Display videos from transactions -->
+        <div v-if="userTrans.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div v-for="(transaction, index) in userTrans" :key="index" class="bg-gray-700 bg-opacity-40 p-4 rounded-lg">
+            <h3 class="text-xl font-semibold mb-3">Transcript #{{ index + 1 }}</h3>
+            <div v-if="transaction.video_url" class="mb-4">
+              <video 
+                :src="transaction.video_url" 
+                class="w-full h-auto rounded-lg" 
+                controls
+                preload="metadata"
+              ></video>
+            </div>
+            <p v-else class="text-yellow-400 mb-4">No video available for this transcript</p>
+            <div class="text-sm text-[#92a3bb]">
+              <p>Created: {{ new Date(transaction.created_at).toLocaleString() }}</p>
+              <p v-if="transaction.description">Description: {{ transaction.description }}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div v-else class="bg-gray-700 bg-opacity-40 p-6 rounded-lg mb-8">
+          <p class="text-[#92a3bb]">No transcripts found. Your transcriptions will appear here once created.</p>
+        </div>
+        
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div class="bg-gray-700 bg-opacity-40 p-6 rounded-lg">
             <h3 class="text-xl font-semibold mb-3">Section One</h3>

@@ -3,7 +3,7 @@
       <header v-if="!hideNavigation" class="bg-[#0f172a] text-white p-4">
         <nav class="container mx-auto flex justify-between items-center">
           <router-link to="/" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-tl from-[#a784ffd4] to-white">
-            Your App Name
+            App Name
           </router-link>
           
           <div class="flex gap-6 items-center">
@@ -48,33 +48,25 @@
   
   // Check for existing session on mount
   onMounted(async () => {
-    // Get the initial session
     const { data } = await supabase.auth.getSession();
     session.value = data.session;
     
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
       session.value = currentSession;
       
-      // Handle different auth events
       if (event === 'SIGNED_IN') {
-        // If user just signed in and they're on the auth pages, redirect to dashboard
         if (route.name === 'SignIn' || route.name === 'SignUp') {
           router.push('/dashboard');
         }
       } else if (event === 'SIGNED_OUT') {
-        // When signed out, redirect to home
         router.push('/');
       } else if (event === 'USER_UPDATED') {
-        // Update session when user data changes
         session.value = currentSession;
       }
     });
   });
   
-  // Handle sign out
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    // Router will handle redirection via the auth state change listener
   };
   </script>
