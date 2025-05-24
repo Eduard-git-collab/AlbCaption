@@ -1,5 +1,17 @@
 <script setup>
 import ModalDialog from './items/ModalDialog.vue'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const handleSignUp =() => {
+  router.push('/signup')
+}
+
+const handleLogin =() => {
+  router.push('/signin')
+}
 </script>
 
 <template>
