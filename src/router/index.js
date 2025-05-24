@@ -3,6 +3,7 @@ import Home from '../components/Home.vue';
 import AuthComponent from '../components/Authentication.vue';
 import Dashboard from '../components/Dashboard.vue';
 import ConfirmationPage from '../components/ConfirmationPage.vue';
+import TransactionDetails from '../components/TransactionDetails.vue';
 import { supabase } from '../lib/supabaseClient';
 
 // Create routes configuration
@@ -52,6 +53,12 @@ const routes = [
     path: '/confirm-email',
     name: 'ConfirmEmail',
     component: ConfirmationPage
+  },
+  {
+    path: '/transaction/:id',
+    name: 'Transaction Details',
+    component: TransactionDetails,
+    meta: { requiresAuth: true }
   }
 ];
 

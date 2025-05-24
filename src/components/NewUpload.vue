@@ -236,7 +236,65 @@ import ModalDialog from './items/ModalDialog.vue'
           <!-- Video Panel -->
           <div class="lg:col-span-2 bg-white rounded-lg shadow-md overflow-hidden">
             <div class="bg-gray-100 border-b border-gray-200 px-4 py-3">
-              <h2 class="text-lg font-semibold text-gray-800">Video Preview</h2>
+              <!-- Display mode -->
+              <div v-if="!isEditingFilename" class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-800">{{ originalFilename }}</h2>
+                <button 
+                  @click="startEditingFilename"
+                  class="ml-2 px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                >
+                  <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                  Edit
+                </button>
+              </div>
+          
+              <!-- Edit mode -->
+              <div v-else class="space-y-2">
+                <div class="flex items-center space-x-2">
+                  <input
+                    ref="filenameInput"
+                    v-model="editedFilename"
+                    @keydown="handleFilenameKeydown"
+                    type="text"
+                    class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                    placeholder="Enter filename"
+                  />
+                  <button
+                    @click="saveFilename"
+                    :disabled="isSavingFilename"
+                    class="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50 transition-colors text-sm"
+                  >
+                    <svg v-if="isSavingFilename" class="w-4 h-4 inline mr-1 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <svg v-else class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    {{ isSavingFilename ? 'Saving...' : 'Save' }}
+                  </button>
+                  <button
+                    @click="cancelEditingFilename"
+                    :disabled="isSavingFilename"
+                    class="px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-50 transition-colors text-sm"
+                  >
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Cancel
+                  </button>
+                </div>
+                
+                <!-- Error message -->
+                <p v-if="filenameError" class="text-red-600 text-sm flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                  </svg>
+                  {{ filenameError }}
+                </p>
+              </div>
             </div>
             
             <div class="p-4">
@@ -253,7 +311,7 @@ import ModalDialog from './items/ModalDialog.vue'
                   :src="videoUrl"
                 ></video>
               </div>
-
+          
               <!-- Custom Video Controls -->
               <div class="mt-4 flex items-center justify-between px-2 py-2 bg-gray-100 rounded">
                 <div class="flex items-center space-x-3">
@@ -403,7 +461,12 @@ export default {
       videoUrl: null,
       audioUrl: null,
       processingId: null,
-      
+      originalFilename: null,
+      isEditingFilename: false,
+      editedFilename: '',
+      isSavingFilename: false,
+      filenameError: null,
+        
       // UI state properties
       isDownloadingSRT: false,
       isSavingTranscript: false,
@@ -575,6 +638,83 @@ export default {
         return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
       }
     },
+
+    startEditingFilename() {
+    this.isEditingFilename = true;
+    this.editedFilename = this.originalFilename || '';
+    this.filenameError = null;
+    
+    this.$nextTick(() => {
+      if (this.$refs.filenameInput) {
+        this.$refs.filenameInput.focus();
+      }
+    });
+  },
+
+  cancelEditingFilename() {
+    this.isEditingFilename = false;
+    this.editedFilename = '';
+    this.filenameError = null;
+  },
+
+  async saveFilename() {
+    if (!this.editedFilename.trim()) {
+      this.filenameError = 'Filename cannot be empty';
+      return;
+    }
+
+    if (!this.processingId) {
+      this.filenameError = 'Processing ID not found';
+      return;
+    }
+
+    this.isSavingFilename = true;
+    this.filenameError = null;
+
+    try {
+      const response = await fetch(`${this.apiUrl}/update-filename/${this.processingId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          original_filename: this.editedFilename.trim()
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update filename');
+      }
+
+      this.originalFilename = this.editedFilename.trim();
+      this.isEditingFilename = false;
+      this.editedFilename = '';
+
+      this.saveStatus = {
+        type: 'text-green-600',
+        message: 'Filename updated successfully'
+      };
+      
+      setTimeout(() => {
+        this.saveStatus = null;
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error updating filename:', error);
+      this.filenameError = error.message;
+    } finally {
+      this.isSavingFilename = false;
+    }
+  },
+
+  handleFilenameKeydown(event) {
+    if (event.key === 'Enter') {
+      this.saveFilename();
+    } else if (event.key === 'Escape') {
+      this.cancelEditingFilename();
+    }
+  },
     
     // ===== VIDEO UPLOAD AND PROCESSING =====
     async checkAuthAndUpload() {
@@ -712,6 +852,7 @@ export default {
         const data = await response.json();
         if (data.transcription_json) {
           this.originalTranscriptionJson = data.transcription_json;
+          this.originalFilename = data.original_filename;
           
           // Update the transcript if not already set
           if (!this.transcript) {
@@ -1385,6 +1526,7 @@ export default {
 
 input[type="range"] {
   -webkit-appearance: none;
+  appearance: none;
   height: 8px;
   border-radius: 5px;  
   outline: none;
