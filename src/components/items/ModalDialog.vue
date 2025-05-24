@@ -141,6 +141,14 @@ const handleBackdropClick = () => {
   }
 }
 
+const handleSignUp =() => {
+  router.push('/signup')
+}
+
+const handleLogin =() => {
+  router.push('/signin')
+}
+
 const handleModalClick = (event) => {
   // Prevent backdrop click when clicking inside modal
   event.stopPropagation()
