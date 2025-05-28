@@ -6,18 +6,26 @@ import ConfirmModal from './items/ModalDialog.vue';
 
 const router = useRouter();
 const loading = ref(true);
-const transcriptsLoading = ref(true); // Separate loading state for transcripts
+const transcriptsLoading = ref(true); 
+const allUsersLoading = ref(false); 
 const userData = ref(null);
 const authError = ref(null);
 const userTrans = ref([]);
+const allUsers = ref([]); 
 const showSuccessAlert = ref(false);
 const successAlertMessage = ref('');
 
-// Modal state
+// Modal state for transaction deletion
 const showDeleteModal = ref(false);
 const transactionToDelete = ref(null);
 const deleteLoading = ref(false);
 const deleteError = ref(null);
+
+// Modal state for user deletion
+const showDeleteUserModal = ref(false);
+const userToDelete = ref(null);
+const deleteUserLoading = ref(false);
+const deleteUserError = ref(null);
 
 const goToDetails = (id) => {
   router.push(`/transaction/${id}`);
@@ -87,8 +95,8 @@ async function getTranscripts() {
         *,
         videos (id, video_url)
       `)
-      .eq('user_id', userData.value.id);
-
+      .eq('user_id', userData.value.id)
+      .order('created_at', { ascending: false });
     if (error) {
       return;
     }
@@ -103,7 +111,95 @@ async function getTranscripts() {
   }
 }
 
-// Delete transaction logic
+// Updated function to get all users from your custom users table (excluding current user)
+async function getAllUsers() {
+  if (userData.value?.role !== 'admin') {
+    return;
+  }
+  
+  allUsersLoading.value = true;
+  try {
+    // Query your custom users table, excluding the current user
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .neq('id', userData.value.id) // Exclude current user by ID
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching users:', error);
+      return;
+    }
+
+    allUsers.value = data || [];
+    
+  } catch (error) {
+    console.error('Error fetching users:', error);
+  } finally {
+    allUsersLoading.value = false;
+  }
+}
+
+// Helper function to check if user is admin
+const isAdmin = () => {
+  return userData.value?.role === 'admin';
+};
+
+// Helper function to check if a user can be deleted (not admin)
+const canDeleteUser = (user) => {
+  return user.role !== 'admin';
+};
+
+// User deletion logic
+const promptDeleteUser = (user) => {
+  if (!canDeleteUser(user)) {
+    return; // Safety check
+  }
+  userToDelete.value = user;
+  showDeleteUserModal.value = true;
+  deleteUserError.value = null;
+};
+
+const confirmDeleteUser = async () => {
+  if (!userToDelete.value) return;
+  deleteUserLoading.value = true;
+  deleteUserError.value = null;
+  
+  try {
+    // Delete user from the users table
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .eq('id', userToDelete.value.id);
+    
+    if (error) {
+      deleteUserError.value = error.message || 'Failed to delete user.';
+    } else {
+      // Remove from local list
+      allUsers.value = allUsers.value.filter(u => u.id !== userToDelete.value.id);
+      showDeleteUserModal.value = false;
+      userToDelete.value = null;
+      showSuccessAlert.value = true;
+      successAlertMessage.value = 'User deleted successfully.';
+      setTimeout(() => {
+        showSuccessAlert.value = false;
+        successAlertMessage.value = '';
+      }, 3000);
+    }
+  } catch (err) {
+    deleteUserError.value = err.message || 'Failed to delete user.';
+  } finally {
+    deleteUserLoading.value = false;
+  }
+};
+
+const cancelDeleteUser = () => {
+  showDeleteUserModal.value = false;
+  userToDelete.value = null;
+  deleteUserError.value = null;
+};
+
+// Transaction deletion logic
 const promptDelete = (transaction) => {
   transactionToDelete.value = transaction;
   showDeleteModal.value = true;
@@ -150,6 +246,10 @@ onMounted(async () => {
   await loadUserData();
   if (userData.value) {
     getTranscripts();
+    // Load all users if admin
+    if (isAdmin()) {
+      getAllUsers();
+    }
   }
   
   supabase.auth.onAuthStateChange((event, session) => {
@@ -157,11 +257,15 @@ onMounted(async () => {
       loadUserData().then(() => {
         if (userData.value) {
           getTranscripts();
+          if (isAdmin()) {
+            getAllUsers();
+          }
         }
       });
     } else if (event === 'SIGNED_OUT') {
       userData.value = null;
       userTrans.value = [];
+      allUsers.value = [];
       router.push('/');
     }
   });
@@ -173,7 +277,7 @@ onMounted(async () => {
   
   <div class="min-h-screen bg-[#0f172a] text-white font-poppins p-6">
     <div class="container mx-auto">
-      <div v-if="showSuccessAlert" class="mb-4 bg-green-500 text-white px-4 py-3 rounded shadow fixed flex justify-center">
+      <div v-if="showSuccessAlert" class="mb-4 bg-green-500 text-white px-4 py-3 rounded shadow fixed flex justify-center z-50">
         {{ successAlertMessage }}
       </div>
       <!-- Only show full loading for initial auth check -->
@@ -203,6 +307,97 @@ onMounted(async () => {
               <p class="text-[#92a3bb] mb-1">Account Type:</p>
               <p class="font-medium capitalize">{{ userData?.role }}</p>
             </div>
+          </div>
+        </div>
+
+        <!-- Admin Section - Only visible to admin users -->
+        <div v-if="isAdmin()" class="bg-gray-700 bg-opacity-40 rounded-lg p-6 mb-8">
+          <h2 class="text-2xl font-semibold mb-4 text-[#a784ffd4]">👤 Admin Panel - User Management</h2>
+          
+          <!-- Refresh button for admin -->
+          <div class="mb-4">
+            <button 
+              @click="getAllUsers" 
+              :disabled="allUsersLoading"
+              class="px-4 py-2 bg-[#a784ffd4] hover:bg-[#9370db] disabled:opacity-50 text-white rounded-lg text-sm"
+            >
+              {{ allUsersLoading ? 'Loading...' : 'Refresh Users' }}
+            </button>
+          </div>
+          
+          <!-- Loading state for users -->
+          <div v-if="allUsersLoading" class="flex justify-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#a784ffd4]"></div>
+          </div>
+          
+          <!-- Users list -->
+          <div v-else-if="allUsers.length > 0" class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-gray-600">
+                  <th class="py-3 px-4 text-[#92a3bb]">Full Name</th>
+                  <th class="py-3 px-4 text-[#92a3bb]">Email</th>
+                  <th class="py-3 px-4 text-[#92a3bb]">Username</th>
+                  <th class="py-3 px-4 text-[#92a3bb]">Role</th>
+                  <th class="py-3 px-4 text-[#92a3bb]">Created</th>
+                  <th class="py-3 px-4 text-[#92a3bb]">Last Updated</th>
+                  <th class="py-3 px-4 text-[#92a3bb]">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="user in allUsers" :key="user.id" class="border-b border-gray-700 hover:bg-gray-600 hover:bg-opacity-30">
+                  <td class="py-3 px-4">{{ user.name }} {{ user.surname }}</td>
+                  <td class="py-3 px-4">{{ user.email }}</td>
+                  <td class="py-3 px-4">{{ user.username }}</td>
+                  <td class="py-3 px-4">
+                    <span class="px-2 py-1 rounded text-sm" :class="{
+                      'bg-purple-600 text-white': user.role === 'admin',
+                      'bg-blue-600 text-white': user.role === 'paid',
+                      'bg-gray-600 text-white': user.role === 'free'
+                    }">
+                      {{ user.role }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-sm text-[#92a3bb]">
+                    {{ user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A' }}
+                  </td>
+                  <td class="py-3 px-4 text-sm text-[#92a3bb]">
+                    {{ user.last_updated_at ? new Date(user.last_updated_at).toLocaleDateString() : 'N/A' }}
+                  </td>
+                  <td class="py-3 px-4">
+                    <div class="flex gap-2">
+                      <!-- Delete button - only for non-admin users -->
+                      <button
+                        v-if="canDeleteUser(user)"
+                        @click="promptDeleteUser(user)"
+                        class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm transition-colors"
+                        title="Delete User"
+                      >
+                        Delete
+                      </button>
+                      <!-- Protected admin indicator -->
+                      <span 
+                        v-else 
+                        class="px-3 py-1 bg-gray-500 text-gray-300 rounded text-sm cursor-not-allowed"
+                        title="Admin users cannot be deleted"
+                      >
+                        Protected
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="mt-4 text-sm text-[#92a3bb]">
+              Total other users: {{ allUsers.length }}
+              <span v-if="allUsers.length === 0" class="ml-2">(You are the only user)</span>
+            </div>
+          </div>
+          
+          <!-- No users message -->
+          <div v-else class="text-center py-8">
+            <p class="text-[#92a3bb]">No other users found in the database.</p>
+            <p class="text-sm text-[#92a3bb] mt-2">You are currently the only user.</p>
           </div>
         </div>
         
@@ -302,7 +497,8 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <!-- Delete confirmation modal -->
+    
+    <!-- Transaction Delete confirmation modal -->
     <ConfirmModal
       v-if="showDeleteModal"
       :title="'Delete Transcript'"
@@ -319,6 +515,47 @@ onMounted(async () => {
       <template #body>
         <p v-if="deleteError" class="text-red-600 mb-2">{{ deleteError }}</p>
         <p v-if="deleteLoading" class="text-gray-500">Deleting...</p>
+      </template>
+    </ConfirmModal>
+
+    <!-- User Delete confirmation modal -->
+    <ConfirmModal
+      v-if="showDeleteUserModal"
+      :title="'Delete User Account'"
+      :message="`Are you sure you want to permanently delete the user account for '${userToDelete?.name} ${userToDelete?.surname}' (${userToDelete?.email})? This action cannot be undone and will remove all associated data.`"
+      icon="warning"
+      confirm-text="Delete User"
+      confirm-variant="danger"
+      cancel-text="Cancel"
+      :show-footer="true"
+      @confirm="confirmDeleteUser"
+      @cancel="cancelDeleteUser"
+      @close="cancelDeleteUser"
+    >
+      <template #body>
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-red-800">Warning: Permanent Action</h3>
+              <div class="mt-2 text-sm text-red-700">
+                <p>This will permanently delete:</p>
+                <ul class="list-disc list-inside mt-1">
+                  <li>User account and profile</li>
+                  <li>All associated transactions and transcripts</li>
+                  <li>All uploaded videos and files</li>
+                  <li>User preferences and settings</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p v-if="deleteUserError" class="text-red-600 mb-2">{{ deleteUserError }}</p>
+        <p v-if="deleteUserLoading" class="text-gray-500">Deleting user account...</p>
       </template>
     </ConfirmModal>
   </div>

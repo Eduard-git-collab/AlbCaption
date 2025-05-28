@@ -456,8 +456,8 @@ export default {
       processingState: null, 
       processingStep: null, 
       errorMessage: null,
-      apiUrl: 'http://localhost:3000',
-      
+      apiUrl: 'https://albcaptions-api-488229739417.europe-west4.run.app',
+    
       //User data
       userId: null,
       userName: 'No User',

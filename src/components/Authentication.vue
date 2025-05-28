@@ -47,7 +47,7 @@ const handleSignUp = async (e) => {
           name: formData.value.name,
           surname: formData.value.surname,
           username: formData.value.username,
-          role: 'admin'
+          role: 'free'
         }
       }
     });
