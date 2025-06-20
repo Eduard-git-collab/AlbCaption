@@ -8,7 +8,7 @@
           
           <div class="flex gap-6 items-center">
             <router-link to="/" class="hover:text-[#a784ffd4] transition-colors">Home</router-link>
-            
+            <router-link to="/paypal" class="hover:text-[#a784ffd4] transition-colors">PayPal</router-link>
             <template v-if="!session">
               <router-link to="/signin" class="hover:text-[#a784ffd4] transition-colors">Sign In</router-link>
               <router-link to="/signup" class="bg-[#a784ffd4] text-white px-4 py-2 rounded-full hover:bg-opacity-80 transition-colors">

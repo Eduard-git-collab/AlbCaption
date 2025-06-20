@@ -27,8 +27,10 @@
       </div>
     </div>
     <NewUpload />
+    <Payment />
   </template>
 
   <script setup>
   import NewUpload from './NewUpload.vue';
+  import Payment from './Payment.vue';
   </script>

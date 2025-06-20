@@ -456,8 +456,11 @@ export default {
       processingState: null, 
       processingStep: null, 
       errorMessage: null,
-      apiUrl: 'https://albcaptions-api-488229739417.europe-west4.run.app',
-    
+      apiUrl: 
+      //'http://localhost:3000',
+      //'https://albcaptions-api-488229739417.europe-west4.run.app',
+      'https://c13c-87-120-103-91.ngrok-free.app',
+
       //User data
       userId: null,
       userName: 'No User',

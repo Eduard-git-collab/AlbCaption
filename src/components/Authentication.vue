@@ -40,14 +40,14 @@ const handleSignUp = async (e) => {
     }
     
     const { data, error: authError } = await supabase.auth.signUp({
-      email: formData.value.email,
-      password: formData.value.password,
-      options: {
-        data: {
-          name: formData.value.name,
-          surname: formData.value.surname,
-          username: formData.value.username,
-          role: 'admin'
+    email: formData.value.email,
+    password: formData.value.password,
+    options: {
+      data: {
+        name: formData.value.name,
+        surname: formData.value.surname,
+        username: formData.value.username,
+        role_id: 'c1a34890-3a46-4969-be5b-704a6b81a54d'
         }
       }
     });
