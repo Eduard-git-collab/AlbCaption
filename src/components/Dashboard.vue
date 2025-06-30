@@ -551,7 +551,7 @@ const confirmDeleteRole = async () => {
       deleteRoleError.value = error.message || 'Failed to delete role.';
     } else {
       // Remove from local list
-      roles.value = roles.value.filter(r => r.id !== roleToDelete.value.id);
+      roles.value = roles.value.filter(r => r && r.id !== roleToDelete.value.id);
       showDeleteRoleModal.value = false;
       roleToDelete.value = null;
       showSuccessAlert.value = true;
@@ -674,7 +674,7 @@ const confirmDeleteUser = async () => {
       deleteUserError.value = error.message || 'Failed to delete user.';
     } else {
       // Remove from local list
-      allUsers.value = allUsers.value.filter(u => u.id !== userToDelete.value.id);
+      allUsers.value = allUsers.value.filter(u => u && u.id !== userToDelete.value.id);
       showDeleteUserModal.value = false;
       userToDelete.value = null;
       showSuccessAlert.value = true;
@@ -824,7 +824,7 @@ const confirmDelete = async () => {
       deleteError.value = error.message || 'Failed to delete transaction.';
     } else {
       // Remove from local list
-      userTrans.value = userTrans.value.filter(t => t.id !== transactionToDelete.value.id);
+      userTrans.value = userTrans.value.filter(t => t && t.id !== transactionToDelete.value.id);
       showDeleteModal.value = false;
       transactionToDelete.value = null;
       showSuccessAlert.value = true;
