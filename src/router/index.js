@@ -5,7 +5,7 @@ import Dashboard from '../components/Dashboard.vue';
 import ConfirmationPage from '../components/ConfirmationPage.vue';
 import TransactionDetails from '../components/TransactionDetails.vue';
 import { supabase } from '../lib/supabaseClient';
-import Paypal from '../components/Paypal.vue';
+import Paypal from '../components/PayPal.vue';
 
 const routes = [
   {
