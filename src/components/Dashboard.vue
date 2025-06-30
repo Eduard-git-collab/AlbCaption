@@ -743,15 +743,83 @@ const promptDelete = (transaction) => {
   deleteError.value = null;
 };
 
+// Helper function to extract file path from Supabase storage URL
+const extractFilePathFromUrl = (videoUrl) => {
+  if (!videoUrl) return null;
+  try {
+    // Handle different Supabase storage URL formats:
+    // Public: https://<project>.supabase.co/storage/v1/object/public/videos/<file-path>
+    // Signed: https://<project>.supabase.co/storage/v1/object/sign/videos/<file-path>?token=...
+    const url = new URL(videoUrl);
+    const pathParts = url.pathname.split('/');
+    
+    // Find the 'videos' bucket in the path
+    const videosIndex = pathParts.indexOf('videos');
+    if (videosIndex !== -1 && videosIndex < pathParts.length - 1) {
+      // Return everything after 'videos/' in the path
+      return pathParts.slice(videosIndex + 1).join('/');
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('Failed to extract file path from video URL:', error);
+    return null;
+  }
+};
+
 const confirmDelete = async () => {
   if (!transactionToDelete.value) return;
   deleteLoading.value = true;
   deleteError.value = null;
+  
+  let videoDeleted = false;
+  
   try {
+    // First, fetch the transaction with video information to get the video URL
+    const { data: transactionData, error: fetchError } = await supabase
+      .from('transactions')
+      .select(`
+        *,
+        videos (id, video_url)
+      `)
+      .eq('id', transactionToDelete.value.id)
+      .single();
+    
+    if (fetchError) {
+      deleteError.value = fetchError.message || 'Failed to fetch transaction details.';
+      return;
+    }
+
+    // If there's an associated video, try to delete it from storage first
+    if (transactionData.videos?.video_url) {
+      const filePath = extractFilePathFromUrl(transactionData.videos.video_url);
+      
+      if (filePath) {
+        try {
+          const { error: storageError } = await supabase.storage
+            .from('videos')
+            .remove([filePath]);
+          
+          if (storageError) {
+            console.warn('Failed to delete video file from storage:', storageError);
+            // Continue with transaction deletion even if storage deletion fails
+            // This prevents orphaned database records if the video file was already deleted
+          } else {
+            videoDeleted = true;
+          }
+        } catch (storageErr) {
+          console.warn('Error deleting video file:', storageErr);
+          // Continue with transaction deletion
+        }
+      }
+    }
+
+    // Now delete the transaction (this will cascade to related tables)
     const { error } = await supabase
       .from('transactions')
       .delete()
       .eq('id', transactionToDelete.value.id);
+      
     if (error) {
       deleteError.value = error.message || 'Failed to delete transaction.';
     } else {
@@ -760,7 +828,14 @@ const confirmDelete = async () => {
       showDeleteModal.value = false;
       transactionToDelete.value = null;
       showSuccessAlert.value = true;
-      successAlertMessage.value = 'Transcript deleted successfully.';
+      
+      // Provide contextual success message
+      if (videoDeleted) {
+        successAlertMessage.value = 'Transcript and associated video deleted successfully.';
+      } else {
+        successAlertMessage.value = 'Transcript deleted successfully.';
+      }
+      
       setTimeout(() => {
         showSuccessAlert.value = false;
         successAlertMessage.value = '';
