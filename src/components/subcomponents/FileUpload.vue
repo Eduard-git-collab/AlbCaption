@@ -36,16 +36,16 @@
   
       <div v-if="file" class="w-full">
         <button
-          @click="$emit('upload-requested')"
-          :disabled="isUploading || processingState === 'complete'"
+          @click="$emit('upload', file)"
+          :disabled="isUploading"
           class="w-full py-2 px-4 rounded-md font-medium text-white transition-colors"
           :class="[
-            isUploading || processingState === 'complete' 
+            isUploading 
               ? 'bg-gray-400 cursor-not-allowed' 
               : 'bg-blue-600 hover:bg-blue-700'
           ]"
         >
-          {{ uploadButtonText }}
+          {{ isUploading ? 'Uploading...' : 'Upload Video' }}
         </button>
       </div>
   
@@ -56,69 +56,69 @@
     </div>
   </template>
   
-  <script>
-  export default {
-    props: {
-      isUploading: Boolean,
-      processingState: String,
-      uploadButtonText: String
-    },
-    data() {
-      return {
-        file: null,
-        isDragging: false,
-        errorMessage: null
-      }
-    },
-    methods: {
-      triggerFileInput() {
-        this.$refs.fileInput.click();
-      },
-      
-      onFileChange(event) {
-        const selectedFile = event.target.files[0];
-        if (selectedFile) {
-          if (this.validateFile(selectedFile)) {
-            this.file = selectedFile;
-            this.errorMessage = null;
-            this.$emit('file-selected', selectedFile);
-          }
-        }
-      },
-      
-      onDrop(event) {
-        this.isDragging = false;
-        const droppedFile = event.dataTransfer.files[0];
-        if (droppedFile) {
-          if (this.validateFile(droppedFile)) {
-            this.file = droppedFile;
-            this.errorMessage = null;
-            this.$emit('file-selected', droppedFile);
-          }
-        }
-      },
-      
-      validateFile(file) {
-        const allowedTypes = ['video/mp4', 'video/quicktime', 'video/webm'];
-        if (!allowedTypes.includes(file.type)) {
-          this.errorMessage = 'Please select a valid video file (MP4, MOV, or WebM).';
-          return false;
-        }
-        
-        const maxSize = 100 * 1024 * 1024;
-        if (file.size > maxSize) {
-          this.errorMessage = 'Video file is too large. Maximum size is 100MB.';
-          return false;
-        }
-        
-        return true;
-      },
-      
-      formatFileSize(bytes) {
-        if (bytes < 1024) return bytes + ' B';
-        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-      }
+  <script setup>
+  import { ref } from 'vue'
+  
+  const props = defineProps({
+    isUploading: {
+      type: Boolean,
+      default: false
+    }
+  })
+  
+  const emit = defineEmits(['upload'])
+  
+  const file = ref(null)
+  const isDragging = ref(false)
+  const errorMessage = ref(null)
+  const fileInput = ref(null)
+  
+  const triggerFileInput = () => {
+    fileInput.value.click()
+  }
+  
+  const onFileChange = (event) => {
+    const selectedFile = event.target.files[0]
+    if (selectedFile) {
+      if (!validateFile(selectedFile)) return
+      file.value = selectedFile
+      errorMessage.value = null
+    }
+  }
+  
+  const onDrop = (event) => {
+    isDragging.value = false
+    const droppedFile = event.dataTransfer.files[0]
+    if (droppedFile) {
+      if (!validateFile(droppedFile)) return
+      file.value = droppedFile
+      errorMessage.value = null
+    }
+  }
+  
+  const validateFile = (file) => {
+    const allowedTypes = ['video/mp4', 'video/quicktime', 'video/webm']
+    if (!allowedTypes.includes(file.type)) {
+      errorMessage.value = 'Please select a valid video file (MP4, MOV, or WebM).'
+      return false
+    }
+    
+    const maxSize = 100 * 1024 * 1024
+    if (file.size > maxSize) {
+      errorMessage.value = 'Video file is too large. Maximum size is 100MB.'
+      return false
+    }
+    
+    return true
+  }
+  
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) {
+      return bytes + ' B'
+    } else if (bytes < 1024 * 1024) {
+      return (bytes / 1024).toFixed(1) + ' KB'
+    } else {
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
     }
   }
   </script>

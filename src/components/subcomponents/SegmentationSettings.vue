@@ -8,7 +8,8 @@
             <div class="flex items-center">
               <input 
                 type="range" 
-                v-model.number="maxWordsPerSegment"
+                :value="maxWordsPerSegment"
+                @input="$emit('update:max-words', $event.target.value)"
                 min="5" 
                 max="30" 
                 step="1"
@@ -22,13 +23,14 @@
             <div class="flex items-center">
               <input 
                 type="range" 
-                v-model.number="segmentOverlapThreshold"
+                :value="pauseThreshold"
+                @input="$emit('update:pause-threshold', $event.target.value)"
                 min="0.5" 
                 max="3" 
                 step="0.1"
                 class="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer"
               />
-              <span class="ml-2 text-sm font-medium w-8 text-gray-700">{{ segmentOverlapThreshold.toFixed(1) }}</span>
+              <span class="ml-2 text-sm font-medium w-8 text-gray-700">{{ pauseThreshold.toFixed(1) }}</span>
             </div>
           </div>
           <button 
@@ -43,12 +45,21 @@
     </div>
   </template>
   
-  <script>
-  export default {
-    props: {
-      maxWordsPerSegment: Number,
-      segmentOverlapThreshold: Number,
-      hasOriginalTranscription: Boolean
+  <script setup>
+  defineProps({
+    maxWordsPerSegment: {
+      type: Number,
+      required: true
+    },
+    pauseThreshold: {
+      type: Number,
+      required: true
+    },
+    hasOriginalTranscription: {
+      type: Boolean,
+      default: false
     }
-  }
+  })
+  
+  defineEmits(['update:max-words', 'update:pause-threshold', 'reprocess'])
   </script>

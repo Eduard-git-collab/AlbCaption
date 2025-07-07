@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-[#0f172a] text-white font-poppins">
+    <!-- <div class="min-h-screen bg-[#0f172a] text-white font-poppins">
       <div class="container mx-auto px-4 py-20">
         <div class="text-center mb-16">
           <h1 class="text-5xl md:text-7xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-tl from-[#a784ffd4] to-white">
@@ -25,6 +25,13 @@
         </div>
         
       </div>
+    </div> -->
+    <div class="h-screen w-screen">
+      <div class="p-3 h-full w-full">
+        <div class="w-full h-full p-2 rounded-2xl hero">
+
+        </div>
+      </div>
     </div>
     <NewUpload />
     <Payment />
@@ -34,3 +41,13 @@
   import NewUpload from './NewUpload.vue';
   import Payment from './Payment.vue';
   </script>
+
+  <style scoped>
+  .hero{
+  background: #F7F5EB;
+  background: -webkit-linear-gradient(150deg, rgba(247, 245, 235, 1) 30%, #ffc7b1 50%, #eae4e9 68%, rgba(219, 209, 183, 1) 100%);
+  background: -moz-linear-gradient(150deg, rgba(247, 245, 235, 1) 30%, rgba(255, 199, 177, 1) 50%, rgba(234, 228, 233, 1) 68%, rgba(219, 209, 183, 1) 100%);
+  background: linear-gradient(150deg, rgba(247, 245, 235, 1) 30%, rgba(255, 199, 177, 1) 50%, rgba(234, 228, 233, 1) 68%, rgba(219, 209, 183, 1) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#F7F5EB", endColorstr="#DBD1B7", GradientType=0);
+  }  
+</style>

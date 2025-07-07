@@ -8,7 +8,7 @@
           
           <div class="flex gap-6 items-center">
             <router-link to="/" class="hover:text-[#a784ffd4] transition-colors">Home</router-link>
-            <router-link to="/paypal" class="hover:text-[#a784ffd4] transition-colors">PayPal</router-link>
+            <router-link to="/pricing" class="hover:text-[#a784ffd4] transition-colors">Pricing</router-link>
             <template v-if="!session">
               <router-link to="/signin" class="hover:text-[#a784ffd4] transition-colors">Sign In</router-link>
               <router-link to="/signup" class="bg-[#a784ffd4] text-white px-4 py-2 rounded-full hover:bg-opacity-80 transition-colors">
@@ -17,7 +17,7 @@
             </template>
             
             <template v-else>
-              <router-link to="/dashboard" class="hover:text-[#a784ffd4] transition-colors">Dashboard</router-link>
+              <router-link to="/new-dashboard" class="hover:text-[#a784ffd4] transition-colors">Dashboard</router-link>
               <button @click="handleSignOut" class="text-white px-4 py-2 rounded-full border border-[#a784ffd4] hover:bg-[#a784ffd4] transition-colors">
                 Sign Out
               </button>
@@ -25,7 +25,9 @@
           </div>
         </nav>
       </header>
-  
+      <header v-if="!hideNavigation">
+        
+      </header>
       <main>
         <router-view />
       </main>
@@ -43,7 +45,7 @@
   
   // Hide navigation on auth pages
   const hideNavigation = computed(() => {
-    return route.name === 'SignIn' || route.name === 'SignUp';
+    return route.name === 'SignIn' || route.name === 'SignUp' || route.name === 'NewDashboard';
   });
   
   // Check for existing session on mount

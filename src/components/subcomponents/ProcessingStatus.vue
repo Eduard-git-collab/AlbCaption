@@ -20,46 +20,55 @@
     </div>
   </template>
   
-  <script>
-  export default {
-    props: {
-      processingState: String,
-      processingStep: String,
-      uploadProgress: Number
+  <script setup>
+  import { computed } from 'vue'
+  
+  const props = defineProps({
+    processingState: {
+      type: String,
+      required: true
     },
-    computed: {
-      processingStateMessage() {
-        switch(this.processingState) {
-          case 'uploading':
-            return 'Uploading video to storage...';
-          case 'processing':
-            if (this.processingStep === 'audio-extraction') {
-              return 'Converting video to audio...';
-            } else if (this.processingStep === 'transcribing') {
-              return 'Transcribing audio to text using Google Speech-to-Text...';
-            }
-            return 'Processing...';
-          case 'complete':
-            return 'Processing complete! Audio transcribed successfully.';
-          case 'error':
-            return 'An error occurred during processing.';
-          default:
-            return '';
-        }
-      },
-      processingStateColor() {
-        switch(this.processingState) {
-          case 'uploading':
-          case 'processing':
-            return 'text-blue-600';
-          case 'complete':
-            return 'text-green-600';
-          case 'error':
-            return 'text-red-600';
-          default:
-            return '';
-        }
-      }
+    processingStep: {
+      type: String,
+      default: null
+    },
+    uploadProgress: {
+      type: Number,
+      default: 0
     }
-  }
+  })
+  
+  const processingStateMessage = computed(() => {
+    switch(props.processingState) {
+      case 'uploading':
+        return 'Uploading video to storage...'
+      case 'processing':
+        if (props.processingStep === 'audio-extraction') {
+          return 'Converting video to audio...'
+        } else if (props.processingStep === 'transcribing') {
+          return 'Transcribing audio to text using Google Speech-to-Text...'
+        }
+        return 'Processing...'
+      case 'complete':
+        return 'Processing complete! Audio transcribed successfully.'
+      case 'error':
+        return 'An error occurred during processing.'
+      default:
+        return ''
+    }
+  })
+  
+  const processingStateColor = computed(() => {
+    switch(props.processingState) {
+      case 'uploading':
+      case 'processing':
+        return 'text-blue-600'
+      case 'complete':
+        return 'text-green-600'
+      case 'error':
+        return 'text-red-600'
+      default:
+        return ''
+    }
+  })
   </script>

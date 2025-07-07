@@ -40,6 +40,11 @@ const deleteUserError = ref(null);
 const showDeactivateModal = ref(false);
 const deactivateLoading = ref(false);
 const deactivateError = ref(null);
+// Modal state for subscription cancellation
+const showCancelSubscriptionModal = ref(false);
+const cancelSubscriptionLoading = ref(false);
+const cancelSubscriptionError = ref(null);
+const hasActiveSubscription = ref(false);
 
 //Roles states
 const roles = ref([]);
@@ -779,10 +784,78 @@ const cancelDelete = () => {
   deleteError.value = null;
 };
 
+const checkActiveSubscription = async () => {
+  if (!userData.value?.id) return;
+  
+  try {
+    const { data, error } = await supabase
+      .from('paypal_subscriptions')
+      .select('paypal_subscription_id')
+      .eq('user_id', userData.value.id)
+      .single();
+    
+    hasActiveSubscription.value = !error && data;
+  } catch (err) {
+    hasActiveSubscription.value = false;
+  }
+};
+
+const promptCancelSubscription = () => {
+  showCancelSubscriptionModal.value = true;
+  cancelSubscriptionError.value = null;
+};
+
+const confirmCancelSubscription = async () => {
+  cancelSubscriptionLoading.value = true;
+  cancelSubscriptionError.value = null;
+  
+  try {
+    const response = await fetch('https://96b5-31-22-56-9.ngrok-free.app/api/paypal/cancel', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userID: userData.value.id
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      cancelSubscriptionError.value = result.error || 'Failed to cancel subscription';
+      return;
+    }
+
+    hasActiveSubscription.value = false;
+    showCancelSubscriptionModal.value = false;
+    
+    await loadUserData();
+    
+    showSuccessAlert.value = true;
+    successAlertMessage.value = 'Subscription cancelled successfully. You have been downgraded to the free plan.';
+    setTimeout(() => {
+      showSuccessAlert.value = false;
+      successAlertMessage.value = '';
+    }, 5000);
+
+  } catch (err) {
+    cancelSubscriptionError.value = err.message || 'Failed to cancel subscription';
+  } finally {
+    cancelSubscriptionLoading.value = false;
+  }
+};
+
+const cancelCancelSubscription = () => {
+  showCancelSubscriptionModal.value = false;
+  cancelSubscriptionError.value = null;
+};
+
 onMounted(async () => {
   await loadUserData();
   if (userData.value) {
     getTranscripts();
+    await checkActiveSubscription();
     if (isAdmin()) {
       await getAllUsers();
       await getAllRoles(); 
@@ -849,6 +922,13 @@ onMounted(async () => {
 >
   Edit Profile
 </button>
+<button
+              v-if="hasActiveSubscription"
+              @click="promptCancelSubscription"
+              class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded"
+            >
+              Cancel Subscription
+            </button>
           </div>
           <div class="bg-gray-700 bg-opacity-40 rounded-lg p-6 mb-8 mt-8">
             <h2 class="text-xl font-semibold mb-3 text-red-400">Deactivate Account</h2>
@@ -1562,5 +1642,26 @@ cancel-text="Cancel"
     </div>
   </template>
 </ConfirmModal>
+<ConfirmModal
+      v-if="showCancelSubscriptionModal"
+      title="Cancel Subscription"
+      :loading="cancelSubscriptionLoading"
+      :error="cancelSubscriptionError"
+      @confirm="confirmCancelSubscription"
+      @cancel="cancelCancelSubscription"
+    >
+      <p class="text-gray-300 mb-4">
+        Are you sure you want to cancel your subscription? This will:
+      </p>
+      <ul class="text-gray-300 mb-4 list-disc list-inside space-y-2">
+        <li>Cancel your PayPal subscription immediately</li>
+        <li>Downgrade your account to the free plan</li>
+        <li>Remove access to premium features</li>
+        <li>This action cannot be undone</li>
+      </ul>
+      <p class="text-orange-400 font-medium">
+        You can always subscribe again later if you change your mind.
+      </p>
+    </ConfirmModal>
   </div>
 </template>

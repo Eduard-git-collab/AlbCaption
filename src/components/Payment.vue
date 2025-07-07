@@ -10,7 +10,7 @@
                 </p>
             </div>
         </div>
-        <div class="flex mx-2.5 px-3 w-full h-full">
+        <div class="flex items-center justify-center w-full h-full">
             <div class="flex flex-wrap justify-center">
                 <div class="bg-white text-black rounded-lg shadow-lg m-4 p-6 w-80">
                     <h2 class="text-2xl font-bold mb-4">Starter</h2>
@@ -63,9 +63,9 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const planIds = {
-  starter: 'P-5V6094008X061394TNBIYGMQ', 
-  pro: 'P-4Y0851619K9273149NBISTKY',
-  business: 'P-71S44675RP008681TNBIWIOQ', 
+  starter: 'P-93354509CK7566242NBNKHJQ', 
+  pro: 'P-40P32125KN1577439NBNKI4A',
+  business: 'P-63C69562KG1645239NBNKF7A', 
   enterprise: 'P-8B0851619K9273149NBISTKY'
 }
 

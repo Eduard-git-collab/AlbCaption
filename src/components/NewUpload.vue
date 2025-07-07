@@ -83,9 +83,53 @@ const handleLogin =() => {
         </div>
 
         <!-- Error Display -->
-        <div v-if="errorMessage" class="w-full mt-4 p-3 bg-red-100 border border-red-200 text-red-700 rounded-md">
-          {{ errorMessage }}
+        <!-- Enhanced Error Display -->
+<div v-if="errorMessage" class="w-full mt-4">
+  <!-- Quota Error Display -->
+  <div v-if="quotaError" class="p-4 bg-red-50 border border-red-200 rounded-md">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <h3 class="text-sm font-medium text-red-800">
+          Upload Quota Exceeded
+        </h3>
+        <div class="mt-2 text-sm text-red-700">
+          <ul class="list-disc list-inside space-y-1">
+            <li v-for="error in quotaError.errors" :key="error">{{ error }}</li>
+          </ul>
         </div>
+        
+        <!-- Quota Information Display -->
+        <div v-if="quotaError.quotaInfo" class="mt-3 p-3 bg-red-100 rounded border">
+          <h4 class="text-sm font-medium text-red-800 mb-2">Current Usage:</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-red-700">
+            <div v-if="quotaError.quotaInfo.videosTotal !== undefined">
+              <strong>Videos:</strong> {{ quotaError.quotaInfo.videosUsed }}/{{ quotaError.quotaInfo.videosTotal }}
+            </div>
+            <div v-if="quotaError.quotaInfo.minutesTotal !== undefined">
+              <strong>Minutes:</strong> {{ quotaError.quotaInfo.minutesUsed }}/{{ quotaError.quotaInfo.minutesTotal }}
+            </div>
+            <div v-if="quotaError.quotaInfo.maxFileSizeMB !== undefined">
+              <strong>File size:</strong> {{ quotaError.quotaInfo.fileSizeMB?.toFixed(1) }}MB / {{ quotaError.quotaInfo.maxFileSizeMB }}MB max
+            </div>
+            <div v-if="quotaError.quotaInfo.maxDurationMinutes !== undefined">
+              <strong>Duration:</strong> {{ Math.ceil(quotaError.quotaInfo.durationSeconds / 60) }} min / {{ quotaError.quotaInfo.maxDurationMinutes }} min max
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Generic Error Display -->
+  <div v-else class="p-3 bg-red-100 border border-red-200 text-red-700 rounded-md">
+    {{ errorMessage }}
+  </div>
+</div>
       </div>
 
       <!-- Processing State -->
@@ -456,10 +500,11 @@ export default {
       processingState: null, 
       processingStep: null, 
       errorMessage: null,
+      quotaError: null,
       apiUrl: 
-      //'http://localhost:3000',
+      'http://localhost:3000',
       //'https://albcaptions-api-488229739417.europe-west4.run.app',
-      'https://c13c-87-120-103-91.ngrok-free.app',
+      //'https://b4d3-95-107-183-154.ngrok-free.app',
 
       //User data
       userId: null,
@@ -773,12 +818,25 @@ export default {
           xhr.open('POST', `${this.apiUrl}/upload-video`, true);
           
           xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              resolve(JSON.parse(xhr.responseText));
-            } else {
-              reject(new Error(`HTTP error ${xhr.status}: ${xhr.statusText}`));
-            }
-          };
+  if (xhr.status >= 200 && xhr.status < 300) {
+    resolve(JSON.parse(xhr.responseText));
+  } else {
+    // Enhanced error handling for different status codes
+    let errorData = null;
+    try {
+      errorData = JSON.parse(xhr.responseText);
+    } catch (parseError) {
+      // If response is not JSON, use status text
+      errorData = { message: xhr.statusText };
+    }
+    
+    // Create a detailed error object
+    const error = new Error(errorData.message || `HTTP error ${xhr.status}`);
+    error.status = xhr.status;
+    error.data = errorData;
+    reject(error);
+  }
+};
           
           xhr.onerror = () => reject(new Error('Network error occurred'));
           xhr.send(formData);
@@ -806,10 +864,24 @@ export default {
         this.processingState = 'complete';
         this.$emit('upload-complete', response);
       } catch (error) {
-        console.error('Upload error:', error);
-        this.errorMessage = `Upload failed: ${error.message || 'Unknown error'}`;
-        this.processingState = 'error';
-      } 
+  console.error('Upload error:', error);
+  
+  // Enhanced error handling
+  if (error.status === 403 && error.data) {
+    // This is a quota error - display structured information
+    this.quotaError = {
+      errors: error.data.message ? error.data.message.split('; ') : ['Quota limit exceeded'],
+      quotaInfo: error.data.quotaInfo || null
+    };
+    this.errorMessage = 'Upload quota exceeded. Please check the details below.';
+  } else {
+    // Generic error
+    this.quotaError = null;
+    this.errorMessage = `Upload failed: ${error.message || 'Unknown error'}`;
+  }
+  
+  this.processingState = 'error';
+} 
       finally {
         this.isUploading = false;
       }

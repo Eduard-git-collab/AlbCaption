@@ -87,7 +87,7 @@ const handleSignIn = async (e) => {
     success.value = "Signed in successfully!";
     
     setTimeout(() => {
-      router.push('/dashboard');
+      router.push('/new-dashboard');
     }, 500);
     
   } catch (err) {

@@ -6,6 +6,9 @@ import ConfirmationPage from '../components/ConfirmationPage.vue';
 import TransactionDetails from '../components/TransactionDetails.vue';
 import { supabase } from '../lib/supabaseClient';
 import Paypal from '../components/Paypal.vue';
+import Pricing from '../components/Payment.vue';
+import NewDashboard from '../components/NewDashboard.vue';
+import NotFound from '../components/views/NotFound.vue'
 
 const routes = [
   {
@@ -58,12 +61,27 @@ const routes = [
     component: TransactionDetails,
     meta: { requiresAuth: true }
   },
+  {
+    path: '/pricing',
+    name: 'Pricing',
+    component: Pricing
+  },
   { 
     path: '/paypal/:planId', 
     name: 'Paypal',
     component: Paypal,
     props: true,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/new-dashboard',
+    name: 'NewDashboard',
+    component: NewDashboard
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFound
   }
 ];
 

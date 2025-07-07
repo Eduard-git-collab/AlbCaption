@@ -3,3 +3,136 @@
 @theme {
   --font-poppins: "Poppins", sans-serif; 
 }
+
+/* Color Variables */
+:root {
+  --color-cream: #F7F5EB;
+  --color-tan: #EDE6D4;
+  --color-tan1: #DBD1B7;
+  --color-tan2: #C8BC9B;
+  --color-tan3: #ADA17F;
+  --color-avocado-1: #D5D372;
+  --color-avocado: #A29E47;
+  --color-avocado1: #7D7B30;
+  --color-avocado2: #666522;
+  --color-lavender: #EAE4E9;
+  --color-lavender1: #D8C6D5;
+  --color-lavender2: #C7B1C3;
+  --color-mint: #D8E6D5;
+  --color-mint1: #BDCFB7;
+  --color-mint2: #ADC6A5;
+  --color-rust-2: #FFC7B1;
+  --color-rust-1: #F19E7D;
+  --color-rust: #E17043;
+  --color-rust1: #BD5333;
+  --color-charcoal-2: #B6B6B6;
+  --color-charcoal-1: #888988;
+  --color-charcoal: #666666;
+  --color-charcoal1: #3F4240;
+}
+
+/* Font Faces */
+@font-face {
+  font-family: 'kollektif';
+  src: url('./assets/fonts/kollektif.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'kollektif-Italic';
+  src: url('./assets/fonts/kollektif-Italic.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'kollektif-Bold';
+  src: url('./assets/fonts/kollektif-Bold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'kollektif-BoldItalic';
+  src: url('./assets/fonts/kollektif-BoldItalic.ttf') format('truetype');
+}
+
+.text-kollektif {
+  font-family: 'kollektif', sans-serif;
+}
+.text-kollektif-italic {
+  font-family: 'kollektif-Italic', sans-serif;
+}
+.text-kollektif-bold {
+  font-family: 'kollektif-Bold', sans-serif;
+}
+.text-kollektif-bolditalic {
+  font-family: 'kollektif-BoldItalic', sans-serif;
+}
+
+/* Background Colors */
+.bg-cream { background: var(--color-cream); }
+.bg-tan { background: var(--color-tan); }
+.bg-tan1 { background: var(--color-tan1); }
+.bg-tan2 { background: var(--color-tan2); }
+.bg-tan3 { background: var(--color-tan3); }
+.bg-avocado-1 { background: var(--color-avocado-1); }
+.bg-avocado { background: var(--color-avocado); }
+.bg-avocado1 { background: var(--color-avocado1); }
+.bg-avocado2 { background: var(--color-avocado2); }
+.bg-lavender { background: var(--color-lavender); }
+.bg-lavender1 { background: var(--color-lavender1); }
+.bg-lavender2 { background: var(--color-lavender2); }
+.bg-mint { background: var(--color-mint); }
+.bg-mint1 { background: var(--color-mint1); }
+.bg-mint2 { background: var(--color-mint2); }
+.bg-rust-2 { background: var(--color-rust-2); }
+.bg-rust-1 { background: var(--color-rust-1); }
+.bg-rust { background: var(--color-rust); }
+.bg-rust1 { background: var(--color-rust1); }
+.bg-charcoal-2 { background: var(--color-charcoal-2); }
+.bg-charcoal-1 { background: var(--color-charcoal-1); }
+.bg-charcoal { background: var(--color-charcoal); }
+.bg-charcoal1 { background: var(--color-charcoal1); }
+
+/* Text Colors */
+.text-cream { color: var(--color-cream); }
+.text-tan { color: var(--color-tan); }
+.text-tan1 { color: var(--color-tan1); }
+.text-tan2 { color: var(--color-tan2); }
+.text-tan3 { color: var(--color-tan3); }
+.text-avocado-1 { color: var(--color-avocado-1); }
+.text-avocado { color: var(--color-avocado); }
+.text-avocado1 { color: var(--color-avocado1); }
+.text-avocado2 { color: var(--color-avocado2); }
+.text-lavender { color: var(--color-lavender); }
+.text-lavender1 { color: var(--color-lavender1); }
+.text-lavender2 { color: var(--color-lavender2); }
+.text-mint { color: var(--color-mint); }
+.text-mint1 { color: var(--color-mint1); }
+.text-mint2 { color: var(--color-mint2); }
+.text-rust-2 { color: var(--color-rust-2); }
+.text-rust-1 { color: var(--color-rust-1); }
+.text-rust { color: var(--color-rust); }
+.text-rust1 { color: var(--color-rust1); }
+.text-charcoal-2 { color: var(--color-charcoal-2); }
+.text-charcoal-1 { color: var(--color-charcoal-1); }
+.text-charcoal { color: var(--color-charcoal); }
+.text-charcoal1 { color: var(--color-charcoal1); }
+
+/* Fill colors */
+.fill-cream { fill: var(--color-cream); }
+.fill-tan { fill: var(--color-tan); }
+.fill-tan1 { fill: var(--color-tan1); }
+.fill-tan2 { fill: var(--color-tan2); }
+.fill-tan3 { fill: var(--color-tan3); }
+.fill-avocado-1 { fill: var(--color-avocado-1); }
+.fill-avocado { fill: var(--color-avocado); }
+.fill-avocado1 { fill: var(--color-avocado1); }
+.fill-avocado2 { fill: var(--color-avocado2); }
+.fill-lavender { fill: var(--color-lavender); }
+.fill-lavender1 { fill: var(--color-lavender1); }
+.fill-lavender2 { fill: var(--color-lavender2); }
+.fill-mint { fill: var(--color-mint); }
+.fill-mint1 { fill: var(--color-mint1); }
+.fill-mint2 { fill: var(--color-mint2); }
+.fill-rust-2 { fill: var(--color-rust-2); }
+.fill-rust-1 { fill: var(--color-rust-1); }
+.fill-rust { fill: var(--color-rust); }
+.fill-rust1 { fill: var(--color-rust1); }
+.fill-charcoal-2 { fill: var(--color-charcoal-2); }
+.fill-charcoal-1 { fill: var(--color-charcoal-1); }
+.fill-charcoal { fill: var(--color-charcoal); }
+.fill-charcoal1 { fill: var(--color-charcoal1); }z
