@@ -477,13 +477,9 @@
           {{ passwordLoading ? "Saving..." : "Save Password" }}
         </button>
         <div class="pt-1">
-          <p v-if="passwordError" class="text-red-600">{{ passwordError }}</p>
-          <p v-if="passwordSuccess" class="text-green-600">{{ passwordSuccess }}</p>
         </div>
       </div>
       <div class="pt-2">
-        <p v-if="editProfileError" class="text-red-600">{{ editProfileError }}</p>
-        <p v-if="editProfileSuccess" class="text-green-600">{{ editProfileSuccess }}</p>
       </div>
     </div>
   </template>
@@ -503,11 +499,11 @@
     @close="cancelDelete"
 >
     <template #body>
-    <p v-if="deleteError" class="text-red-600 mb-2">{{ deleteError }}</p>
     <p v-if="deleteLoading" class="text-gray-500">Deleting...</p>
     </template>
 </ConfirmModal>
 <ProfileModal v-if="showProfileDetails"/>
+<MessageDisplay />
 </template>
 
 <style>
@@ -532,26 +528,25 @@
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../lib/supabaseClient';
+import { useMessageDisplay } from '../composables/useMessageDisplay';
 import Albcaptions_logo from './logos/Albcaptions_Logo_inv.vue';
 import Time from './items/Time.vue';
 import VideoIcon from './items/Video.vue';
 import Save from './items/Save.vue';
 import ConfirmModal from './items/ModalDialog.vue';
 import ProfileModal from './items/ProfileModal.vue';
+import MessageDisplay from './items/MessageDisplay.vue';
 
 const router = useRouter();
+const { showSuccess, showError, showWarning, showInfo } = useMessageDisplay();
 const loading = ref(true);
 const transcriptsLoading = ref(true); 
 const allUsersLoading = ref(false); 
 const userData = ref(null);
 const userRoleDetails = ref(null);
 const userRoleDetailsLoading = ref(false);
-const userRoleDetailsError = ref(null);
-const authError = ref(null);
 const userTrans = ref([]);
-const allUsers = ref([]); 
-const showSuccessAlert = ref(false);
-const successAlertMessage = ref('');
+const allUsers = ref([]);
 
 // Search and Filter State
 const searchFilename = ref('');
@@ -572,21 +567,17 @@ const jumpToPageInput = ref(null);
 const showDeleteModal = ref(false);
 const transactionToDelete = ref(null);
 const deleteLoading = ref(false);
-const deleteError = ref(null);
 
 // Modal state for user deletion
 const showDeleteUserModal = ref(false);
 const userToDelete = ref(null);
 const deleteUserLoading = ref(false);
-const deleteUserError = ref(null);
 // Modal state for deactivating account
 const showDeactivateModal = ref(false);
 const deactivateLoading = ref(false);
-const deactivateError = ref(null);
 // Modal state for subscription cancellation
 const showCancelSubscriptionModal = ref(false);
 const cancelSubscriptionLoading = ref(false);
-const cancelSubscriptionError = ref(null);
 const hasActiveSubscription = ref(false);
 
 //Roles states
@@ -594,13 +585,11 @@ const roles = ref([]);
 const rolesLoading = ref(false);
 const showRoleModal = ref(false);
 const roleModalLoading = ref(false);
-const roleModalError = ref(null);
 const editingRole = ref(null);
 
 // Modal state for Role creation
 const showCreateRoleModal = ref(false);
 const createRoleLoading = ref(false);
-const createRoleError = ref(null);
 const newRole = ref({
   name: '',
   price: 0,
@@ -615,7 +604,6 @@ const newRole = ref({
 const showDeleteRoleModal = ref(false);
 const roleToDelete = ref(null);
 const deleteRoleLoading = ref(false);
-const deleteRoleError = ref(null);
 
 //User update states
 const showEditProfileModal = ref(false);
@@ -625,8 +613,6 @@ const editProfileForm = ref({
   surname: ''
 });
 const editProfileLoading = ref(false);
-const editProfileError = ref(null);
-const editProfileSuccess = ref(null);
 
 // Password change form state
 const showPasswordFields = ref(false);
@@ -635,9 +621,7 @@ const passwordForm = ref({
   new: '',
   confirm: ''
 });
-const passwordError = ref(null);
 const passwordLoading = ref(false);
-const passwordSuccess = ref(null);
 
 // Computed property for filtered and sorted transactions
 const filteredTransactions = computed(() => {
@@ -811,12 +795,8 @@ const promptEditProfile = () => {
     name: userData.value.name || '',
     surname: userData.value.surname || ''
   };
-  editProfileError.value = null;
-  editProfileSuccess.value = null;
   showPasswordFields.value = false;
   passwordForm.value = { current: '', new: '', confirm: '' };
-  passwordError.value = null;
-  
 };
 
 const closeEditProfileModal = () => {
@@ -826,8 +806,6 @@ const closeEditProfileModal = () => {
 // Save profile changes
 const saveProfile = async () => {
   editProfileLoading.value = true;
-  editProfileError.value = null;
-  editProfileSuccess.value = null;
   try {
     // Update user fields in your users table
     const { error } = await supabase
@@ -839,17 +817,17 @@ const saveProfile = async () => {
       })
       .eq('id', userData.value.id);
     if (error) throw error;
-    editProfileSuccess.value = 'Profile updated!';
+    
+    showSuccess('Profile updated successfully!');
     // Optionally update local userData
     userData.value.username = editProfileForm.value.username;
     userData.value.name = editProfileForm.value.name;
     userData.value.surname = editProfileForm.value.surname;
     setTimeout(() => {
       showEditProfileModal.value = false;
-      editProfileSuccess.value = null;
     }, 1200);
   } catch (err) {
-    editProfileError.value = err.message || 'Failed to update profile.';
+    showError(err.message || 'Failed to update profile.');
   } finally {
     editProfileLoading.value = false;
   }
@@ -858,15 +836,13 @@ const saveProfile = async () => {
 // Password change logic
 const changePassword = async () => {
   passwordLoading.value = true;
-  passwordError.value = null;
-  passwordSuccess.value = null;
   if (!passwordForm.value.current || !passwordForm.value.new || !passwordForm.value.confirm) {
-    passwordError.value = 'All password fields are required.';
+    showError('All password fields are required.');
     passwordLoading.value = false;
     return;
   }
   if (passwordForm.value.new !== passwordForm.value.confirm) {
-    passwordError.value = 'New password and confirmation do not match.';
+    showError('New password and confirmation do not match.');
     passwordLoading.value = false;
     return;
   }
@@ -877,7 +853,7 @@ const changePassword = async () => {
       password: passwordForm.value.current
     });
     if (signInError) {
-      passwordError.value = 'Current password is incorrect.';
+      showError('Current password is incorrect.');
       passwordLoading.value = false;
       return;
     }
@@ -886,17 +862,16 @@ const changePassword = async () => {
       password: passwordForm.value.new
     });
     if (pwdError) {
-      passwordError.value = pwdError.message || 'Failed to update password.';
+      showError(pwdError.message || 'Failed to update password.');
     } else {
-      passwordSuccess.value = 'Password updated!';
+      showSuccess('Password updated successfully!');
       passwordForm.value = { current: '', new: '', confirm: '' };
       setTimeout(() => {
         showPasswordFields.value = false;
-        passwordSuccess.value = null;
       }, 1200);
     }
   } catch (err) {
-    passwordError.value = err.message || 'Failed to update password.';
+    showError(err.message || 'Failed to update password.');
   } finally {
     passwordLoading.value = false;
   }
@@ -946,19 +921,18 @@ const setDatePreset = (days) => {
 // Function to load user data with debugging
 const loadUserData = async () => {
   loading.value = true;
-  authError.value = null;
 
   try {
     // Get current session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
     if (sessionError) {
-      authError.value = "Error retrieving session";
+      showError("Error retrieving session");
       return;
     }
 
     if (!session) {
-      authError.value = "No active session found";
+      showError("No active session found");
       return;
     }
 
@@ -985,14 +959,14 @@ const loadUserData = async () => {
       .single();
 
     if (dbError || !dbUser) {
-      authError.value = "User profile not found in the database.";
+      showError("User profile not found in the database.");
       userData.value = null;
       return;
     }
 
     // Check for all required fields
     if (!dbUser.name || !dbUser.surname || !dbUser.username || !dbUser.role) {
-      authError.value = "Incomplete user profile data. Please contact support.";
+      showError("Incomplete user profile data. Please contact support.");
       userData.value = null;
       return;
     }
@@ -1007,7 +981,7 @@ const loadUserData = async () => {
     console.log("User data loaded successfully:", userData.value);
 
   } catch (error) {
-    authError.value = error.message;
+    showError(error.message);
     userData.value = null;
   } finally {
     loading.value = false;
@@ -1017,7 +991,6 @@ const loadUserData = async () => {
 // Function to load user role details
 const getUserRoleDetails = async () => {
   userRoleDetailsLoading.value = true;
-  userRoleDetailsError.value = null;
   try {
     if (!userData.value?.id) return;
     const { data, error } = await supabase
@@ -1028,7 +1001,7 @@ const getUserRoleDetails = async () => {
     if (error) throw error;
     userRoleDetails.value = data;
   } catch (error) {
-    userRoleDetailsError.value = error.message || 'Failed to fetch user role details.';
+    showError(error.message || 'Failed to fetch user role details.');
     userRoleDetails.value = null;
   } finally {
     userRoleDetailsLoading.value = false;
@@ -1053,20 +1026,17 @@ const getAllRoles = async () => {
 const openRoleModal = (role) => {
   editingRole.value = { ...role }; // clone to avoid direct mutation
   showRoleModal.value = true;
-  roleModalError.value = null;
 };
 
 const closeRoleModal = () => {
   editingRole.value = null;
   showRoleModal.value = false;
-  roleModalError.value = null;
 };
 
 // Save changes to a role
 const saveRole = async () => {
   if (!editingRole.value) return;
   roleModalLoading.value = true;
-  roleModalError.value = null;
   try {
     // Prepare update object, exclude id and created_at
     const updateData = { ...editingRole.value };
@@ -1083,14 +1053,9 @@ const saveRole = async () => {
     // Refresh roles in UI
     await getAllRoles();
     closeRoleModal();
-    showSuccessAlert.value = true;
-    successAlertMessage.value = `Role '${editingRole.value.name}' updated successfully.`;
-    setTimeout(() => {
-      showSuccessAlert.value = false;
-      successAlertMessage.value = '';
-    }, 2500);
+    showSuccess(`Role '${editingRole.value.name}' updated successfully.`);
   } catch (err) {
-    roleModalError.value = err.message || 'Failed to update role.';
+    showError(err.message || 'Failed to update role.');
   } finally {
     roleModalLoading.value = false;
   }
@@ -1109,22 +1074,19 @@ const openCreateRoleModal = () => {
     is_admin: false
   };
   showCreateRoleModal.value = true;
-  createRoleError.value = null;
 };
 
 const closeCreateRoleModal = () => {
   showCreateRoleModal.value = false;
-  createRoleError.value = null;
 };
 
 const createRole = async () => {
   createRoleLoading.value = true;
-  createRoleError.value = null;
   
   try {
     // Validate required fields
     if (!newRole.value.name.trim()) {
-      createRoleError.value = 'Role name is required.';
+      showError('Role name is required.');
       createRoleLoading.value = false;
       return;
     }
@@ -1142,7 +1104,7 @@ const createRole = async () => {
     
     if (error) {
       if (error.code === '23505') { // Unique constraint violation
-        createRoleError.value = 'A role with this name already exists.';
+        showError('A role with this name already exists.');
       } else {
         throw error;
       }
@@ -1152,14 +1114,9 @@ const createRole = async () => {
     // Refresh roles in UI
     await getAllRoles();
     closeCreateRoleModal();
-    showSuccessAlert.value = true;
-    successAlertMessage.value = `Role '${newRole.value.name}' created successfully.`;
-    setTimeout(() => {
-      showSuccessAlert.value = false;
-      successAlertMessage.value = '';
-    }, 2500);
+    showSuccess(`Role '${newRole.value.name}' created successfully.`);
   } catch (err) {
-    createRoleError.value = err.message || 'Failed to create role.';
+    showError(err.message || 'Failed to create role.');
   } finally {
     createRoleLoading.value = false;
   }
