@@ -1128,13 +1128,11 @@ const promptDeleteRole = (role) => {
   // You might want to check if any users are assigned to this role
   roleToDelete.value = role;
   showDeleteRoleModal.value = true;
-  deleteRoleError.value = null;
 };
 
 const confirmDeleteRole = async () => {
   if (!roleToDelete.value) return;
   deleteRoleLoading.value = true;
-  deleteRoleError.value = null;
   
   try {
     // Optional: Check if role is in use before deletion
@@ -1145,14 +1143,16 @@ const confirmDeleteRole = async () => {
       .limit(1);
     
     if (checkError) {
-      deleteRoleError.value = 'Error checking role usage.';
+      showError('Error checking role usage.');
       return;
     }
     
     if (usersWithRole && usersWithRole.length > 0) {
-      deleteRoleError.value = 'Cannot delete role: it is currently assigned to users.';
+      showError('Cannot delete role: it is currently assigned to users.');
       return;
     }
+
+    const roleName = roleToDelete.value.name; // Store name before deletion
 
     // Delete role from the roles table
     const { error } = await supabase
@@ -1161,21 +1161,16 @@ const confirmDeleteRole = async () => {
       .eq('id', roleToDelete.value.id);
     
     if (error) {
-      deleteRoleError.value = error.message || 'Failed to delete role.';
+      showError(error.message || 'Failed to delete role.');
     } else {
       // Remove from local list
       roles.value = roles.value.filter(r => r.id !== roleToDelete.value.id);
       showDeleteRoleModal.value = false;
       roleToDelete.value = null;
-      showSuccessAlert.value = true;
-      successAlertMessage.value = `Role '${roleToDelete.value.name}' deleted successfully.`;
-      setTimeout(() => {
-        showSuccessAlert.value = false;
-        successAlertMessage.value = '';
-      }, 3000);
+      showSuccess(`Role '${roleName}' deleted successfully.`);
     }
   } catch (err) {
-    deleteRoleError.value = err.message || 'Failed to delete role.';
+    showError(err.message || 'Failed to delete role.');
   } finally {
     deleteRoleLoading.value = false;
   }
@@ -1184,7 +1179,6 @@ const confirmDeleteRole = async () => {
 const cancelDeleteRole = () => {
   showDeleteRoleModal.value = false;
   roleToDelete.value = null;
-  deleteRoleError.value = null;
 };
 
 // Function to get user transcripts
@@ -1268,13 +1262,11 @@ const promptDeleteUser = (user) => {
   }
   userToDelete.value = user;
   showDeleteUserModal.value = true;
-  deleteUserError.value = null;
 };
 
 const confirmDeleteUser = async () => {
   if (!userToDelete.value) return;
   deleteUserLoading.value = true;
-  deleteUserError.value = null;
   
   try {
     // Delete user from the users table
@@ -1284,21 +1276,16 @@ const confirmDeleteUser = async () => {
       .eq('id', userToDelete.value.id);
     
     if (error) {
-      deleteUserError.value = error.message || 'Failed to delete user.';
+      showError(error.message || 'Failed to delete user.');
     } else {
       // Remove from local list
       allUsers.value = allUsers.value.filter(u => u.id !== userToDelete.value.id);
       showDeleteUserModal.value = false;
       userToDelete.value = null;
-      showSuccessAlert.value = true;
-      successAlertMessage.value = 'User deleted successfully.';
-      setTimeout(() => {
-        showSuccessAlert.value = false;
-        successAlertMessage.value = '';
-      }, 3000);
+      showSuccess('User deleted successfully.');
     }
   } catch (err) {
-    deleteUserError.value = err.message || 'Failed to delete user.';
+    showError(err.message || 'Failed to delete user.');
   } finally {
     deleteUserLoading.value = false;
   }
@@ -1307,18 +1294,15 @@ const confirmDeleteUser = async () => {
 const cancelDeleteUser = () => {
   showDeleteUserModal.value = false;
   userToDelete.value = null;
-  deleteUserError.value = null;
 };
 
 // Deactivate account logic
 const promptDeactivate = () => {
   showDeactivateModal.value = true;
-  deactivateError.value = null;
 };
 
 const confirmDeactivate = async () => {
   deactivateLoading.value = true;
-  deactivateError.value = null;
   try {
     // Delete from custom users table
     const { error } = await supabase
@@ -1327,7 +1311,7 @@ const confirmDeactivate = async () => {
       .eq('id', userData.value.id);
 
     if (error) {
-      deactivateError.value = error.message || 'Failed to deactivate account.';
+      showError(error.message || 'Failed to deactivate account.');
       return;
     }
 
@@ -1338,7 +1322,7 @@ const confirmDeactivate = async () => {
     router.push('/');
 
   } catch (err) {
-    deactivateError.value = err.message || 'Failed to deactivate account.';
+    showError(err.message || 'Failed to deactivate account.');
   } finally {
     deactivateLoading.value = false;
   }
@@ -1346,14 +1330,12 @@ const confirmDeactivate = async () => {
 
 const cancelDeactivate = () => {
   showDeactivateModal.value = false;
-  deactivateError.value = null;
 };
 
 // Transaction deletion logic
 const promptDelete = (transaction) => {
   transactionToDelete.value = transaction;
   showDeleteModal.value = true;
-  deleteError.value = null;
 };
 
 const confirmDelete = async () => {
@@ -1363,7 +1345,6 @@ const confirmDelete = async () => {
   const videoUrl = transactionToDelete.value.video_url;
   
   deleteLoading.value = true;
-  deleteError.value = null;
   
   try {
     if (videoUrl) {
@@ -1388,7 +1369,7 @@ const confirmDelete = async () => {
         if (storageError) {
           console.error('Failed to delete video file from storage:', storageError);
           // You might want to decide whether to continue with DB deletion or not
-          deleteError.value = `Failed to delete video file: ${storageError.message}`;
+          showError(`Failed to delete video file: ${storageError.message}`);
           return; // Stop here if storage deletion fails
         } else {
           console.log('Video file deleted from storage successfully:', data);
@@ -1403,21 +1384,16 @@ const confirmDelete = async () => {
       .eq('id', transactionId);
       
     if (error) {
-      deleteError.value = error.message || 'Failed to delete transaction.';
+      showError(error.message || 'Failed to delete transaction.');
     } else {
       // Remove from local list using the stored transaction ID
       userTrans.value = userTrans.value.filter(t => t.id !== transactionId);
       showDeleteModal.value = false;
       transactionToDelete.value = null;
-      showSuccessAlert.value = true;
-      successAlertMessage.value = 'Transaction and video deleted successfully.';
-      setTimeout(() => {
-        showSuccessAlert.value = false;
-        successAlertMessage.value = '';
-      }, 2500);
+      showSuccess('Transaction and video deleted successfully.');
     }
   } catch (err) {
-    deleteError.value = err.message || 'Failed to delete transaction.';
+    showError(err.message || 'Failed to delete transaction.');
     console.error('Delete operation failed:', err);
   } finally {
     deleteLoading.value = false;
@@ -1427,7 +1403,6 @@ const confirmDelete = async () => {
 const cancelDelete = () => {
   showDeleteModal.value = false;
   transactionToDelete.value = null;
-  deleteError.value = null;
 };
 
 const checkActiveSubscription = async () => {
@@ -1448,12 +1423,10 @@ const checkActiveSubscription = async () => {
 
 const promptCancelSubscription = () => {
   showCancelSubscriptionModal.value = true;
-  cancelSubscriptionError.value = null;
 };
 
 const confirmCancelSubscription = async () => {
   cancelSubscriptionLoading.value = true;
-  cancelSubscriptionError.value = null;
   
   try {
     const response = await fetch('https://96b5-31-22-56-9.ngrok-free.app/api/paypal/cancel', {
@@ -1469,7 +1442,7 @@ const confirmCancelSubscription = async () => {
     const result = await response.json();
 
     if (!response.ok) {
-      cancelSubscriptionError.value = result.error || 'Failed to cancel subscription';
+      showError(result.error || 'Failed to cancel subscription');
       return;
     }
 
@@ -1478,15 +1451,10 @@ const confirmCancelSubscription = async () => {
     
     await loadUserData();
     
-    showSuccessAlert.value = true;
-    successAlertMessage.value = 'Subscription cancelled successfully. You have been downgraded to the free plan.';
-    setTimeout(() => {
-      showSuccessAlert.value = false;
-      successAlertMessage.value = '';
-    }, 5000);
+    showSuccess('Subscription cancelled successfully. You have been downgraded to the free plan.');
 
   } catch (err) {
-    cancelSubscriptionError.value = err.message || 'Failed to cancel subscription';
+    showError(err.message || 'Failed to cancel subscription');
   } finally {
     cancelSubscriptionLoading.value = false;
   }
@@ -1494,7 +1462,6 @@ const confirmCancelSubscription = async () => {
 
 const cancelCancelSubscription = () => {
   showCancelSubscriptionModal.value = false;
-  cancelSubscriptionError.value = null;
 };
 
 const handleSignOut = async () => {
