@@ -8,7 +8,8 @@ import { supabase } from '../lib/supabaseClient';
 import Paypal from '../components/Paypal.vue';
 import Pricing from '../components/Payment.vue';
 import NewDashboard from '../components/NewDashboard.vue';
-import NotFound from '../components/views/NotFound.vue'
+import NotFound from '../components/views/NotFound.vue';
+import Login from '../components/Login.vue';
 
 const routes = [
   {
@@ -43,6 +44,11 @@ const routes = [
         next();
       }
     }
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login
   },
   {
     path: '/dashboard',

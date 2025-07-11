@@ -91,18 +91,18 @@ const goToHome = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#0f172a] flex items-center justify-center px-4 font-poppins">
-    <div class="bg-gray-800 bg-opacity-50 p-8 rounded-2xl max-w-lg w-full text-center">
-      <div class="h-20 w-20 bg-[#a784ff30] rounded-full flex items-center justify-center mx-auto mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[#a784ffd4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <div class="min-h-screen bg-[#052B28] flex items-center justify-center px-4 font-poppins">
+    <div class="bg-[#084742] bg-opacity-50 p-8 rounded-2xl max-w-lg w-full text-center">
+      <div class="h-20 w-20 bg-[#052B28] rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[#9FE29E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
         </svg>
       </div>
       
-      <h1 class="text-3xl font-bold text-white mb-3">Confirm Your Email</h1>
-      <p class="text-[#92a3bb] mb-8">
-        We've sent a confirmation link to <span class="text-white font-medium">{{ email }}</span>. 
-        Please check your inbox and click the link to activate your account.
+      <h1 class="text-3xl font-bold text-white mb-3">Konfirmoni emailin</h1>
+      <p class="text-gray-400 mb-8">
+        Kemi dërguar një email verifikimi në <span class="text-white font-medium">{{ email }}</span>. 
+        Kerkoni në inbox për emailin me linkun e aktivizimit.
       </p>
       
       <div v-if="getEmailProvider" class="mb-8">
@@ -110,10 +110,10 @@ const goToHome = () => {
           :href="getEmailProvider.url" 
           target="_blank" 
           rel="noopener noreferrer"
-          class="block w-full py-3 px-4 rounded-full bg-[#a784ffd4] hover:bg-[#9163ff] text-white font-medium transition-colors duration-300"
+          class="block w-full py-3 px-4 rounded-full bg-[#052B28] hover:bg-[#0d1b19] text-white font-medium transition-colors duration-300"
         >
           <span v-if="getEmailProvider.known">
-            Open {{ getEmailProvider.name }}
+            Hap {{ getEmailProvider.name }}
           </span>
           <span v-else>
             Check Your Email
@@ -121,20 +121,20 @@ const goToHome = () => {
         </a>
       </div>
       
-      <div class="text-sm text-[#92a3bb]">
-        <p class="mb-4">Didn't receive an email? Check your spam folder or try these options:</p>
+      <div class="text-sm text-gray-100">
+        <p class="mb-4">Emaili nuk gjëndet? Klikoni spam folder, ose provoni:</p>
         <div class="flex justify-center gap-4">
           <button 
             @click="goToHome" 
-            class="text-[#a784ffd4] hover:underline"
+            class="cursor-pointer text-[#9FE29E] hover:underline"
           >
-            Return to Home
+            &nbsp;Rikthehu&nbsp;
           </button>
           <router-link 
             to="/signin" 
-            class="text-[#a784ffd4] hover:underline"
+            class="cursor-pointer text-[#9FE29E] hover:underline"
           >
-            Try signing in
+          &nbsp;Provo hyrjen&nbsp;
           </router-link>
         </div>
       </div>

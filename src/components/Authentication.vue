@@ -1,4 +1,178 @@
+<template>
+    <div class="max-h-screen h-screen w-screen bg-gray-100 overflow-hidden">
+        <div class="p-3 w-full h-full">
+            <div class="h-full w-full flex gap-2 flex-row">
+                <div class="w-2/5 h-full bg-[#052b28] rounded-4xl relative">
+                    <div class="h-full z-10 relative w-full">
+                        <div class="h-full w-full py-10 px-5 flex justify-between flex-col">
+                            <div class="flex w-full h-full flex-col gap-4">
+                                <h1 class="text-4xl text-kollektif-bold font-bold text-[#9FE29E] mx-6 relative inline-block w-fit">
+                                    Regjistrohu 
+                                    <span class="relative">
+                                        falas
+                                        <svg 
+                                            class="absolute -bottom-2 left-0 w-full h-3" 
+                                            viewBox="0 0 100 12" 
+                                            preserveAspectRatio="none"
+                                        >
+                                            <path 
+                                                d="M 0 8 Q 25 2 50 6 T 100 4" 
+                                                stroke="#9FE29E" 
+                                                stroke-width="4" 
+                                                fill="none"
+                                                stroke-linecap="round"
+                                            />
+                                        </svg>
+                                    </span>
+                                </h1>
+                                <span class="text-white text-sm font-poppins font-thin mx-6">
+                                    Bashkohu me AlbCaptions, mënyra më e shpejtë për të bërë video me cilësi profesionale që tërheqin dhe mbajnë vëmendjen e audiencës tënde
+                                </span>
+                                <span class="text-[#9FE29E] text-lg font-poppins h-fit w-fit rounded-xl mx-6">
+                                    3 video falas në muaj, shkarkim direkt në formatet .srt, .vtt, .txt
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <Logo_lines class="absolute bottom-0 left-0 w-full z-0 pointer-events-none"/>
+                </div> 
+                <div class="w-3/5 h-full rounded-3xl">
+                    <form v-if="!showLogin" @submit="handleSignUp" class="w-full h-full py-10 px-3 rounded-3xl">
+                        <div class="w-full h-fit flex flex-col items-center gap-3">
+                            <Albcaptions_logo class="h-16 w-auto"/>
+                            <h1 class="text-5xl text-kollektif-bold text-[#052b28]">
+                                Krijoni llogarinë
+                            </h1>
+                            <span class="text-[#052b28] text-md font-poppins font-thin">
+                                Plotëso formularin më poshtë për të krijuar llogarinë
+                            </span>
+                            <div v-if="error" class="bg-red-300 border border-red-400 text-md text-red-500 font-poppins font-normal p-3 rounded-xl">
+                                {{ error }}
+                            </div>
+                            <div v-if="success" class="bg-green-500 bg-opacity-20 border border-green-500 text-white px-5 py-3 rounded-full mt-5">
+                                {{ success }}
+                            </div>
+                        </div>
+                        <div class="w-full h-full flex flex-col items-center gap-4 mt-10">
+                            <input 
+                            type="text" 
+                            id="name" 
+                            v-model="formData.name"
+                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
+                            placeholder="Emër" 
+                            required
+                            />
+                            <input 
+                            type="text" 
+                            id="surname" 
+                            v-model="formData.surname"
+                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
+                            placeholder="Mbiemër" 
+                            required
+                            />
+                            <input 
+                            type="text" 
+                            id="username" 
+                            v-model="formData.username"
+                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
+                            placeholder="Username" 
+                            required
+                            />
+                            <input 
+                            type="email" 
+                            id="email" 
+                            v-model="formData.email"
+                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
+                            placeholder="përdorues@mail.com" 
+                            required
+                            />
+                            <input 
+                            type="password" 
+                            id="password" 
+                            v-model="formData.password"
+                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
+                            placeholder="Fjalëkalimi" 
+                            required
+                            />
+                            <button 
+                                type="submit" 
+                                class="w-full max-w-md bg-[#9FE29E] text-white font-bold py-2.5 rounded-lg hover:bg-[#052b28] cursor-pointer duration-300 transition-colors"
+                                :disabled="loading"
+                            >
+                                <span v-if="loading">Duke u regjistruar...</span>
+                                <span v-else>Regjistrohu</span>
+                            </button>
+                            <span class="text-[#052b28] text-xs font-poppins font-normal text-center">
+                                Duke vazhduar, ti pranon
+                                <a href="#" class="text-[#052b28] font-bold underline hover:text-[#9FE29E] transition-all duration-300 ease-in-out">Kushtet e Shërbimit</a> 
+                                dhe 
+                                <a href="#" class="text-[#052b28] font-bold underline hover:text-[#9FE29E] transition-all duration-300 ease-in-out">Politikën tonë të Privatësisë</a>
+                            </span>
+                            <div class="w-full flex items-center justify-center gap-2">
+                                <button 
+                                    type="button" 
+                                    @click="toggleForm" 
+                                    class="text-white font-bold p-2.5 rounded-xl bg-[#052b28] hover:bg-[#9FE29E] transition-all duration-300 ease-in-out cursor-pointer"
+                                >
+                                Ke një llogari? Hyr
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <form v-if="showLogin" @submit="handleSignIn" class="w-full h-full py-10 px-3 rounded-3xl">
+                        <div class="w-full h-fit flex flex-col items-center gap-3">
+                            <Albcaptions_logo class="h-16 w-auto"/>
+                            <h1 class="text-5xl text-kollektif-bold text-[#052b28]">
+                                Hyr 
+                            </h1>
+                            <span class="text-[#052b28] text-md font-poppins font-thin">
+                                Plotëso formularin më poshtë për të hyrë
+                            </span>
+                            <div v-if="error" class="bg-red-300 border border-red-400 text-xs text-red-500 font-poppins font-normal p-3 rounded-xl">
+                                {{ error }}
+                            </div>
+                            <div v-if="success" class="bg-green-300 border border-green-400 text-green-500 font-poppins font-normal p-3 rounded-xl">
+                                {{ success }}
+                            </div>
+                        </div>
+                        <div class="w-full h-full flex flex-col items-center gap-4 mt-10">
+                            <input 
+                            type="email" 
+                            id="email" 
+                            v-model="formData.email"
+                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
+                            placeholder="përdorues@mail.com" 
+                            required
+                            />
+                            <input 
+                            type="password" 
+                            id="password" 
+                            v-model="formData.password"
+                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
+                            placeholder="Fjalëkalimi" 
+                            required
+                            />
+                            <button 
+                                type="submit" 
+                                class="w-full max-w-md bg-[#9FE29E] text-white font-bold py-3 rounded-lg hover:bg-[#052b28] cursor-pointer duration-300 transition-colors"
+                                :disabled="loading"
+                            >
+                                <span v-if="loading">Hyr...</span>
+                                <span v-else>Hyr</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
 <script setup>
+import Logo_lines from './logos/Logo_lines.vue';
+import Albcaptions_logo from './logos/Albcaptions_logo.vue';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '../lib/supabaseClient.js';
@@ -18,8 +192,7 @@ const formData = ref({
   surname: '',
   username: '',
   email: '',
-  password: '',
-  terms: false
+  password: ''
 });
 
 const loading = ref(false);
@@ -35,8 +208,8 @@ const handleSignUp = async (e) => {
   try {
     if (!formData.value.email || !formData.value.password || 
         !formData.value.name || !formData.value.surname || 
-        !formData.value.username || !formData.value.terms) {
-      throw new Error("Please fill out all fields and accept the terms");
+        !formData.value.username ) {
+      throw new Error("Të lutem plotësoni të gjitha fushat dhe pranoni kushtet e shërbimit.");
     }
     
     const { data, error: authError } = await supabase.auth.signUp({
@@ -91,7 +264,7 @@ const handleSignIn = async (e) => {
     }, 500);
     
   } catch (err) {
-    error.value = err.message || "Invalid email or password";
+    error.value = err.message || "Emaili ose passwordi gabuar.\nProvo përsëri.";
     console.error("Sign in error:", err);
   } finally {
     loading.value = false;
@@ -114,185 +287,3 @@ onMounted(() => {
   showLogin.value = props.isLogin;
 });
 </script>
-
-
-<template>
-    <div class="w-screen min-h-screen px-60 bg-[#0f172a] font-poppins">
-        <div class="w-full h-full flex gap-36 flex-row">
-            <!-- <div class="w-full h-full flex flex-col justify-center items-center">
-                <h1 class="inline-block text-center text-transparent bg-clip-text h-fit w-fit bg-gradient-to-tl from-[#a784ffd4] outline outline-whtie to-white text-6xl my-2">
-                    Authentication Section
-                </h1>
-                
-            </div> -->
-            <div class="w-full h-full flex justify-center p-10">
-                <div class="w-full h-full flex flex-col">
-                    <h1 class="text-white text-6xl font-medium mb-10">
-                        {{ showLogin ? 'Welcome back' : 'Join us today' }}
-                    </h1>
-                    <p class="text-[#92a3bb] text-lg font-regular">
-                        {{ showLogin ? 'Sign in to your account' : 'Create an account to get started' }}
-                    </p>
-                    
-                    <!-- Display error/success messages -->
-                    <div v-if="error" class="bg-red-500 bg-opacity-20 border border-red-500 text-white px-5 py-3 rounded-full mt-5">
-                        {{ error }}
-                    </div>
-                    <div v-if="success" class="bg-green-500 bg-opacity-20 border border-green-500 text-white px-5 py-3 rounded-full mt-5">
-                        {{ success }}
-                    </div>
-                    
-                    <div class="w-full h-fit mt-10 rounded-full">
-                        <button class="w-full h-full flex flex-row items-center justify-center gap-2 bg-gray-800 py-4 text-white text-lg px-5 font-regular rounded-full hover:bg-gray-600 transition duration-300 ease-in-out focus:outline-2 focus:outline-offset-2 focus:outline-gray-600 active:bg-gray-600">
-                            <google class="h-6"/>
-                            <span>
-                                {{ showLogin ? 'Sign In with Google' : 'Sign Up with Google' }}
-                            </span>
-                        </button>
-                    </div>
-                    
-                    <!-- Sign Up Form -->
-                    <form v-if="!showLogin" @submit="handleSignUp" class="w-full h-fit mt-10 flex flex-col gap-4">
-                        <div class="flex flex-row gap-2 justify-between">
-                            <div>
-                                <label class="text-md text-white" for="name">Name</label>
-                                <input 
-                                    type="text" 
-                                    id="name" 
-                                    v-model="formData.name"
-                                    class="w-full h-fit bg-transparent text-[#92a3bb] px-5 py-4 text-md rounded-full mt-2 ring-2 ring-gray-800 focus:outline-none focus:ring-2 focus:ring-[#a784ffd4] focus:border-transparent" 
-                                    placeholder="Enter your name" 
-                                    required
-                                >
-                            </div>
-                            <div>
-                                <label class="text-md text-white" for="surname">Surname</label>
-                                <input 
-                                    type="text" 
-                                    id="surname" 
-                                    v-model="formData.surname"
-                                    class="w-full h-fit bg-transparent text-[#92a3bb] px-5 py-4 text-md rounded-full mt-2 ring-2 ring-gray-800 focus:outline-none focus:ring-2 focus:ring-[#a784ffd4] focus:border-transparent" 
-                                    placeholder="Enter your surname" 
-                                    required
-                                >
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="text-md text-white" for="username">Username</label>
-                            <div>
-                                <input 
-                                    type="text" 
-                                    id="username" 
-                                    v-model="formData.username"
-                                    class="w-full h-fit bg-transparent text-[#92a3bb] px-5 py-4 text-md rounded-full mt-2 ring-2 ring-gray-800 focus:outline-none focus:ring-2 focus:ring-[#a784ffd4] focus:border-transparent" 
-                                    placeholder="Enter your username" 
-                                    required
-                                >
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="text-md text-white" for="email">E-mail</label>
-                            <div>
-                                <input 
-                                    type="email" 
-                                    id="email" 
-                                    v-model="formData.email"
-                                    class="w-full h-fit bg-transparent text-[#92a3bb] px-5 py-4 text-md rounded-full mt-2 ring-2 ring-gray-800 focus:outline-none focus:ring-2 focus:ring-[#a784ffd4] focus:border-transparent" 
-                                    placeholder="user@mail.com" 
-                                    required
-                                >
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-md text-white" for="password">Password</label>
-                            <div>
-                                <input 
-                                    type="password" 
-                                    id="password" 
-                                    v-model="formData.password"
-                                    class="w-full h-fit bg-transparent text-[#92a3bb] px-5 py-4 text-md rounded-full mt-2 ring-2 ring-gray-800 focus:outline-none focus:ring-2 focus:ring-[#a784ffd4] focus:border-transparent" 
-                                    placeholder="Min 8 characters" 
-                                    required
-                                    minlength="8"
-                                >
-                            </div>
-                        </div>
-                        <div class="w-full h-fit flex flex-row items-center justify-between mt-2">
-                            <div class="flex flex-row items-center gap-2">
-                                <input 
-                                    type="checkbox" 
-                                    id="terms" 
-                                    v-model="formData.terms"
-                                    class="w-4 h-4 text-[#a784ffd4] bg-gray-800 border-gray-600 rounded focus:ring-[#a784ffd4] focus:ring-offset-gray-800" 
-                                    required
-                                >
-                                <label for="terms" class="text-[#92a3bb] text-md font-regular">I agree to the terms and conditions</label>
-                            </div>
-                        </div>
-                        <div class="w-full h-fit rounded-full">
-                            <button 
-                                type="submit" 
-                                class="w-full h-full flex flex-row items-center justify-center gap-2 bg-gray-800 py-4 text-white text-md px-5 font-regular rounded-full hover:bg-gray-600 transition duration-300 ease-in-out focus:outline-2 focus:outline-offset-2 focus:outline-gray-600 active:bg-gray-600"
-                                :disabled="loading"
-                            >
-                                <span v-if="loading">Signing up...</span>
-                                <span v-else>Sign Up</span>
-                            </button>
-                        </div>
-                    </form>
-                    
-                    <!-- Sign In Form -->
-                    <form v-if="showLogin" @submit="handleSignIn" class="w-full h-fit mt-10 flex flex-col gap-4">
-                        <div>
-                            <label class="text-md text-white" for="email">E-mail</label>
-                            <div>
-                                <input 
-                                    type="email" 
-                                    id="login-email" 
-                                    v-model="formData.email"
-                                    class="w-full h-fit bg-transparent text-[#92a3bb] px-5 py-4 text-md rounded-full mt-2 ring-2 ring-gray-800 focus:outline-none focus:ring-2 focus:ring-[#a784ffd4] focus:border-transparent" 
-                                    placeholder="user@mail.com" 
-                                    required
-                                >
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-md text-white" for="password">Password</label>
-                            <div>
-                                <input 
-                                    type="password" 
-                                    id="login-password" 
-                                    v-model="formData.password"
-                                    class="w-full h-fit bg-transparent text-[#92a3bb] px-5 py-4 text-md rounded-full mt-2 ring-2 ring-gray-800 focus:outline-none focus:ring-2 focus:ring-[#a784ffd4] focus:border-transparent" 
-                                    placeholder="Your password" 
-                                    required
-                                >
-                            </div>
-                        </div>
-                        <div class="w-full h-fit rounded-full">
-                            <button 
-                                type="submit" 
-                                class="w-full h-full flex flex-row items-center justify-center gap-2 bg-gray-800 py-4 text-white text-md px-5 font-regular rounded-full hover:bg-gray-600 transition duration-300 ease-in-out focus:outline-2 focus:outline-offset-2 focus:outline-gray-600 active:bg-gray-600"
-                                :disabled="loading"
-                            >
-                                <span v-if="loading">Signing in...</span>
-                                <span v-else>Sign In</span>
-                            </button>
-                        </div>
-                    </form>
-                    
-                    <div class="w-full h-fit flex flex-row items-center mt-5 justify-center gap-2">
-                        <p class="text-[#92a3bb] text-lg font-regular">
-                            {{ showLogin ? "Don't have an account?" : "Already have an account?" }}
-                        </p>
-                        <button @click="toggleForm" class="text-[#a784ffd4] text-lg font-regular hover:text-white transition duration-300 ease-in-out active:text-white">
-                            {{ showLogin ? "Sign Up" : "Sign In" }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>

@@ -508,6 +508,7 @@
     </template>
 </ConfirmModal>
 <ProfileModal v-if="showProfileDetails"/>
+<p>{{ successAlertMessage }} </p>
 </template>
 
 <style>

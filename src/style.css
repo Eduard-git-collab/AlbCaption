@@ -6,6 +6,8 @@
 
 /* Color Variables */
 :root {
+  --color-primary: #F19E7D;
+  --color-secondary: #9FE29E;
   --color-cream: #F7F5EB;
   --color-tan: #EDE6D4;
   --color-tan1: #DBD1B7;
@@ -58,8 +60,17 @@
 .text-kollektif-bold {
   font-family: 'kollektif-Bold', sans-serif;
 }
-.text-kollektif-bolditalic {
+.text-kollektif-bold-italic {
   font-family: 'kollektif-BoldItalic', sans-serif;
+}
+
+.rtl{
+  direction: rtl;
+}
+
+body{
+  overscroll-behavior: none ;
+  scroll-behavior: smooth;
 }
 
 /* Background Colors */

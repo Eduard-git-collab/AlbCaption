@@ -17,18 +17,18 @@ const handleLogin =() => {
 <template>
   <ModalDialog 
     v-if="modalVisible" 
-    title="Sign In Required"
+    title="Identifikohu"
     :message="modalMessage"
     icon="info"
-    confirm-text="Sign Up"
-    cancel-text="Log In"
+    confirm-text="Regjistrohu"
+    cancel-text="Hyr"
     confirm-variant="primary"
     size="md"
     @confirm="handleSignUp"
     @cancel="handleLogin"
     @close="modalVisible = false"
   />
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gray-100">
     <div class="container mx-auto px-4 py-6">
       
       <!-- File Upload Section -->
@@ -512,7 +512,7 @@ export default {
 
       //Modal dialog properties
       modalVisible: false,
-      modalMessage: "You need to log in to upload videos",
+      modalMessage: "Regjistrimi është i nevojshëm për të vazhduar me ngarkimin e videos.",
       
       // Transcription related properties
       transcript: null,
