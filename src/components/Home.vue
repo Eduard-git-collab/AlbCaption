@@ -120,6 +120,6 @@
   <script setup>
   import NewUpload from './NewUpload.vue';
   import Hero_svg from './items/Hero_svg.vue';
-  import Curved_line from './items/Curved_line.vue';
+  import Curved_line from './items/Curved_Line.vue';
   import Payment from './Payment.vue';
   </script>

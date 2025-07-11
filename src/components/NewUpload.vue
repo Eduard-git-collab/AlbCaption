@@ -1,5 +1,6 @@
 <script setup>
 import ModalDialog from './items/ModalDialog.vue'
+import FileUploadArea from './subcomponents/FileUploadArea.vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -32,42 +33,17 @@ const handleLogin =() => {
     <div class="container mx-auto px-4 py-6">
       
       <!-- File Upload Section -->
-      <div v-if="!processingState || processingState === 'error'" class="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
-        <div class="mb-4">
-          <h2 class="text-xl font-bold mb-4 text-gray-800">Upload Video</h2>
-          <div 
-            class="w-full border-2 border-dashed rounded-lg p-8 mb-6 text-center cursor-pointer transition-colors"
-            :class="{ 'border-blue-500 bg-blue-50': isDragging, 'border-gray-300 hover:bg-gray-50': !isDragging }"
-            @dragover.prevent="isDragging = true"
-            @dragleave.prevent="isDragging = false"
-            @drop.prevent="onDrop"
-            @click="triggerFileInput"
-          >
-            <div class="flex flex-col items-center justify-center">
-              <svg class="w-12 h-12 text-gray-400 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              <p class="mb-2 text-lg font-medium text-gray-700">
-                {{ file ? 'Change video' : 'Drop video here or click to upload' }}
-              </p>
-              <p class="mb-2 text-sm text-gray-500">
-                MP4, MOV, or WebM files only (max. 100MB)
-              </p>
-              <span v-if="file" class="text-sm font-medium text-blue-600">
-                {{ file.name }} ({{ formatFileSize(file.size) }})
-              </span>
-            </div>
-            <input
-              ref="fileInput"
-              type="file"
-              class="hidden"
-              accept="video/*"
-              @change="onFileChange"
-            />
-          </div>
-        </div>
+      <div v-if="!processingState || processingState === 'error'">
+        <FileUploadArea
+          :current-file="file"
+          title="Upload Video"
+          drop-text="Drop video here or click to upload"
+          @file-selected="handleFileSelected"
+          @validation-error="handleValidationError"
+          @file-cleared="handleFileCleared"
+        />
 
-        <div v-if="file && (!processingState || processingState === 'error')" class="w-full">
+        <div v-if="file && (!processingState || processingState === 'error')" class="w-full max-w-3xl mx-auto mt-4">
           <button
             @click="checkAuthAndUpload"
             :disabled="isUploading || processingState === 'complete'"
@@ -81,55 +57,48 @@ const handleLogin =() => {
             {{ uploadButtonText }}
           </button>
         </div>
-
-        <!-- Error Display -->
-        <!-- Enhanced Error Display -->
-<div v-if="errorMessage" class="w-full mt-4">
-  <!-- Quota Error Display -->
-  <div v-if="quotaError" class="p-4 bg-red-50 border border-red-200 rounded-md">
-    <div class="flex">
-      <div class="flex-shrink-0">
-        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-        </svg>
       </div>
-      <div class="ml-3">
-        <h3 class="text-sm font-medium text-red-800">
-          Upload Quota Exceeded
-        </h3>
-        <div class="mt-2 text-sm text-red-700">
-          <ul class="list-disc list-inside space-y-1">
-            <li v-for="error in quotaError.errors" :key="error">{{ error }}</li>
-          </ul>
-        </div>
-        
-        <!-- Quota Information Display -->
-        <div v-if="quotaError.quotaInfo" class="mt-3 p-3 bg-red-100 rounded border">
-          <h4 class="text-sm font-medium text-red-800 mb-2">Current Usage:</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-red-700">
-            <div v-if="quotaError.quotaInfo.videosTotal !== undefined">
-              <strong>Videos:</strong> {{ quotaError.quotaInfo.videosUsed }}/{{ quotaError.quotaInfo.videosTotal }}
+
+      <!-- Enhanced Error Display for Quota Errors -->
+      <div v-if="quotaError" class="max-w-3xl mx-auto mt-4">
+        <div class="p-4 bg-red-50 border border-red-200 rounded-md">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
             </div>
-            <div v-if="quotaError.quotaInfo.minutesTotal !== undefined">
-              <strong>Minutes:</strong> {{ quotaError.quotaInfo.minutesUsed }}/{{ quotaError.quotaInfo.minutesTotal }}
-            </div>
-            <div v-if="quotaError.quotaInfo.maxFileSizeMB !== undefined">
-              <strong>File size:</strong> {{ quotaError.quotaInfo.fileSizeMB?.toFixed(1) }}MB / {{ quotaError.quotaInfo.maxFileSizeMB }}MB max
-            </div>
-            <div v-if="quotaError.quotaInfo.maxDurationMinutes !== undefined">
-              <strong>Duration:</strong> {{ Math.ceil(quotaError.quotaInfo.durationSeconds / 60) }} min / {{ quotaError.quotaInfo.maxDurationMinutes }} min max
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-red-800">
+                Upload Quota Exceeded
+              </h3>
+              <div class="mt-2 text-sm text-red-700">
+                <ul class="list-disc list-inside space-y-1">
+                  <li v-for="error in quotaError.errors" :key="error">{{ error }}</li>
+                </ul>
+              </div>
+              
+              <!-- Quota Information Display -->
+              <div v-if="quotaError.quotaInfo" class="mt-3 p-3 bg-red-100 rounded border">
+                <h4 class="text-sm font-medium text-red-800 mb-2">Current Usage:</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-red-700">
+                  <div v-if="quotaError.quotaInfo.videosTotal !== undefined">
+                    <strong>Videos:</strong> {{ quotaError.quotaInfo.videosUsed }}/{{ quotaError.quotaInfo.videosTotal }}
+                  </div>
+                  <div v-if="quotaError.quotaInfo.minutesTotal !== undefined">
+                    <strong>Minutes:</strong> {{ quotaError.quotaInfo.minutesUsed }}/{{ quotaError.quotaInfo.minutesTotal }}
+                  </div>
+                  <div v-if="quotaError.quotaInfo.maxFileSizeMB !== undefined">
+                    <strong>File size:</strong> {{ quotaError.quotaInfo.fileSizeMB?.toFixed(1) }}MB / {{ quotaError.quotaInfo.maxFileSizeMB }}MB max
+                  </div>
+                  <div v-if="quotaError.quotaInfo.maxDurationMinutes !== undefined">
+                    <strong>Duration:</strong> {{ Math.ceil(quotaError.quotaInfo.durationSeconds / 60) }} min / {{ quotaError.quotaInfo.maxDurationMinutes }} min max
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Generic Error Display -->
-  <div v-else class="p-3 bg-red-100 border border-red-200 text-red-700 rounded-md">
-    {{ errorMessage }}
-  </div>
-</div>
       </div>
 
       <!-- Processing State -->
@@ -488,13 +457,17 @@ const handleLogin =() => {
 </template>
 
 <script>
+import FileUploadArea from './subcomponents/FileUploadArea.vue'
+
 export default {
   name: 'VideoUpload',
+  components: {
+    FileUploadArea
+  },
   data() {
     return {
       // File upload and processing properties
       file: null,
-      isDragging: false,
       isUploading: false,
       uploadProgress: 0,
       processingState: null, 
@@ -646,46 +619,42 @@ export default {
     },
     
     // ===== FILE UPLOAD METHODS =====
+    handleFileSelected(file) {
+      this.file = file;
+      this.errorMessage = null;
+      this.quotaError = null;
+    },
+    
+    handleValidationError(error) {
+      this.errorMessage = error;
+      this.quotaError = null;
+    },
+    
+    handleFileCleared() {
+      this.file = null;
+      this.errorMessage = null;
+      this.quotaError = null;
+    },
+    
+    // Legacy methods - kept for compatibility but now use the new component
     triggerFileInput() {
-      this.$refs.fileInput.click();
+      // This is now handled by FileUploadArea component
+      console.warn('triggerFileInput called - this should be handled by FileUploadArea');
     },
     
     onFileChange(event) {
-      const selectedFile = event.target.files[0];
-      if (selectedFile) {
-        // Validate file type and size
-        if (!this.validateFile(selectedFile)) return;
-        this.file = selectedFile;
-        this.errorMessage = null;
-      }
+      // This is now handled by FileUploadArea component
+      console.warn('onFileChange called - this should be handled by FileUploadArea');
     },
     
     onDrop(event) {
-      this.isDragging = false;
-      const droppedFile = event.dataTransfer.files[0];
-      if (droppedFile) {
-        // Validate file type and size
-        if (!this.validateFile(droppedFile)) return;
-        this.file = droppedFile;
-        this.errorMessage = null;
-      }
+      // This is now handled by FileUploadArea component
+      console.warn('onDrop called - this should be handled by FileUploadArea');
     },
     
     validateFile(file) {
-      // Check file type
-      const allowedTypes = ['video/mp4', 'video/quicktime', 'video/webm'];
-      if (!allowedTypes.includes(file.type)) {
-        this.errorMessage = 'Please select a valid video file (MP4, MOV, or WebM).';
-        return false;
-      }
-      
-      // Check file size (max 100MB)
-      const maxSize = 100 * 1024 * 1024;
-      if (file.size > maxSize) {
-        this.errorMessage = 'Video file is too large. Maximum size is 100MB.';
-        return false;
-      }
-      
+      // This is now handled by FileUploadArea component
+      console.warn('validateFile called - this should be handled by FileUploadArea');
       return true;
     },
     
