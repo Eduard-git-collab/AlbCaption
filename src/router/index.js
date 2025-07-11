@@ -10,7 +10,6 @@ import Pricing from '../components/Payment.vue';
 import NewDashboard from '../components/NewDashboard.vue';
 import NotFound from '../components/views/NotFound.vue';
 import Login from '../components/Login.vue';
-import FileUploadTest from '../components/FileUploadTest.vue';
 
 const routes = [
   {
@@ -84,11 +83,6 @@ const routes = [
     path: '/new-dashboard',
     name: 'NewDashboard',
     component: NewDashboard
-  },
-  {
-    path: '/test-upload',
-    name: 'FileUploadTest',
-    component: FileUploadTest
   },
   {
     path: '/:pathMatch(.*)*',
