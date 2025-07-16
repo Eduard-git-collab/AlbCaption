@@ -6,14 +6,14 @@
       :class="{ 'transform -translate-y-full': isHeaderHidden }"
     >
       <div class="w-full h-full px-8 py-2 flex justify-center">
-          <nav class="min-w-3/4 h-fit bg-tan p-3 rounded-full flex flex-row justify-between items-center">
+          <nav class="min-w-3/4 h-fit bg-tan shadow-2xl p-3 rounded-full flex flex-row justify-between items-center">
             <RouterLink to="/">  
               <Albcaptions_logo_nobg class="w-10 h-10 cursor-pointer"/>
             </RouterLink>
               <div class="w-fit text-lg flex flex-row gap-4 justify-evenly font-poppins font-medium">
                 <RouterLink to="/about" class="text-[#052B28] hover:text-[#9FE29E] transition-colors">Rreth Nesh</RouterLink>
                 <RouterLink to="/contact" class="text-[#052B28] hover:text-[#9FE29E] transition-colors">Kontakt</RouterLink>
-                <RouterLink to="/pricing" class="text-[#052B28] hover:text-[#9FE29E] transition-colors">Paketat</RouterLink>
+                <RouterLink to="/pricing" class="text-[#052B28] hover:text-[#9FE29E] transition-colors">Çmimet</RouterLink>
                 <RouterLink to="/faq" class="text-[#052B28] hover:text-[#9FE29E] transition-colors">FAQ</RouterLink>
               </div>
               <div class="w-fit flex flex-row gap-2 justify-between font-poppins items-center font-medium">
@@ -29,7 +29,7 @@
           </nav>
       </div>
   </header>
-    <main class="bg-gray-100">
+    <main class="bg-white">
       <router-view />
     </main>
   </div>
@@ -49,28 +49,24 @@ const router = useRouter();
 const isHeaderHidden = ref(false);
 const lastScrollY = ref(0);
 const scrollThreshold = 10; // Minimum scroll distance to trigger hide/show
-const headerHeight = 80; // Approximate header height for better UX
+const headerHeight = 70; // Approximate header height for better UX
 
-// Hide navigation on auth pages
 const hideNavigation = computed(() => {
   return route.name === 'SignIn' || route.name === 'SignUp' || route.name === 'NewDashboard' || route.name === 'ConfirmEmail';
 });
 
-// Scroll handler with threshold and direction detection
 const handleScroll = () => {
   const currentScrollY = window.scrollY;
   const scrollDifference = Math.abs(currentScrollY - lastScrollY.value);
   
-  // Only trigger if scroll difference exceeds threshold
   if (scrollDifference < scrollThreshold) {
     return;
   }
-  
-  // Hide header when scrolling down (and past the header height)
+
   if (currentScrollY > lastScrollY.value && currentScrollY > headerHeight) {
     isHeaderHidden.value = true;
   } 
-  // Show header when scrolling up or near the top
+
   else if (currentScrollY < lastScrollY.value || currentScrollY <= headerHeight) {
     isHeaderHidden.value = false;
   }
@@ -78,7 +74,6 @@ const handleScroll = () => {
   lastScrollY.value = currentScrollY;
 };
 
-// Throttled scroll handler to improve performance
 let ticking = false;
 const throttledHandleScroll = () => {
   if (!ticking) {
@@ -90,12 +85,10 @@ const throttledHandleScroll = () => {
   }
 };
 
-// Check for existing session on mount
 onMounted(async () => {
   const { data } = await supabase.auth.getSession();
   session.value = data.session;
   
-  // Add scroll event listener
   window.addEventListener('scroll', throttledHandleScroll, { passive: true });
   lastScrollY.value = window.scrollY;
   

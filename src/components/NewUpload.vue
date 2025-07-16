@@ -28,13 +28,12 @@ const handleLogin =() => {
     @cancel="handleLogin"
     @close="modalVisible = false"
   />
-  <div class="min-h-screen bg-gray-100">
+  <div class="min-h-screen">
     <div class="container mx-auto px-4 py-6">
       
       <!-- File Upload Section -->
       <div v-if="!processingState || processingState === 'error'" class="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
         <div class="mb-4">
-          <h2 class="text-xl font-bold mb-4 text-gray-800">Upload Video</h2>
           <div 
             class="w-full border-2 border-dashed rounded-lg p-8 mb-6 text-center cursor-pointer transition-colors"
             :class="{ 'border-blue-500 bg-blue-50': isDragging, 'border-gray-300 hover:bg-gray-50': !isDragging }"
@@ -48,12 +47,12 @@ const handleLogin =() => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
               <p class="mb-2 text-lg font-medium text-gray-700">
-                {{ file ? 'Change video' : 'Drop video here or click to upload' }}
+                {{ file ? 'Ngarko një video tjetër' : 'Ngarko videon' }}
               </p>
               <p class="mb-2 text-sm text-gray-500">
-                MP4, MOV, or WebM files only (max. 100MB)
+                Formatet e pranuara janë MP4, MOV, ose WebM<br>(max. 100MB)
               </p>
-              <span v-if="file" class="text-sm font-medium text-blue-600">
+              <span v-if="file" class="text-sm font-medium text-[#052B28]">
                 {{ file.name }} ({{ formatFileSize(file.size) }})
               </span>
             </div>
@@ -71,11 +70,11 @@ const handleLogin =() => {
           <button
             @click="checkAuthAndUpload"
             :disabled="isUploading || processingState === 'complete'"
-            class="w-full py-2 px-4 rounded-md font-medium text-white transition-colors"
+            class="w-full py-2 px-4 rounded-2xl font-poppins font-medium transition-colors"
             :class="[
               isUploading || processingState === 'complete' 
                 ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-blue-600 hover:bg-blue-700'
+                : 'bg-[#9FE29E] hover:bg-[#052B28] text-[#052B28] hover:text-white'
             ]"
           >
             {{ uploadButtonText }}
@@ -135,14 +134,14 @@ const handleLogin =() => {
       <!-- Processing State -->
       <div v-if="processingState && processingState !== 'error' && processingState !== 'complete'" class="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
         <div class="text-center">
-          <h2 class="text-xl font-bold mb-4 text-gray-800">Processing Video</h2>
+          <h2 class="text-xl font-bold mb-4 text-gray-800">Procesimi i videos</h2>
           
           <!-- Upload Progress -->
           <div v-if="uploadProgress > 0 && uploadProgress < 100" class="w-full mb-4">
             <div class="w-full bg-gray-200 rounded-full h-2">
               <div class="bg-blue-600 h-2 rounded-full" :style="{ width: `${uploadProgress}%` }"></div>
             </div>
-            <p class="text-sm text-gray-600 mt-1">{{ uploadProgress }}% uploaded</p>
+            <p class="text-sm text-gray-600 mt-1">{{ uploadProgress }}% ngarkuar</p>
           </div>
           
           <div class="mb-4">
@@ -159,7 +158,7 @@ const handleLogin =() => {
           <!-- Combined Transcript Panel - Now takes 3/5 of the width -->
           <div class="lg:col-span-3 bg-white rounded-lg shadow-md overflow-hidden">
             <div class="bg-gray-100 border-b border-gray-200 px-4 py-3 flex justify-between items-center">
-              <h2 class="text-lg font-semibold text-gray-800">Transcript Segments</h2>
+              <h2 class="text-lg font-semibold text-gray-800">Segmentet e transkriptuara</h2>
               <div class="flex space-x-2">
                 <button 
                   @click="copyTranscript" 
@@ -168,7 +167,7 @@ const handleLogin =() => {
                   <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
-                  Copy
+                  Kopjo
                 </button>
                 <button 
                   @click="downloadSRT" 
@@ -179,7 +178,7 @@ const handleLogin =() => {
                   <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  {{ isDownloadingSRT ? 'Downloading...' : 'Download SRT' }}
+                  {{ isDownloadingSRT ? 'Downloading...' : 'Shkarko SRT/VTT' }}
                 </button>
                 <button 
                   v-if="hasUnsavedChanges"
@@ -190,7 +189,7 @@ const handleLogin =() => {
                   <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                   </svg>
-                  Save All
+                  Ruaj të gjitha
                 </button>
               </div>
             </div>
@@ -271,13 +270,13 @@ const handleLogin =() => {
                       @click="cancelEditing(index)"
                       class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors mr-2"
                     >
-                      Cancel
+                      Anulo
                     </button>
                     <button 
                       @click="finishEditing(index, true)"
                       class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                     >
-                      Save
+                      Ruaj
                     </button>
                   </div>
                 </div>
@@ -302,7 +301,7 @@ const handleLogin =() => {
                   <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                   </svg>
-                  Edit
+                  Edito
                 </button>
               </div>
           
@@ -329,7 +328,7 @@ const handleLogin =() => {
                     <svg v-else class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    {{ isSavingFilename ? 'Saving...' : 'Save' }}
+                    {{ isSavingFilename ? 'Duke u ruajtur...' : 'Ruaj' }}
                   </button>
                   <button
                     @click="cancelEditingFilename"
@@ -339,7 +338,7 @@ const handleLogin =() => {
                     <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
-                    Cancel
+                    Anulo
                   </button>
                 </div>
                 
@@ -419,7 +418,7 @@ const handleLogin =() => {
                   <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                   </svg>
-                  Previous
+                  Para
                 </button>
                 <button 
                   @click="playNextSegment"
@@ -427,7 +426,7 @@ const handleLogin =() => {
                   :disabled="currentSegmentIndex >= transcriptSegments.length - 1"
                   :class="{ 'opacity-50 cursor-not-allowed': currentSegmentIndex >= transcriptSegments.length - 1 }"
                 >
-                  Next
+                  Pas
                   <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
@@ -549,18 +548,18 @@ export default {
     processingStateMessage() {
       switch(this.processingState) {
         case 'uploading':
-          return 'Uploading video to storage...';
+          return 'Video duke u ngarkuar...';
         case 'processing':
           if (this.processingStep === 'audio-extraction') {
-            return 'Converting video to audio...';
+            return 'Konvertimi i videos ne audio...';
           } else if (this.processingStep === 'transcribing') {
-            return 'Transcribing audio to text using Google Speech-to-Text...';
+            return 'Transkriptimi i audios...';
           }
-          return 'Processing...';
+          return 'Duke u procesuar...';
         case 'complete':
-          return 'Processing complete! Audio transcribed successfully.';
+          return 'Procesimi perfundoi me sukses.';
         case 'error':
-          return 'An error occurred during processing.';
+          return 'Një error është shfaqur gjatë procesimit.';
         default:
           return '';
       }
@@ -569,9 +568,9 @@ export default {
       switch(this.processingState) {
         case 'uploading':
         case 'processing':
-          return 'text-blue-600';
+          return 'text-[#052B28]';
         case 'complete':
-          return 'text-green-600';
+          return 'text-[#052B28]';
         case 'error':
           return 'text-red-600';
         default:
@@ -579,8 +578,8 @@ export default {
       }
     },
     uploadButtonText() {
-      if (this.processingState === 'complete') return 'Processing Complete';
-      return this.isUploading ? 'Uploading...' : 'Upload Video';
+      if (this.processingState === 'complete') return 'Transkirptimi përfundoi';
+      return this.isUploading ? 'Duke u ngarkuar...' : 'Ngarko videon';
     },
     hasUnsavedChanges() {
       return this.transcriptSegments.some(segment => 

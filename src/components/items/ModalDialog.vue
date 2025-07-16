@@ -104,12 +104,12 @@ const iconConfig = computed(() => {
 
 const confirmButtonClasses = computed(() => {
   const variants = {
-    primary: 'bg-blue-600 hover:bg-blue-500 text-white',
+    primary: 'bg-[#052B28] hover:bg-[#9FE29E] text-white hover:text-[#052B28]',
     danger: 'bg-red-600 hover:bg-red-500 text-white',
-    success: 'bg-green-600 hover:bg-green-500 text-white',
-    warning: 'bg-yellow-600 hover:bg-yellow-500 text-white'
+    success: 'bg-green-600 hover:bg-green-500 text-white ',
+    warning: 'bg-yellow-600 hover:bg-yellow-500 text-white '
   }
-  return `inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold shadow-xs sm:ml-3 sm:w-auto ${variants[props.confirmVariant]}`
+  return `inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold shadow-xs sm:ml-3 sm:w-auto transition-all duration-300 cursor-pointer ${variants[props.confirmVariant]}`
 })
 
 // Event handlers
@@ -121,17 +121,17 @@ const closeModal = async () => {
   
   // Wait for animation to complete
   setTimeout(() => {
-    emit('mbyll')
+    emit('close')
   }, 300)
 }
 
 const handleConfirm = () => {
-  emit('konfirmo')
+  emit('confirm')
   closeModal()
 }
 
 const handleCancel = () => {
-  emit('anulo')
+  emit('cancel')
   closeModal()
 }
 

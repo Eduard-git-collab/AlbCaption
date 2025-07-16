@@ -113,7 +113,7 @@
                                 <button 
                                     type="button" 
                                     @click="toggleForm" 
-                                    class="text-white font-bold p-2.5 rounded-xl bg-[#052b28] hover:bg-[#9FE29E] transition-all duration-300 ease-in-out cursor-pointer"
+                                    class="text-[#052B28] font-thin text-sm underline hover:font-light p-2.5 transition-all duration-300 ease-in-out cursor-pointer"
                                 >
                                 Ke një llogari? Hyr
                                 </button>
@@ -161,6 +161,13 @@
                             >
                                 <span v-if="loading">Hyr...</span>
                                 <span v-else>Hyr</span>
+                            </button>
+                            <button 
+                                    type="button" 
+                                    @click="toggleForm" 
+                                    class="text-[#052B28] font-thin text-sm underline hover:font-light p-2.5 transition-all duration-300 ease-in-out cursor-pointer"
+                                >
+                                Nuk ke llogari? Regjistrohu
                             </button>
                         </div>
                     </form>
