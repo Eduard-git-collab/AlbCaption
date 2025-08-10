@@ -50,7 +50,7 @@ const handleLogin =() => {
                 {{ file ? 'Ngarko një video tjetër' : 'Ngarko videon' }}
               </p>
               <p class="mb-2 text-sm text-gray-500">
-                Formatet e pranuara janë MP4, MOV, ose WebM<br>(max. 100MB)
+                Formatet e pranuara janë MP4, MOV, ose WebM<br>(max. {{ formattedMaxFileSize }})
               </p>
               <span v-if="file" class="text-sm font-medium text-[#052B28]">
                 {{ file.name }} ({{ formatFileSize(file.size) }})
@@ -508,6 +508,7 @@ export default {
       //User data
       userId: null,
       userName: 'No User',
+      userRole: null,
 
       //Modal dialog properties
       modalVisible: false,
@@ -586,7 +587,24 @@ export default {
         segment.originalText !== segment.text || 
         segment.isEditing
       );
-    }
+    },
+
+    maxFileSizeMB() {
+      return this.userRole?.max_file_size_mb || 100; 
+    },
+    
+    maxFileSizeBytes() {
+      return this.maxFileSizeMB * 1024 * 1024;
+    },
+
+    formattedMaxFileSize() {
+      if (this.maxFileSizeMB >= 1024) {
+        const sizeInGB = this.maxFileSizeMB / 1024;
+        return `${sizeInGB % 1 === 0 ? sizeInGB.toFixed(0) : sizeInGB.toFixed(1)}GB`;
+      } else {
+        return `${this.maxFileSizeMB}MB`;
+      }
+    },
   },
   watch: {
     originalTranscriptionJson: {
@@ -613,7 +631,6 @@ export default {
   methods: {
     async getCurrentUser() {
       try {
-        // Import the supabase client (ensure this is accessible in your component)
         const { supabase } = await import('../lib/supabaseClient');
         
         // Get current session
@@ -636,11 +653,50 @@ export default {
         // Update component data
         this.userId = user.id;
         this.userName = user.user_metadata?.name || user.email?.split('@')[0] || 'Anonymous';
+        await this.fetchUserRole();
         
         return user.id;
       } catch (error) {
         console.error("Error getting current user:", error);
         return null;
+      }
+    },
+
+        async fetchUserRole() {
+      try {
+        if (!this.userId) return;
+        
+        const { supabase } = await import('../lib/supabaseClient');
+        
+        // Query to get user's role information
+        const { data, error } = await supabase
+          .from('users')
+          .select(`
+            role,
+            roles (
+              id,
+              name,
+              max_file_size_mb,
+              max_video_duration,
+              videos_per_month,
+              total_minutes_per_month,
+              srt_exports_per_month
+            )
+          `)
+          .eq('id', this.userId)
+          .single();
+        
+        if (error) {
+          console.error("Error fetching user role:", error);
+          return;
+        }
+        
+        if (data && data.roles) {
+          this.userRole = data.roles;
+          console.log("User role loaded:", this.userRole);
+        }
+      } catch (error) {
+        console.error("Error fetching user role:", error);
       }
     },
     
@@ -685,6 +741,7 @@ export default {
         return false;
       }
       
+      
       return true;
     },
     
@@ -693,8 +750,10 @@ export default {
         return bytes + ' B';
       } else if (bytes < 1024 * 1024) {
         return (bytes / 1024).toFixed(1) + ' KB';
-      } else {
+      } else if (bytes < 1024 * 1024 * 1024) {
         return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+      } else {
+        return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
       }
     },
 

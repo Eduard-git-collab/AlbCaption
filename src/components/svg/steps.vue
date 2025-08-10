@@ -1,0 +1,3 @@
+<template>
+    <svg id="visual" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"><rect x="0" y="0" width="960" height="540" fill=none></rect><path d="M19 0L325 25L365 49L146 74L221 98L239 123L116 147L139 172L24 196L94 221L13 245L28 270L257 295L91 319L345 344L195 368L304 393L4 417L286 442L110 466L56 491L237 515L82 540" fill="none" stroke-linecap="round" stroke-linejoin="bevel" stroke="#9FE29E" stroke-width="90"></path></svg>
+</template>

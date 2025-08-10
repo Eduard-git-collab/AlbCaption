@@ -73,6 +73,7 @@ body {
   scroll-behavior: smooth;
 }
 
+
 /* Background Colors */
 .bg-cream { background: var(--color-cream); }
 .bg-tan { background: var(--color-tan); }
@@ -146,4 +147,4 @@ body {
 .fill-charcoal-2 { fill: var(--color-charcoal-2); }
 .fill-charcoal-1 { fill: var(--color-charcoal-1); }
 .fill-charcoal { fill: var(--color-charcoal); }
-.fill-charcoal1 { fill: var(--color-charcoal1); }z
+.fill-charcoal1 { fill: var(--color-charcoal1); }

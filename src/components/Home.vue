@@ -52,7 +52,7 @@
                   shikohen 
                   <span class="relative inline-block">
                       me zërin e fikur
-                      <Curved_line/>
+                      <Curved_line class="overflow-visible"/>
                   </span>
               </h1>
           </div>
@@ -166,8 +166,10 @@
       </div>
     </div>
   </div>
-  <NewUpload />
+  <!-- <NewUpload /> -->
+  <Test />
   <Payment />
+  <FAQ/>
   <FooterComponent />
 </template>
 
@@ -178,6 +180,8 @@ import Hero_svg from './items/Hero_svg.vue';
 import Curved_line from './items/Curved_line.vue';
 import Payment from './Payment.vue';
 import lightning from './items/lightning.vue';
+import FAQ from './FAQ.vue';
+import Test from './Test.vue';
 </script>
 
 <style scoped>

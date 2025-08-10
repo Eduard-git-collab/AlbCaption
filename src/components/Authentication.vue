@@ -40,7 +40,9 @@
                 <div class="w-3/5 h-full rounded-3xl">
                     <form v-if="!showLogin" @submit="handleSignUp" class="w-full h-full py-10 px-3 rounded-3xl">
                         <div class="w-full h-fit flex flex-col items-center gap-3">
-                            <Albcaptions_logo class="h-16 w-auto"/>
+                            <RouterLink to="/">
+                                <Albcaptions_logo class="h-16 w-auto"/>
+                            </RouterLink>
                             <h1 class="text-5xl text-kollektif-bold text-[#052b28]">
                                 Krijoni llogarinë
                             </h1>
@@ -123,7 +125,9 @@
 
                     <form v-if="showLogin" @submit="handleSignIn" class="w-full h-full py-10 px-3 rounded-3xl">
                         <div class="w-full h-fit flex flex-col items-center gap-3">
-                            <Albcaptions_logo class="h-16 w-auto"/>
+                            <RouterLink to="/">
+                                <Albcaptions_logo class="h-16 w-auto"/>
+                            </RouterLink>
                             <h1 class="text-5xl text-kollektif-bold text-[#052b28]">
                                 Hyr 
                             </h1>
@@ -139,11 +143,11 @@
                         </div>
                         <div class="w-full h-full flex flex-col items-center gap-4 mt-10">
                             <input 
-                            type="email" 
-                            id="email" 
-                            v-model="formData.email"
+                            type="text" 
+                            id="emailOrUsername" 
+                            v-model="formData.emailOrUsername"
                             class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
-                            placeholder="përdorues@mail.com" 
+                            placeholder="email ose username" 
                             required
                             />
                             <input 
@@ -181,7 +185,7 @@
 import Logo_lines from './logos/Logo_lines.vue';
 import Albcaptions_logo from './logos/Albcaptions_logo.vue';
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { supabase } from '../lib/supabaseClient.js';
 import google from './svg/google.vue';
 
@@ -199,6 +203,7 @@ const formData = ref({
   surname: '',
   username: '',
   email: '',
+  emailOrUsername: '',
   password: ''
 });
 
@@ -206,6 +211,58 @@ const loading = ref(false);
 const error = ref(null);
 const success = ref(null);
 const showLogin = ref(props.isLogin);
+
+// Helper function to check if a string is an email
+const isEmail = (str) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
+};
+
+// Function to check if email or username already exists
+const checkUserExists = async (email, username) => {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('email, username')
+      .or(`email.eq.${email},username.eq.${username}`);
+    
+    if (error) {
+      console.error('Error checking user existence:', error);
+      return { exists: false };
+    }
+    
+    const emailExists = data.some(user => user.email === email);
+    const usernameExists = data.some(user => user.username === username);
+    
+    return { 
+      exists: emailExists || usernameExists,
+      emailExists,
+      usernameExists 
+    };
+  } catch (err) {
+    console.error('Error in checkUserExists:', err);
+    return { exists: false };
+  }
+};
+
+// Function to get user email by username
+const getUserEmailByUsername = async (username) => {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('email')
+      .eq('username', username)
+      .single();
+    
+    if (error || !data) {
+      return null;
+    }
+    
+    return data.email;
+  } catch (err) {
+    console.error('Error getting user email by username:', err);
+    return null;
+  }
+};
 
 const handleSignUp = async (e) => {
   e.preventDefault();
@@ -217,6 +274,19 @@ const handleSignUp = async (e) => {
         !formData.value.name || !formData.value.surname || 
         !formData.value.username ) {
       throw new Error("Të lutem plotësoni të gjitha fushat dhe pranoni kushtet e shërbimit.");
+    }
+    
+    // Check if email or username already exists
+    const userCheck = await checkUserExists(formData.value.email, formData.value.username);
+    
+    if (userCheck.exists) {
+      if (userCheck.emailExists && userCheck.usernameExists) {
+        throw new Error("Ky email është i regjistruar. Provo hyrje ose një email tjetër.");
+      } else if (userCheck.emailExists) {
+        throw new Error("Ky email është i regjistruar. Provo hyrje ose një email tjetër");
+      } else if (userCheck.usernameExists) {
+        throw new Error("Ky username është i regjistruar. Provo hyrje ose një username tjetër");
+      }
     }
     
     const { data, error: authError } = await supabase.auth.signUp({
@@ -257,8 +327,19 @@ const handleSignIn = async (e) => {
   error.value = null;
   
   try {
+    let emailToUse = formData.value.emailOrUsername;
+    
+    // If the input is not an email, treat it as a username and get the corresponding email
+    if (!isEmail(formData.value.emailOrUsername)) {
+      const email = await getUserEmailByUsername(formData.value.emailOrUsername);
+      if (!email) {
+        throw new Error("Username nuk u gjet. Të lutem kontrolloni username-in ose përdorni email-in.");
+      }
+      emailToUse = email;
+    }
+    
     const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email: formData.value.email,
+      email: emailToUse,
       password: formData.value.password
     });
     
@@ -271,7 +352,7 @@ const handleSignIn = async (e) => {
     }, 500);
     
   } catch (err) {
-    error.value = err.message || "Emaili ose passwordi gabuar.\nProvo përsëri.";
+    error.value = err.message || "Emaili/username ose passwordi gabuar.\nProvo përsëri.";
     console.error("Sign in error:", err);
   } finally {
     loading.value = false;

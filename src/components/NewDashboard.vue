@@ -1417,30 +1417,56 @@ const confirmDelete = async () => {
       
       if (videosIndex > -1 && videosIndex < pathParts.length - 1) {
         const filePath = pathParts.slice(videosIndex + 1).join('/');
-        console.log('Attempting to delete file path:', filePath);
-        console.log('Original video URL:', videoUrl);
-        console.log('URL pathname:', url.pathname);
-        console.log('Path parts:', pathParts);
-        console.log('Videos index:', videosIndex);
+        const baseFileName = filePath.replace(/\.[^/.]+$/, '');
+        const videoFileName = filePath.split('/').pop(); 
+        const baseFileNameOnly = videoFileName.replace(/\.[^/.]+$/, '');
         
-        // Fixed: Use correct destructuring - 'data' and 'error', not 'BucketData' and 'BucketError'
-        const { data, error: storageError } = await supabase
-          .storage
+        console.log('Full video URL:', videoUrl);
+        console.log('Base file name:', baseFileNameOnly);
+        console.log('Video file path:', filePath);
+
+        // Define all the files to delete
+        const filesToDelete = [
+          filePath,
+          `user-uploads/extractions/${baseFileNameOnly}-transcript.json`,
+          `user-uploads/extractions/${baseFileNameOnly}.wav`
+        ];
+
+        console.log('Files to delete:', filesToDelete);
+
+        // Also check the root of the videos bucket
+        const { data: rootListData, error: rootListError } = await supabase.storage
           .from('videos')
-          .remove([filePath]);
+          .list('', { limit: 100 });
+          
+        console.log('Files in root of videos bucket:', rootListData, rootListError);
+
+        // Let's also try to list all folders
+        const { data: foldersData, error: foldersError } = await supabase.storage
+          .from('videos')
+          .list('', { limit: 100, search: '' });
+          
+        console.log('All items in videos bucket:', foldersData, foldersError);
+
+        // Delete all files at once
+        const { data, error: storageError } = await supabase.storage
+            .from('videos')
+            .remove(filesToDelete);
+
+        console.log('Storage deletion response:', { data, error: storageError });
 
         if (storageError) {
-          console.error('Failed to delete video file from storage:', storageError);
-          // You might want to decide whether to continue with DB deletion or not
-          deleteError.value = `Failed to delete video file: ${storageError.message}`;
-          return; // Stop here if storage deletion fails
-        } else {
-          console.log('Video file deleted from storage successfully:', data);
+            console.error('Failed to delete video file from storage:', storageError);
+            deleteError.value = `Failed to delete video file: ${storageError.message}`;
+            return;
         }
+
+        
+        console.log('Video file deleted from storage successfully:', filePath);
       }
     }
 
-    // Delete the transaction from database (this will cascade to related tables including videos)
+    
     const { error } = await supabase
       .from('transactions')
       .delete()
@@ -1449,7 +1475,6 @@ const confirmDelete = async () => {
     if (error) {
       deleteError.value = error.message || 'Failed to delete transaction.';
     } else {
-      // Remove from local list using the stored transaction ID
       userTrans.value = userTrans.value.filter(t => t.id !== transactionId);
       showDeleteModal.value = false;
       transactionToDelete.value = null;

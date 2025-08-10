@@ -6,7 +6,8 @@
       :class="{ 'transform -translate-y-full': isHeaderHidden }"
     >
       <div class="w-full h-full px-8 py-2 flex justify-center">
-          <nav class="min-w-3/4 h-fit bg-tan shadow-2xl p-3 rounded-full flex flex-row justify-between items-center">
+          <nav :class="{ 'transition-all duration-300 ease-in-out shadow-2xl': !isHeaderHidden }"
+           class="min-w-3/4 h-fit bg-tan p-3 rounded-full flex flex-row justify-between items-center transition-all duration-300 ease-in-out">
             <RouterLink to="/">  
               <Albcaptions_logo_nobg class="w-10 h-10 cursor-pointer"/>
             </RouterLink>
@@ -48,11 +49,11 @@ const router = useRouter();
 // Header visibility state
 const isHeaderHidden = ref(false);
 const lastScrollY = ref(0);
-const scrollThreshold = 10; // Minimum scroll distance to trigger hide/show
-const headerHeight = 70; // Approximate header height for better UX
+const scrollThreshold = 10; 
+const headerHeight = 70; 
 
 const hideNavigation = computed(() => {
-  return route.name === 'SignIn' || route.name === 'SignUp' || route.name === 'NewDashboard' || route.name === 'ConfirmEmail';
+  return route.name === 'SignIn' || route.name === 'SignUp' || route.name === 'NewDashboard' || route.name === 'ConfirmEmail' || route.name === 'Login';
 });
 
 const handleScroll = () => {

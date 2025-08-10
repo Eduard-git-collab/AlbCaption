@@ -10,6 +10,7 @@ import Pricing from '../components/Payment.vue';
 import NewDashboard from '../components/NewDashboard.vue';
 import NotFound from '../components/views/NotFound.vue';
 import Login from '../components/Login.vue';
+import Test from '../components/Test.vue';
 
 const routes = [
   {
@@ -88,6 +89,11 @@ const routes = [
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: NotFound
+  },
+  {
+    path: '/test',
+    name: 'Test',
+    component: Test
   }
 ];
 
