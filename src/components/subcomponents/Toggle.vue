@@ -10,12 +10,12 @@
       <!-- Track highlight for yearly -->
       <span
         class="absolute left-0 top-0 h-full w-full rounded-full pointer-events-none transition-colors duration-300"
-        :class="isOn ? 'bg-[#9FE29E]/60' : 'bg-[#1a4a47]'"
+        :class="isOn ? 'bg-secondary/60' : 'bg-[#1a4a47]'"
       ></span>
       <!-- Toggle knob -->
       <span
         class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-all duration-300"
-        :class="isOn ? 'translate-x-6 ring-2 ring-[#9FE29E]' : ''"
+        :class="isOn ? 'translate-x-6 ring-2 ring-secondary' : ''"
         style="transition-property: transform;"
       ></span>
     </button>
@@ -25,11 +25,11 @@
       :class="isOn ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'"
     >
       <div
-        class="absolute inset-0 bg-[#9FE29E] rounded-full transition-transform duration-500"
+        class="absolute inset-0 bg-secondary rounded-full transition-transform duration-500"
         :class="isOn ? 'translate-x-0 animate-bounce' : 'translate-x-full'"
       ></div>
       <span
-        class="relative z-10 flex items-center justify-center h-full text-[#052B28] text-xs font-semibold transition-all duration-500"
+        class="relative z-10 flex items-center justify-center h-full text-primary text-xs font-semibold transition-all duration-500"
         :class="isOn ? 'opacity-100' : 'opacity-0'"
       >
         Kurse deri në {{ percent }}%

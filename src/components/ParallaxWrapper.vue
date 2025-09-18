@@ -24,7 +24,7 @@
               <div class="w-2/5 h-full p-3">
                 <div class="w-full h-full flex items-center justify-center flex-col">
                   <div class="w-full h-1/3 flex items-center justify-center">
-                    <h1 class="text-7xl text-[#052B28] text-center font-bold">Pyetje të shpeshta</h1>
+                    <h1 class="text-7xl text-primary text-center font-bold">Pyetje të shpeshta</h1>
                   </div>
                 </div>
               </div>
@@ -38,8 +38,8 @@
                     @click="toggle(index)"
                     class="w-full text-left flex justify-between items-center"
                   >
-                    <h3 class="text-lg font-semibold text-[#052B28]">{{ faq.question }}</h3>
-                    <span class="text-2xl text-[#052B28] transform transition-transform duration-300"
+                    <h3 class="text-lg font-semibold text-primary">{{ faq.question }}</h3>
+                    <span class="text-2xl text-primary transform transition-transform duration-300"
                           :class="{ 'rotate-45': openIndex === index }">+</span>
                   </button>
                   <div
@@ -72,7 +72,7 @@
         }"
       >
         <!-- Simple Footer Content for Testing -->
-        <div class="w-full bg-[#052B28] text-[#9FE29E] p-8">
+        <div class="w-full bg-primary text-secondary p-8">
           <div class="text-center">
             <h3 class="text-3xl font-bold mb-4">Footer Content</h3>
             <p class="mb-4">This is the footer that should slide up</p>

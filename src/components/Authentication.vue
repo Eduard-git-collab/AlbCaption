@@ -2,11 +2,11 @@
     <div class="max-h-screen h-screen w-screen bg-gray-100 overflow-hidden">
         <div class="p-3 w-full h-full">
             <div class="h-full w-full flex gap-2 flex-row">
-                <div class="w-2/5 h-full bg-[#052b28] rounded-4xl relative">
+                <div class="w-2/5 h-full bg-primary rounded-4xl relative">
                     <div class="h-full z-10 relative w-full">
                         <div class="h-full w-full py-10 px-5 flex justify-between flex-col">
                             <div class="flex w-full h-full flex-col gap-4">
-                                <h1 class="text-4xl text-kollektif-bold font-bold text-[#9FE29E] mx-6 relative inline-block w-fit">
+                                <h1 class="text-4xl text-kollektif-bold font-bold text-secondary mx-6 relative inline-block w-fit">
                                     Regjistrohu 
                                     <span class="relative">
                                         falas
@@ -28,7 +28,7 @@
                                 <span class="text-white text-sm font-poppins font-thin mx-6">
                                     Bashkohu me AlbCaptions, mënyra më e shpejtë për të bërë video me cilësi profesionale që tërheqin dhe mbajnë vëmendjen e audiencës tënde
                                 </span>
-                                <span class="text-[#9FE29E] text-lg font-poppins h-fit w-fit rounded-xl mx-6">
+                                <span class="text-secondary text-lg font-poppins h-fit w-fit rounded-xl mx-6">
                                     3 video falas në muaj, shkarkim direkt në formatet .srt, .vtt, .txt
                                 </span>
                             </div>
@@ -43,10 +43,10 @@
                             <RouterLink to="/">
                                 <Albcaptions_logo class="h-16 w-auto"/>
                             </RouterLink>
-                            <h1 class="text-5xl text-kollektif-bold text-[#052b28]">
+                            <h1 class="text-5xl text-kollektif-bold text-primary">
                                 Krijoni llogarinë
                             </h1>
-                            <span class="text-[#052b28] text-md font-poppins font-thin">
+                            <span class="text-primary text-md font-poppins font-thin">
                                 Plotëso formularin më poshtë për të krijuar llogarinë
                             </span>
                             <div v-if="error" class="bg-red-300 border border-red-400 text-md text-red-500 font-poppins font-normal p-3 rounded-xl">
@@ -61,7 +61,7 @@
                             type="text" 
                             id="name" 
                             v-model="formData.name"
-                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
+                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
                             placeholder="Emër" 
                             required
                             />
@@ -69,7 +69,7 @@
                             type="text" 
                             id="surname" 
                             v-model="formData.surname"
-                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
+                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
                             placeholder="Mbiemër" 
                             required
                             />
@@ -77,7 +77,7 @@
                             type="text" 
                             id="username" 
                             v-model="formData.username"
-                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
+                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
                             placeholder="Username" 
                             required
                             />
@@ -85,7 +85,7 @@
                             type="email" 
                             id="email" 
                             v-model="formData.email"
-                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
+                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
                             placeholder="përdorues@mail.com" 
                             required
                             />
@@ -93,29 +93,29 @@
                             type="password" 
                             id="password" 
                             v-model="formData.password"
-                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
+                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
                             placeholder="Fjalëkalimi" 
                             required
                             />
                             <button 
                                 type="submit" 
-                                class="w-full max-w-md bg-[#9FE29E] text-white font-bold py-2.5 rounded-lg hover:bg-[#052b28] cursor-pointer duration-300 transition-colors"
+                                class="w-full max-w-md bg-secondary text-white font-bold py-2.5 rounded-lg hover:bg-primary cursor-pointer duration-300 transition-colors"
                                 :disabled="loading"
                             >
                                 <span v-if="loading">Duke u regjistruar...</span>
                                 <span v-else>Regjistrohu</span>
                             </button>
-                            <span class="text-[#052b28] text-xs font-poppins font-normal text-center">
+                            <span class="text-primary text-xs font-poppins font-normal text-center">
                                 Duke vazhduar, ti pranon
-                                <a href="#" class="text-[#052b28] font-bold underline hover:text-[#9FE29E] transition-all duration-300 ease-in-out">Kushtet e Shërbimit</a> 
+                                <a href="#" class="text-primary font-bold underline hover:text-secondary transition-all duration-300 ease-in-out">Kushtet e Shërbimit</a> 
                                 dhe 
-                                <a href="#" class="text-[#052b28] font-bold underline hover:text-[#9FE29E] transition-all duration-300 ease-in-out">Politikën tonë të Privatësisë</a>
+                                <a href="#" class="text-primary font-bold underline hover:text-secondary transition-all duration-300 ease-in-out">Politikën tonë të Privatësisë</a>
                             </span>
                             <div class="w-full flex items-center justify-center gap-2">
                                 <button 
                                     type="button" 
                                     @click="toggleForm" 
-                                    class="text-[#052B28] font-thin text-sm underline hover:font-light p-2.5 transition-all duration-300 ease-in-out cursor-pointer"
+                                    class="text-primary font-thin text-sm underline hover:font-light p-2.5 transition-all duration-300 ease-in-out cursor-pointer"
                                 >
                                 Ke një llogari? Hyr
                                 </button>
@@ -128,10 +128,10 @@
                             <RouterLink to="/">
                                 <Albcaptions_logo class="h-16 w-auto"/>
                             </RouterLink>
-                            <h1 class="text-5xl text-kollektif-bold text-[#052b28]">
+                            <h1 class="text-5xl text-kollektif-bold text-primary">
                                 Hyr 
                             </h1>
-                            <span class="text-[#052b28] text-md font-poppins font-thin">
+                            <span class="text-primary text-md font-poppins font-thin">
                                 Plotëso formularin më poshtë për të hyrë
                             </span>
                             <div v-if="error" class="bg-red-300 border border-red-400 text-xs text-red-500 font-poppins font-normal p-3 rounded-xl">
@@ -146,7 +146,7 @@
                             type="text" 
                             id="emailOrUsername" 
                             v-model="formData.emailOrUsername"
-                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
+                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
                             placeholder="email ose username" 
                             required
                             />
@@ -154,13 +154,13 @@
                             type="password" 
                             id="password" 
                             v-model="formData.password"
-                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#9FE29E]"
+                            class="w-full max-w-md p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-secondary"
                             placeholder="Fjalëkalimi" 
                             required
                             />
                             <button 
                                 type="submit" 
-                                class="w-full max-w-md bg-[#9FE29E] text-white font-bold py-3 rounded-lg hover:bg-[#052b28] cursor-pointer duration-300 transition-colors"
+                                class="w-full max-w-md bg-secondary text-white font-bold py-3 rounded-lg hover:bg-primary cursor-pointer duration-300 transition-colors"
                                 :disabled="loading"
                             >
                                 <span v-if="loading">Hyr...</span>
@@ -169,7 +169,7 @@
                             <button 
                                     type="button" 
                                     @click="toggleForm" 
-                                    class="text-[#052B28] font-thin text-sm underline hover:font-light p-2.5 transition-all duration-300 ease-in-out cursor-pointer"
+                                    class="text-primary font-thin text-sm underline hover:font-light p-2.5 transition-all duration-300 ease-in-out cursor-pointer"
                                 >
                                 Nuk ke llogari? Regjistrohu
                             </button>
@@ -273,7 +273,7 @@ const handleSignUp = async (e) => {
     if (!formData.value.email || !formData.value.password || 
         !formData.value.name || !formData.value.surname || 
         !formData.value.username ) {
-      throw new Error("Të lutem plotësoni të gjitha fushat dhe pranoni kushtet e shërbimit.");
+      throw new Error("Të lutem plotësoni të gjitha fushat");
     }
     
     // Check if email or username already exists
@@ -348,7 +348,7 @@ const handleSignIn = async (e) => {
     success.value = "Signed in successfully!";
     
     setTimeout(() => {
-      router.push('/new-dashboard');
+      router.push('/dashboard');
     }, 500);
     
   } catch (err) {

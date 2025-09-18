@@ -5,7 +5,7 @@
       v-if="isRecommended"
       class="absolute left-1/2 -top-8 -translate-x-1/2 z-30 flex flex-col items-center"
     >
-      <span class="bg-[#052B28] text-white font-bold px-6 py-1 rounded-full border-[#C8BC9B] border-4 text-md shadow-lg">
+      <span class="bg-primary text-white font-bold px-6 py-1 rounded-full border-[#C8BC9B] border-4 text-md shadow-lg">
         Rekomanduar
       </span>
     </div>
@@ -40,7 +40,7 @@
       
       <!-- Subtle savings indicator -->
       <div v-if="isRecommended && showOldMonthlyPrice" class="absolute right-8 top-8">
-        <span class="text-xs text-[#052B28] font-medium bg-[#9FE29E]/20 px-3 py-1 rounded-full">
+        <span class="text-xs text-primary font-medium bg-secondary/20 px-3 py-1 rounded-full">
             Kurse {{ Math.floor(((oldMonthlyPrice - price) / oldMonthlyPrice) * 100) }}%
         </span>
       </div>
@@ -48,7 +48,7 @@
       <!-- Price Section -->
       <div class="mt-14 flex flex-row items-center gap-3 relative z-10">
         <div class="flex flex-row items-end text-kollektif-bold leading-tight">
-          <span class="text-[#052B28] text-7xl text-kollektif-bold ml-1 tracking-tight flex items-baseline gap-1">
+          <span class="text-primary text-7xl text-kollektif-bold ml-1 tracking-tight flex items-baseline gap-1">
             <!-- Subtle old price -->
             <span
               v-if="showOldMonthlyPrice && oldMonthlyPrice"
@@ -66,12 +66,12 @@
               .{{decimal}}
             </span>
           </span>
-          <span class="text-[#052B28] font-semibold ml-3 mb-2 text-sm font-poppins italic">/<sub>{{ priceDescription }}</sub></span>
+          <span class="text-primary font-semibold ml-3 mb-2 text-sm font-poppins italic">/<sub>{{ priceDescription }}</sub></span>
         </div>
       </div>
       
       <!-- Plan Description -->
-      <div class="mt-2 text-[#052B28] flex items-center justify-center text-sm font-poppins relative z-10">
+      <div class="mt-2 text-primary flex items-center justify-center text-sm font-poppins relative z-10">
         <p class="text-center w-3/4" :class="isRecommended ? 'font-medium' : ''">{{description}}</p>
       </div>
       
@@ -81,8 +81,8 @@
           v-if="to"
           :to="to"
           :class="isRecommended 
-            ? 'w-full text-center bg-[#052B28] text-[#F7F5EB] font-semibold py-3 px-4 rounded-full hover:bg-[#9FE29E] hover:text-[#052B28] transition-all shadow-lg'
-            : 'w-full text-center border-2 border-[#052B28] bg-transparent text-[#052B28] font-semibold py-2 px-4 rounded-full hover:bg-[#052B28] hover:text-[#F7F5EB] transition-colors'"
+            ? 'w-full text-center bg-primary text-[#F7F5EB] font-semibold py-3 px-4 rounded-full hover:bg-secondary hover:text-primary transition-all shadow-lg'
+            : 'w-full text-center border-2 border-primary bg-transparent text-primary font-semibold py-2 px-4 rounded-full hover:bg-primary hover:text-[#F7F5EB] transition-colors'"
         >
           Zgjidh
         </router-link>
@@ -90,8 +90,8 @@
           v-else
           @click="$emit('select', planType)"
           :class="isRecommended
-            ? 'w-full text-center bg-[#052B28] text-cream font-semibold py-3 px-4 rounded-full hover:bg-[#9FE29E] hover:text-[#052B28] transition-all shadow-lg'
-            : 'w-full text-center border-2 border-[#052B28] bg-transparent text-[#052B28] font-semibold py-2 px-4 rounded-full hover:bg-[#052B28] hover:text-cream transition-colors'"
+            ? 'w-full text-center bg-primary text-cream font-semibold py-3 px-4 rounded-full hover:bg-secondary hover:text-primary transition-all shadow-lg'
+            : 'w-full text-center border-2 border-primary bg-transparent text-primary font-semibold py-2 px-4 rounded-full hover:bg-primary hover:text-cream transition-colors'"
         >
           Zgjidh
         </button>
@@ -102,18 +102,18 @@
         <li v-for="(feature, i) in features" :key="i"
           class="flex items-center gap-3 text-base transition-opacity duration-200"
           :class="[
-            feature.locked ? 'text-gray-400 opacity-60' : 'text-[#052B28]',
+            feature.locked ? 'text-gray-400 opacity-60' : 'text-primary',
             isRecommended && !feature.locked ? 'font-medium' : ''
           ]"
         >
-          <svg v-if="!feature.locked" class="w-5 h-5 text-[#9FE29E] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <svg v-if="!feature.locked" class="w-5 h-5 text-secondary flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <svg v-else class="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <span class="font-poppins flex-1"
-            :class="feature.locked ? 'line-through' : 'text-[#052B28]'"
+            :class="feature.locked ? 'line-through' : 'text-primary'"
           >
             {{ feature.text || feature }}
           </span>

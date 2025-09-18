@@ -4,7 +4,7 @@
         class="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
     >
         <span 
-            class="absolute rounded-full bg-[#052B28] ease-out flex items-center justify-center" 
+            class="absolute rounded-full bg-primary ease-out flex items-center justify-center" 
             :class="isActive ? 'w-[170vmax] h-[200vmax] transition-all duration-[2s]' : 'w-0 h-0 transition-all duration-[0.5s]'">
             <div
                 id="processing_container"
@@ -12,14 +12,14 @@
             >
                 <div class="flex items-center gap-2">
                     <span
-                        class="text-4xl text-kollektif font-bold text-[#9FE29E] whitespace-nowrap overflow-hidden wipe-transition"
+                        class="text-4xl text-kollektif font-bold text-secondary whitespace-nowrap overflow-hidden wipe-transition"
                         :class="showText ? 'wipe-open' : 'wipe-close'"
                     >
                         {{ dynamicText }}
                     </span>
                     <span
                         v-if="isActive"
-                        class="text-2xl text-kollektif font-bold text-[#9FE29E] flex items-center"
+                        class="text-2xl text-kollektif font-bold text-secondary flex items-center"
                     >
                         <span class="dot dot-1">.</span>
                         <span class="dot dot-2">.</span>

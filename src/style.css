@@ -2,11 +2,13 @@
 @import "tailwindcss";
 @theme {
   --font-poppins: "Poppins", sans-serif; 
+  --color-primary: var(--primary-color);
+  --color-secondary: var(--secondary-color);
 }
 
 /* Color Variables */
 :root {
-  --color-primary: #F19E7D;
+  --color-primary: #052B28;
   --color-secondary: #9FE29E;
   --color-cream: #F7F5EB;
   --color-tan: #EDE6D4;
@@ -71,6 +73,7 @@
 body {
   overscroll-behavior-y: none;
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 

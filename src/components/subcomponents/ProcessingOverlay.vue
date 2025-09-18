@@ -1,7 +1,7 @@
 <template>
   <span 
     ref="animationSpan"
-    class="absolute rounded-full bg-[#052B28] ease-out flex items-center justify-center z-100" 
+    class="absolute rounded-full bg-primary ease-out flex items-center justify-center z-100" 
     :class="isClicked ? 'w-[170vmax] h-[200vmax] transition-all duration-[2s]' : 'w-0 h-0 transition-all duration-[0.5s]'"
   >
     <div
@@ -10,14 +10,14 @@
     >
       <div class="flex items-center gap-2">
         <span
-          class="text-4xl text-kollektif font-bold text-[#9FE29E] whitespace-nowrap overflow-hidden wipe-transition"
+          class="text-4xl text-kollektif font-bold text-secondary whitespace-nowrap overflow-hidden wipe-transition"
           :class="showText ? 'wipe-open' : 'wipe-close'"
         >
           {{ processingStateMessage }}
         </span>
         <span
           v-if="isClicked"
-          class="text-2xl text-kollektif font-bold text-[#9FE29E] flex items-center"
+          class="text-2xl text-kollektif font-bold text-secondary flex items-center"
         >
           <span class="dot dot-1">.</span>
           <span class="dot dot-2">.</span>

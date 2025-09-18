@@ -11,6 +11,9 @@ import NewDashboard from '../components/NewDashboard.vue';
 import NotFound from '../components/views/NotFound.vue';
 import Login from '../components/Login.vue';
 import Test from '../components/Test.vue';
+import ResetPassword from '../components/views/reset-password.vue'; 
+import Upload from '../components/Upload.vue';
+import Payment from '../components/Paypal.vue';
 
 const routes = [
   {
@@ -25,11 +28,8 @@ const routes = [
     props: { isLogin: false },
     beforeEnter: async (to, from, next) => {
       const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        next('/dashboard');
-      } else {
-        next();
-      }
+      if (data.session) next('/dashboard');
+      else next();
     }
   },
   {
@@ -39,11 +39,8 @@ const routes = [
     props: { isLogin: true },
     beforeEnter: async (to, from, next) => {
       const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        next('/dashboard');
-      } else {
-        next();
-      }
+      if (data.session) next('/dashboard');
+      else next();
     }
   },
   {
@@ -52,9 +49,20 @@ const routes = [
     component: Login
   },
   {
+    path: '/usage',
+    name: 'Usage',
+    component: Login
+  },
+  {
     path: '/dashboard',
     name: 'Dashboard',
-    component: Dashboard,
+    component: Test,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/upload',
+    name: 'Ngarko',
+    component: Upload,
     meta: { requiresAuth: true }
   },
   {
@@ -69,6 +77,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path:'/payment',
+    name: 'Payment',
+    component: Payment,
+    meta: {requiresAuth: true}
+  },
+  {
     path: '/pricing',
     name: 'Pricing',
     component: Pricing
@@ -81,19 +95,24 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/new-dashboard',
+    path: '/dashboard',
     name: 'NewDashboard',
     component: NewDashboard
   },
   {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: NotFound
+    path: '/auth/reset-password',
+    name: 'ResetPassword',
+    component: ResetPassword // PUBLIC route; no requiresAuth
   },
   {
     path: '/test',
     name: 'Test',
     component: Test
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFound
   }
 ];
 
@@ -105,12 +124,8 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
     const { data } = await supabase.auth.getSession();
-    
     if (!data.session) {
-      next({ 
-        name: 'SignIn',
-        query: { redirect: to.fullPath } 
-      });
+      next({ name: 'SignIn', query: { redirect: to.fullPath } });
     } else {
       next();
     }

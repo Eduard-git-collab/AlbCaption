@@ -1,9 +1,9 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
+  <div class="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto font-poppins">
     <div class="mb-4">
       <div 
         class="w-full border-2 border-dashed rounded-lg p-8 mb-6 text-center cursor-pointer transition-colors"
-        :class="{ 'border-blue-500 bg-blue-50': isDragging, 'border-gray-300 hover:bg-gray-50': !isDragging }"
+        :class="{ 'border-primary bg-[#F7FBF9]': isDragging, 'border-gray-300 hover:bg-[#FBFBFB]': !isDragging }"
         @dragover.prevent="isDragging = true"
         @dragleave.prevent="isDragging = false"
         @drop.prevent="onDrop"
@@ -13,13 +13,13 @@
           <svg class="w-12 h-12 text-gray-400 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
-          <p class="mb-2 text-lg font-medium text-gray-700">
+          <p class="mb-2 text-lg font-poppins text-primary">
             {{ file ? 'Ngarko një video tjetër' : 'Ngarko videon' }}
           </p>
-          <p class="mb-2 text-sm text-gray-500">
+          <p class="mb-2 text-sm text-gray-500 font-poppins">
             Formatet e pranuara janë MP4, MOV, ose WebM<br>(max. {{ formattedMaxFileSize }})
           </p>
-          <span v-if="file" class="text-sm font-medium text-[#052B28]">
+          <span v-if="file" class="text-sm font-medium text-primary font-poppins">
             {{ file.name }} ({{ formatFileSize(file.size) }})
           </span>
         </div>
@@ -39,9 +39,9 @@
         :disabled="isUploading"
         class="w-full py-2 px-4 rounded-2xl font-poppins font-medium transition-colors"
         :class="[
-          isUploading 
-            ? 'bg-gray-400 cursor-not-allowed' 
-            : 'bg-[#9FE29E] hover:bg-[#052B28] text-[#052B28] hover:text-white'
+          isUploading.value 
+            ? 'bg-gray-400 cursor-not-allowed text-white' 
+            : 'bg-secondary hover:bg-primary text-primary hover:text-white'
         ]"
       >
         {{ uploadButtonText }}
@@ -49,7 +49,7 @@
     </div>
 
     <!-- Error Display -->
-    <div v-if="errorMessage" class="w-full mt-4">
+    <div v-if="errorMessage" class="w-full mt-4 font-poppins">
       <!-- Quota Error Display -->
       <div v-if="quotaError" class="p-4 bg-red-50 border border-red-200 rounded-md">
         <div class="flex">
@@ -59,17 +59,17 @@
             </svg>
           </div>
           <div class="ml-3">
-            <h3 class="text-sm font-medium text-red-800">
+            <h3 class="text-sm text-kollektif-bold text-red-800">
               Upload Quota Exceeded
             </h3>
-            <div class="mt-2 text-sm text-red-700">
+            <div class="mt-2 text-sm text-red-700 font-poppins">
               <ul class="list-disc list-inside space-y-1">
                 <li v-for="error in quotaError.errors" :key="error">{{ error }}</li>
               </ul>
             </div>
             <div v-if="quotaError.quotaInfo" class="mt-3 p-3 bg-red-100 rounded border">
               <h4 class="text-sm font-medium text-red-800 mb-2">Current Usage:</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-red-700">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-red-700 font-poppins">
                 <div v-if="quotaError.quotaInfo.videosTotal !== undefined">
                   <strong>Videos:</strong> {{ quotaError.quotaInfo.videosUsed }}/{{ quotaError.quotaInfo.videosTotal }}
                 </div>
@@ -88,7 +88,7 @@
         </div>
       </div>
       <!-- Generic Error Display -->
-      <div v-else class="p-3 bg-red-100 border border-red-200 text-red-700 rounded-md">
+      <div v-else class="p-3 bg-red-100 border border-red-200 text-red-700 rounded-md font-poppins">
         {{ errorMessage }}
       </div>
     </div>

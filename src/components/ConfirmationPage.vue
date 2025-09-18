@@ -91,10 +91,10 @@ const goToHome = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#052B28] flex items-center justify-center px-4 font-poppins">
+  <div class="min-h-screen bg-primary flex items-center justify-center px-4 font-poppins">
     <div class="bg-[#084742] bg-opacity-50 p-8 rounded-2xl max-w-lg w-full text-center">
-      <div class="h-20 w-20 bg-[#052B28] rounded-full flex items-center justify-center mx-auto mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-[#9FE29E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="h-20 w-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
         </svg>
       </div>
@@ -110,7 +110,7 @@ const goToHome = () => {
           :href="getEmailProvider.url" 
           target="_blank" 
           rel="noopener noreferrer"
-          class="block w-full py-3 px-4 rounded-full bg-[#052B28] hover:bg-[#0d1b19] text-white font-medium transition-colors duration-300"
+          class="block w-full py-3 px-4 rounded-full bg-primary hover:bg-[#0d1b19] text-white font-medium transition-colors duration-300"
         >
           <span v-if="getEmailProvider.known">
             Hap {{ getEmailProvider.name }}
@@ -126,13 +126,13 @@ const goToHome = () => {
         <div class="flex justify-center gap-4">
           <button 
             @click="goToHome" 
-            class="cursor-pointer text-[#9FE29E] hover:underline"
+            class="cursor-pointer text-secondary hover:underline"
           >
             &nbsp;Rikthehu&nbsp;
           </button>
           <router-link 
             to="/signin" 
-            class="cursor-pointer text-[#9FE29E] hover:underline"
+            class="cursor-pointer text-secondary hover:underline"
           >
           &nbsp;Provo hyrjen&nbsp;
           </router-link>

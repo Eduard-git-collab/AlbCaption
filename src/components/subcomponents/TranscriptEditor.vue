@@ -1,14 +1,14 @@
 <template>
-  <div class="max-w-6xl mx-auto">
+  <div class="max-w-6xl mx-auto font-poppins">
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
       <!-- Transcript Panel -->
       <div class="lg:col-span-3 bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="bg-gray-100 border-b border-gray-200 px-4 py-3 flex justify-between items-center">
-          <h2 class="text-lg font-semibold text-gray-800">Segmentet e transkriptuara</h2>
+        <div class="bg-[#FBFCFB] border-b border-gray-200 px-4 py-3 flex justify-between items-center">
+          <h2 class="text-lg text-kollektif-bold text-primary">Segmentet e transkriptuara</h2>
           <div class="flex space-x-2">
             <button 
               @click="copyTranscript" 
-              class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors flex items-center"
+              class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center"
             >
               <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -17,7 +17,7 @@
             </button>
             <button 
               @click="downloadSRT" 
-              class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors flex items-center"
+              class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center"
               :disabled="isDownloadingSRT || hasUnsavedChanges"
               :class="{ 'opacity-50 cursor-not-allowed': isDownloadingSRT || hasUnsavedChanges }"
             >
@@ -29,7 +29,7 @@
             <button 
               v-if="hasUnsavedChanges"
               @click="saveAllSegments" 
-              class="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center"
+              class="px-2 py-1 text-xs bg-primary text-white rounded hover:bg-[#033027] transition-colors flex items-center"
               :disabled="isSavingTranscript"
             >
               <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -64,13 +64,13 @@
 
       <!-- Video Panel -->
       <div class="lg:col-span-2 bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="bg-gray-100 border-b border-gray-200 px-4 py-3">
+        <div class="bg-[#FBFCFB] border-b border-gray-200 px-4 py-3">
           <!-- Display mode -->
           <div v-if="!isEditingFilename" class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-800">{{ originalFilenameLocal }}</h2>
+            <h2 class="text-lg text-kollektif-bold text-primary">{{ originalFilenameLocal }}</h2>
             <button 
               @click="startEditingFilename"
-              class="ml-2 px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              class="ml-2 px-3 py-1 text-sm bg-primary text-white rounded hover:bg-[#033027] transition-colors"
             >
               <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -86,13 +86,13 @@
                 v-model="editedFilename"
                 @keydown="handleFilenameKeydown"
                 type="text"
-                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-gray-800 font-poppins"
                 placeholder="Enter filename"
               />
               <button
                 @click="saveFilename"
                 :disabled="isSavingFilename"
-                class="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50 transition-colors text-sm"
+                class="px-3 py-2 bg-secondary text-primary rounded hover:bg-[#7ED089] disabled:opacity-50 transition-colors text-sm"
               >
                 <svg v-if="isSavingFilename" class="w-4 h-4 inline mr-1 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -114,7 +114,7 @@
                 Anulo
               </button>
             </div>
-            <p v-if="filenameError" class="text-red-600 text-sm flex items-center">
+            <p v-if="filenameError" class="text-red-600 text-sm flex items-center font-poppins">
               <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
               </svg>
@@ -139,22 +139,22 @@
           </div>
 
           <!-- Custom Video Controls -->
-          <div class="mt-4 flex items-center justify-between px-2 py-2 bg-gray-100 rounded">
+          <div class="mt-4 flex items-center justify-between px-2 py-2 bg-[#FBFCFB] rounded">
             <div class="flex items-center space-x-3">
               <button 
                 @click="togglePlayback" 
-                class="p-1.5 rounded-full bg-white shadow hover:bg-gray-50"
+                class="p-1.5 rounded-full bg-white shadow hover:bg-[#F4F9F7]"
               >
-                <svg v-if="isVideoPlaying" class="w-5 h-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <svg v-if="isVideoPlaying" class="w-5 h-5 text-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                   <path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7-.75a.75.75 0 00-.75.75v13.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V5.25a.75.75 0 00-.75-.75h-1.5z" clip-rule="evenodd" />
                 </svg>
-                <svg v-else class="w-5 h-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <svg v-else class="w-5 h-5 text-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                   <path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clip-rule="evenodd" />
                 </svg>
               </button>
               <button 
                 @click="skipBackward(5)"
-                class="flex items-center text-xs font-medium text-gray-700 px-2 py-1 hover:bg-gray-200 rounded"
+                class="flex items-center text-xs font-medium text-primary px-2 py-1 hover:bg-[#F4F9F7] rounded"
               >
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z"></path>
@@ -169,7 +169,7 @@
             
             <button 
               @click="skipForward(5)"
-              class="flex items-center text-xs font-medium text-gray-700 px-2 py-1 hover:bg-gray-200 rounded"
+              class="flex items-center text-xs font-medium text-primary px-2 py-1 hover:bg-[#F4F9F7] rounded"
             >
               5s
               <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -182,7 +182,7 @@
           <div class="mt-4 flex justify-between">
             <button 
               @click="playPreviousSegment"
-              class="flex items-center text-sm font-medium text-gray-700 px-3 py-1.5 bg-gray-200 hover:bg-gray-300 rounded transition-colors"
+              class="flex items-center text-sm font-medium text-primary px-3 py-1.5 bg-[#FBFCFB] hover:bg-[#F4F9F7] rounded transition-colors"
               :disabled="currentSegmentIndex <= 0"
               :class="{ 'opacity-50 cursor-not-allowed': currentSegmentIndex <= 0 }"
             >
@@ -193,7 +193,7 @@
             </button>
             <button 
               @click="playNextSegment"
-              class="flex items-center text-sm font-medium text-gray-700 px-3 py-1.5 bg-gray-200 hover:bg-gray-300 rounded transition-colors"
+              class="flex items-center text-sm font-medium text-primary px-3 py-1.5 bg-[#FBFCFB] hover:bg-[#F4F9F7] rounded transition-colors"
               :disabled="currentSegmentIndex >= transcriptSegments.length - 1"
               :class="{ 'opacity-50 cursor-not-allowed': currentSegmentIndex >= transcriptSegments.length - 1 }"
             >
@@ -208,10 +208,10 @@
         <!-- Segment settings -->
         <div class="mt-4 px-4 pb-4">
           <div class="border border-gray-200 rounded-md p-3">
-            <h3 class="text-sm font-medium text-gray-700 mb-2">Segmentation Settings</h3>
+            <h3 class="text-sm text-kollektif-bold text-primary mb-2">Segmentation Settings</h3>
             <div class="space-y-3">
               <div>
-                <label class="block text-xs text-gray-600 mb-1">Max words per segment</label>
+                <label class="block text-xs text-gray-600 mb-1 font-poppins">Max words per segment</label>
                 <div class="flex items-center">
                   <input 
                     type="range" 
@@ -219,13 +219,13 @@
                     min="5" 
                     max="30" 
                     step="1"
-                    class="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer"
+                    class="w-full h-2 bg-[#FBFCFB] rounded-lg appearance-none cursor-pointer"
                   />
-                  <span class="ml-2 text-sm font-medium w-8 text-gray-700">{{ maxWordsPerSegment }}</span>
+                  <span class="ml-2 text-sm font-medium w-8 text-gray-700 font-poppins">{{ maxWordsPerSegment }}</span>
                 </div>
               </div>
               <div>
-                <label class="block text-xs text-gray-600 mb-1">Pause threshold (seconds)</label>
+                <label class="block text-xs text-gray-600 mb-1 font-poppins">Pause threshold (seconds)</label>
                 <div class="flex items-center">
                   <input 
                     type="range" 
@@ -233,14 +233,14 @@
                     min="0.5" 
                     max="3" 
                     step="0.1"
-                    class="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer"
+                    class="w-full h-2 bg-[#FBFCFB] rounded-lg appearance-none cursor-pointer"
                   />
-                  <span class="ml-2 text-sm font-medium w-8 text-gray-700">{{ segmentOverlapThreshold.toFixed(1) }}</span>
+                  <span class="ml-2 text-sm font-medium w-8 text-gray-700 font-poppins">{{ segmentOverlapThreshold.toFixed(1) }}</span>
                 </div>
               </div>
               <button 
                 @click="reprocessSegments"
-                class="w-full px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors mt-2"
+                class="w-full px-3 py-1.5 text-sm bg-primary text-white rounded hover:bg-[#033027] transition-colors mt-2"
                 :disabled="!hasOriginalTranscription"
               >
                 Reprocess Segments
@@ -719,7 +719,7 @@ input[type="range"]::-webkit-slider-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%; 
-  background: #3b82f6;
+  background: #052B28;
   cursor: pointer;
   border: 2px solid white;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
@@ -728,7 +728,7 @@ input[type="range"]::-moz-range-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: #052B28;
   cursor: pointer;
   border: 2px solid white;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);

@@ -4,14 +4,14 @@
       <path d="M0 80C200 0 500 0 720 40C940 80 1240 80 1440 0V160H0V80Z" fill="#052B28"/>
     </svg>
   </div>
-  <div class="min-h-screen bg-[#052B28] relative overflow-hidden">
+  <div class="min-h-screen bg-primary relative overflow-hidden">
     <div class="absolute inset-0 grid-mask">
       <div class="absolute inset-0 bg-grid-pattern opacity-100"></div>
     </div>
     <div class="w-full h-fit flex flex-col gap-2 items-center justify-center my-12 relative z-10">
-      <span class="text-5xl text-center leading-18 text-kollektif-bold text-[#9FE29E]">
+      <span class="text-5xl text-center leading-18 text-kollektif-bold text-secondary">
         Zgjidh 
-        <span class="bg-[#9FE29E] text-[#052B28] p-1 rounded-md">Abonimin</span>
+        <span class="bg-secondary text-primary p-1 rounded-md">Abonimin</span>
         <br> që të Përshtatet Ty
       </span>
       <toggle @toggle="handleBillingToggle"/>
@@ -39,8 +39,8 @@
             :plan-type="plan.key"
           />
           <PricingCardEnterprise />
-          <div class="col-span-1 md:col-span-2 text-lg lg:col-span-3 text-center text-[#9FE29E] font-poppins font-thin mt-10"> 
-              <RouterLink to="/pricing" class="text-xl text-[#9FE29E] font-poppins relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-[#9FE29E] after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">
+          <div class="col-span-1 md:col-span-2 text-lg lg:col-span-3 text-center text-secondary font-poppins font-thin mt-10"> 
+              <RouterLink to="/pricing" class="text-xl text-secondary font-poppins relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-secondary after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">
                 Krahaso Planet
               </RouterLink>
             </div>

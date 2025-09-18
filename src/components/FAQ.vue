@@ -22,15 +22,15 @@ const toggle = (index) => {
 
 <template>
     <div class="w-screen h-screen">
-      <div class="w-full h-full p-3 relative">
+      <div class="w-full h-full relative">
         <div class="w-full h-full absolute z-0">
-            <steps class="rounded-3xl"/>
+          <steps class="rounded-3xl p-3"/>
         </div>
         <div class="w-full h-full flex flex-row gap-3 relative z-10">
           <div class="w-2/5 h-full p-3">
             <div class="w-full h-full flex items-center justify-center flex-col">
               <div class="w-full h-1/3 flex items-center justify-center">
-                <h1 class="text-7xl text-[#052B28] text-center text-kollektif-bold">Pyetje të shpeshta</h1>
+                <h1 class="text-7xl text-primary text-center text-kollektif-bold">Pyetje të shpeshta</h1>
               </div>
             </div>
           </div>

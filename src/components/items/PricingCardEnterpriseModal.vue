@@ -88,14 +88,14 @@
           
           <div class="space-y-3">
             <button 
-              @click="$emit('contact-enterprise')"
+              @click="emitContact()"
               class="w-full bg-secondary text-primary font-semibold px-6 py-3 rounded-full hover:bg-white transition-all shadow-lg transform hover:scale-105"
             >
               Hajde flasim
             </button>
             
             <button 
-              @click="$emit('apply-demo')"
+              @click="emitDemo()"
               class="w-full border-2 border-secondary text-secondary font-semibold px-6 py-2.5 rounded-full hover:bg-secondary hover:text-primary transition-all"
             >
               Apliko për Demo
@@ -115,7 +115,16 @@
   </template>
   
   <script setup>
-  defineEmits(['contact-enterprise', 'apply-demo'])
+  const emit = defineEmits(['contact-enterprise', 'apply-demo'])
+  
+  function emitContact() {
+    // close/modal logic is handled by parent; emit event so the parent can react
+    emit('contact-enterprise')
+  }
+  
+  function emitDemo() {
+    emit('apply-demo')
+  }
   </script>
   
   <style scoped>
@@ -128,3 +137,4 @@
     background-size: 20px 20px;
   }
   </style>
+  

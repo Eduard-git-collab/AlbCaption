@@ -5,14 +5,14 @@
         @click="toggle"
       >
         <span 
-        class="text-lg group-hover:text-[#9FE29E] transition-all duration-500 text-kollektif-bold"
-        :class="isOpen ? 'text-[#9FE29E]' : 'text-[#052B28]'"
+        class="text-lg group-hover:text-secondary transition-all duration-500 text-kollektif-bold"
+        :class="isOpen ? 'text-secondary' : 'text-primary'"
         >
           {{ question }}
         </span>
         <svg
-          class="w-5 h-5 transform transition-transform duration-300 ease-out group-hover:text-[#9FE29E]"
-          :class="isOpen ? 'rotate-180 text-[#9FE29E]' : 'text-[#052B28]'"
+          class="w-5 h-5 transform transition-transform duration-300 ease-out group-hover:text-secondary"
+          :class="isOpen ? 'rotate-180 text-secondary' : 'text-primary'"
           fill="none"
           stroke="currentColor"
           stroke-width="2"
