@@ -76,13 +76,13 @@
       </div>
       
       <!-- Action Button -->
-      <div class="mt-8 w-full flex justify-items-center relative z-10">
+      <div class="mt-8 w-full flex justify-items-center relative z-10 font-kollektif cursor-pointer">
         <router-link
           v-if="to"
           :to="to"
           :class="isRecommended 
-            ? 'w-full text-center bg-primary text-[#F7F5EB] font-semibold py-3 px-4 rounded-full hover:bg-secondary hover:text-primary transition-all shadow-lg'
-            : 'w-full text-center border-2 border-primary bg-transparent text-primary font-semibold py-2 px-4 rounded-full hover:bg-primary hover:text-[#F7F5EB] transition-colors'"
+          ? 'w-full text-center bg-primary font-semibold py-3 px-4 rounded-full hover:bg-secondary hover:text-secondary transition-all shadow-lg cursor-pointer'
+          : 'w-full text-center border-2 border-primary bg-transparent text-primary font-semibold py-2 px-4 rounded-full hover:bg-primary hover:text-primary transition-colors cursor-pointer'"
         >
           Zgjidh
         </router-link>
@@ -90,8 +90,8 @@
           v-else
           @click="$emit('select', planType)"
           :class="isRecommended
-            ? 'w-full text-center bg-primary text-cream font-semibold py-3 px-4 rounded-full hover:bg-secondary hover:text-primary transition-all shadow-lg'
-            : 'w-full text-center border-2 border-primary bg-transparent text-primary font-semibold py-2 px-4 rounded-full hover:bg-primary hover:text-cream transition-colors'"
+            ? 'w-full text-center bg-primary text-cream hover:text-primary font-semibold py-3 px-4 rounded-full hover:bg-secondary shadow-lg cursor-pointer transition-colors duration-300'
+            : 'w-full text-center border-2 border-primary bg-transparent text-primary font-semibold py-2 px-4 rounded-full hover:bg-primary hover:text-secondary transition-colors cursor-pointer duration-300'"
         >
           Zgjidh
         </button>

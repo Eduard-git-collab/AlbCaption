@@ -1434,7 +1434,6 @@ const confirmDelete = async () => {
 
         console.log('Files to delete:', filesToDelete);
 
-        // Also check the root of the videos bucket
         const { data: rootListData, error: rootListError } = await supabase.storage
           .from('videos')
           .list('', { limit: 100 });

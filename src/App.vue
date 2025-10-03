@@ -53,7 +53,7 @@ const scrollThreshold = 10;
 const headerHeight = 70; 
 
 const hideNavigation = computed(() => {
-  return route.name === 'SignIn' || route.name === 'SignUp' || route.name === 'NewDashboard' || route.name === 'ConfirmEmail' || route.name === 'Test';
+  return route.name === 'Home' || route.name === 'Pricing' ;
 });
 
 const handleScroll = () => {

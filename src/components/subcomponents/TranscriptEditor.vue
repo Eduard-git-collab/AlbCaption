@@ -26,6 +26,17 @@
               </svg>
               {{ isDownloadingSRT ? 'Downloading...' : 'Shkarko SRT/VTT' }}
             </button>
+
+            <!--Download embedded captions (burned-in) -->
+            <button
+              @click="downloadEmbeddedCaptionsModalCall"
+              class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center"
+              :disabled="isDownloadingVideo || hasUnsavedChanges"
+              :class="{ 'opacity-50 cursor-not-allowed': isDownloadingVideo || hasUnsavedChanges }"
+            >
+              {{ isDownloadingVideo ? 'Downloading...' : 'Download embedded captions' }}
+            </button>
+
             <button 
               v-if="hasUnsavedChanges"
               @click="saveAllSegments" 
@@ -251,6 +262,33 @@
       </div>
     </div>
   </div>  
+  <teleport to="body">
+    <div 
+      v-if="downloadModal" 
+      class="fixed inset-0 z-[1000] flex items-center justify-center">
+    <!-- Backdrop -->
+    <div
+      class="absolute inset-0 bg-black/30 backdrop-blur-sm"
+      @click="closeDownloadModal"
+    />
+    <!-- Content wrapper -->
+    <div class="w-full h-full md:w-[1020px] md:h-[595px] px-4 md:px-8 py-6 relative z-10">
+      <div class="w-full h-full bg-white relative rounded-xl shadow-xl overflow-hidden">
+        <!-- Close button -->
+        <button
+          class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 cursor-pointer z-20"
+          @click="closeDownloadModal"
+          aria-label="Mbyll"
+        >
+          ✕
+        </button>
+        <button
+        @click="downloadEmbeddedCaptions"
+        class="text-xl text-primary bg-secondary">Download</button>
+      </div>
+      </div>
+    </div>
+  </teleport> 
 </template>
 
 <script setup>
@@ -269,6 +307,8 @@ const videoPlayer = ref(null)
 
 // UI state properties
 const isDownloadingSRT = ref(false)
+const isDownloadingVideo = ref(false)
+const downloadModal = ref(false);
 const isSavingTranscript = ref(false)
 const saveStatus = ref(null)
 
@@ -701,6 +741,86 @@ function copyTranscript() {
       console.error('Could not copy text: ', err)
       saveStatus.value = { type: 'text-red-600', message: 'Failed to copy transcript' }
     })
+}
+
+const downloadEmbeddedCaptionsModalCall = () =>{
+  downloadModal.value = true;
+  console.log(downloadModal.value);
+}
+
+function buildTranscriptForRender() {
+  return {
+    segments: transcriptSegments.value.map(s => ({
+      startTime: s.startTime,
+      endTime: s.endTime,
+      text: s.text,
+      words: (s.words || []).map(w => ({
+        text: w.text,
+        startTime: w.startTime,
+        endTime: w.endTime
+      }))
+    }))
+  };
+}
+
+async function downloadEmbeddedCaptions() {
+  if (hasUnsavedChanges.value) {
+    saveStatus.value = { type: 'text-red-600', message: 'Please save all transcript edits before downloading the video.' };
+    setTimeout(() => { saveStatus.value = null }, 2500);
+    return;
+  }
+  if (!props.videoUrl) {
+    saveStatus.value = { type: 'text-red-600', message: 'Video URL is missing.' };
+    setTimeout(() => { saveStatus.value = null }, 2500);
+    return;
+  }
+  isDownloadingVideo.value = true;
+  try {
+    const transcript = buildTranscriptForRender();
+    const res = await fetch(`${props.apiUrl}/render-captioned-video`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        videoPath: props.videoUrl,
+        transcript,
+        style: {
+          fontName: "Poppins",
+          fontSize: 72,
+          outline: 6,
+          borderStyle: 3,
+          alignment: 2,
+          karaoke: true,
+          primaryColour: "&H009EE29F&",
+          secondaryColour: "&H8C9EE29F&",
+          outlineColour: "&H00000000&",
+          backColour: "&HB37B8410&"
+        },
+        output: { width: 1080, height: 1920 }
+      })
+    });
+    if (!res.ok) {
+      let err = {};
+      try { err = await res.json(); } catch {}
+      throw new Error(err.error || `Render failed (${res.status})`);
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const base = (props.originalFilename || '').replace(/\.[^/.]+$/, '') || 'video';
+    a.href = url;
+    a.download = `${base}-captioned.mp4`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    saveStatus.value = { type: 'text-green-600', message: 'Video downloaded successfully' };
+    setTimeout(() => { saveStatus.value = null }, 3000);
+  } catch (e) {
+    console.error(e);
+    saveStatus.value = { type: 'text-red-600', message: e.message || 'Unknown error' };
+  } finally {
+    isDownloadingVideo.value = false;
+  }
 }
 </script>
 

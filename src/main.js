@@ -1,17 +1,21 @@
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
-import router from './router';
-import { supabase } from './lib/supabaseClient';
-const app = createApp(App);
+import router from './router'
+import { createPinia } from 'pinia'
+import { useAuthStore } from './stores/auth'
+import { supabase } from './lib/supabaseClient'
+
+const app = createApp(App)
+const pinia = createPinia()
+app.use(pinia)
+app.use(router)
 
 const initApp = async () => {
-  const { data } = await supabase.auth.getSession();
-  
-  app.use(router);
-  
-  app.mount('#app');
-};
+  // Initialize auth and profile once
+  await useAuthStore().init()
+  app.mount('#app')
+}
 
 //GSAP Imports
 import { gsap } from "gsap";

@@ -97,20 +97,6 @@
               </section>
 
               <hr class="my-4 border-primary/10" />
-
-              <!-- Contact email -->
-              <section class="py-2">
-                <div class="flex items-center justify-between mb-3">
-                  <p class="text-sm font-medium text-primary">Email</p>
-                  <button
-                    type="button"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] bg-white border border-primary/15 rounded-md shadow-sm hover:bg-primary/5 transition"
-                    @click="promptAndChangeEmail"
-                  >
-                    Ndrysho emailin
-                  </button>
-                </div>
-
                 <div class="space-y-2">
                   <div class="flex items-center gap-2">
                     <div class="flex-1">
@@ -131,32 +117,7 @@
                       </div>
                     </div>
                   </div>
-
-                  <!-- Extra emails (local only demo) -->
-                  <div
-                    v-for="(em, idx) in form.extraEmails"
-                    :key="idx"
-                    class="flex items-center gap-2"
-                  >
-                    <input
-                      v-model.trim="form.extraEmails[idx]"
-                      type="email"
-                      class="flex-1 rounded-md bg-white border border-primary/15 focus:border-secondary focus:ring-2 focus:ring-secondary/40 px-3 py-2 text-sm text-primary outline-none"
-                      placeholder="billing@example.com"
-                    />
-                    <button
-                      class="px-2 py-2 text-red-600/90 hover:text-red-600"
-                      @click="form.extraEmails.splice(idx, 1)"
-                      aria-label="Remove email"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M6 18L18 6M6 6l12 12"/>
-                      </svg>
-                    </button>
-                  </div>
                 </div>
-              </section>
-
               <hr class="my-4 border-primary/10" />
 
               <!-- Password -->
@@ -335,7 +296,7 @@ async function promptAndChangeEmail() {
     )
     if (error) throw error
     // If "Secure email change" is enabled in Supabase, emails go to both old and new addresses.
-    status.value = 'Dërguam një email konfirmimi për ndryshimin e emailit. Ju lutemi kontrolloni postën.'
+    status.value = 'Dërguam një email konfirmimi për ndryshimin e emailit. Ju lutemi kontrolloni emailin tuaj.'
   } catch (err) {
     status.value = err.message || 'Ndryshimi i emailit dështoi.'
   } finally {

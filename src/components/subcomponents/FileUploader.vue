@@ -60,7 +60,7 @@
           </div>
           <div class="ml-3">
             <h3 class="text-sm text-kollektif-bold text-red-800">
-              Upload Quota Exceeded
+              Limiti i planit eshte arritur
             </h3>
             <div class="mt-2 text-sm text-red-700 font-poppins">
               <ul class="list-disc list-inside space-y-1">
@@ -68,19 +68,19 @@
               </ul>
             </div>
             <div v-if="quotaError.quotaInfo" class="mt-3 p-3 bg-red-100 rounded border">
-              <h4 class="text-sm font-medium text-red-800 mb-2">Current Usage:</h4>
+              <h4 class="text-sm font-medium text-red-800 mb-2">Detajet e planit:</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-red-700 font-poppins">
                 <div v-if="quotaError.quotaInfo.videosTotal !== undefined">
-                  <strong>Videos:</strong> {{ quotaError.quotaInfo.videosUsed }}/{{ quotaError.quotaInfo.videosTotal }}
+                  <strong>Video:</strong> {{ quotaError.quotaInfo.videosUsed }}/{{ quotaError.quotaInfo.videosTotal }}
                 </div>
                 <div v-if="quotaError.quotaInfo.minutesTotal !== undefined">
-                  <strong>Minutes:</strong> {{ quotaError.quotaInfo.minutesUsed }}/{{ quotaError.quotaInfo.minutesTotal }}
+                  <strong>Minuta:</strong> {{ quotaError.quotaInfo.minutesUsed }}/{{ quotaError.quotaInfo.minutesTotal }}
                 </div>
                 <div v-if="quotaError.quotaInfo.maxFileSizeMB !== undefined">
                   <strong>File size:</strong> {{ quotaError.quotaInfo.fileSizeMB?.toFixed(1) }}MB / {{ quotaError.quotaInfo.maxFileSizeMB }}MB max
                 </div>
                 <div v-if="quotaError.quotaInfo.maxDurationMinutes !== undefined">
-                  <strong>Duration:</strong> {{ Math.ceil(quotaError.quotaInfo.durationSeconds / 60) }} min / {{ quotaError.quotaInfo.maxDurationMinutes }} min max
+                  <strong>Kohezgjatja:</strong> {{ Math.ceil(quotaError.quotaInfo.durationSeconds / 60) }} min / {{ quotaError.quotaInfo.maxDurationMinutes }} min max
                 </div>
               </div>
             </div>
