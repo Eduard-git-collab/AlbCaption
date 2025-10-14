@@ -38,8 +38,7 @@
         v-model="localEditText"
         class="w-full p-2 border rounded-md text-primary focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-20"
         rows="3"
-        @blur="onFinish(false)"
-        @keydown.ctrl.enter.prevent="onFinish(true)"
+        @keydown.ctrl.enter.prevent="handleSave"
         ref="segmentTextarea"
       ></textarea>
 
@@ -62,13 +61,13 @@
     <!-- Edit buttons -->
     <div v-if="segment.isEditing" class="flex justify-end px-3 py-2 bg-[#FBFCFB] border-t border-gray-200">
       <button 
-        @click="onCancel"
+        @click="handleCancel"
         class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors mr-2"
       >
         Anulo
       </button>
       <button 
-        @click="onFinish(true)"
+        @click="handleSave"
         class="px-3 py-1 text-sm bg-primary text-white rounded hover:bg-[#033027] transition-colors"
       >
         Ruaj
@@ -111,6 +110,14 @@ function formatVideoTime(seconds) {
   const mins = Math.floor(seconds / 60)
   const secs = Math.floor(seconds % 60)
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+}
+
+function handleSave() {
+  emit('save', { index: props.index, text: localEditText.value })
+}
+
+function handleCancel() {
+  emit('cancel-edit', props.index)
 }
 </script>
 

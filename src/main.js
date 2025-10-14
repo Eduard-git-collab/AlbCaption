@@ -4,7 +4,6 @@ import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia'
 import { useAuthStore } from './stores/auth'
-import { supabase } from './lib/supabaseClient'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -12,42 +11,39 @@ app.use(pinia)
 app.use(router)
 
 const initApp = async () => {
-  // Initialize auth and profile once
-  await useAuthStore().init()
-  app.mount('#app')
+  try {
+    // Only initialize auth store for non-public routes
+    const authStore = useAuthStore()
+    
+    // Check if current route is public
+    const currentPath = window.location.pathname
+    const isPublicRoute = currentPath.includes('/auth/reset-password') || 
+                         currentPath === '/' || 
+                         currentPath.includes('/login') ||
+                         currentPath.includes('/signin') ||
+                         currentPath.includes('/signup')
+    
+    if (!isPublicRoute) {
+      await authStore.init()
+    }
+    
+    app.mount('#app')
+  } catch (error) {
+    console.error('Failed to initialize app:', error)
+    app.mount('#app') // Mount anyway to show error state
+  }
 }
 
-//GSAP Imports
+// GSAP Imports
 import { gsap } from "gsap";
-
 import { CustomEase } from "gsap/CustomEase";
-// CustomBounce requires CustomEase
 import { CustomBounce } from "gsap/CustomBounce";
-// CustomWiggle requires CustomEase
 import { CustomWiggle } from "gsap/CustomWiggle";
 import { RoughEase, ExpoScaleEase, SlowMo } from "gsap/EasePack";
-    
 import { Draggable } from "gsap/Draggable";
-import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
-import { EaselPlugin } from "gsap/EaselPlugin";
-import { Flip } from "gsap/Flip";
-import { GSDevTools } from "gsap/GSDevTools";
-import { InertiaPlugin } from "gsap/InertiaPlugin";
-import { MotionPathHelper } from "gsap/MotionPathHelper";
-import { MotionPathPlugin } from "gsap/MotionPathPlugin";
-import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
-import { Observer } from "gsap/Observer";
-import { Physics2DPlugin } from "gsap/Physics2DPlugin";
-import { PhysicsPropsPlugin } from "gsap/PhysicsPropsPlugin";
-import { PixiPlugin } from "gsap/PixiPlugin";
-import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-// ScrollSmoother requires ScrollTrigger
-import { ScrollSmoother } from "gsap/ScrollSmoother";
-import { ScrollToPlugin } from "gsap/ScrollToPlugin";
-import { SplitText } from "gsap/SplitText";
-import { TextPlugin } from "gsap/TextPlugin";
 
-gsap.registerPlugin(Draggable,DrawSVGPlugin,EaselPlugin,Flip,GSDevTools,InertiaPlugin,MotionPathHelper,MotionPathPlugin,MorphSVGPlugin,Observer,Physics2DPlugin,PhysicsPropsPlugin,PixiPlugin,ScrambleTextPlugin,ScrollTrigger,ScrollSmoother,ScrollToPlugin,SplitText,TextPlugin,RoughEase,ExpoScaleEase,SlowMo,CustomEase,CustomBounce,CustomWiggle);
+// Register GSAP plugins
+gsap.registerPlugin(CustomEase, CustomBounce, CustomWiggle, RoughEase, ExpoScaleEase, SlowMo, Draggable);
 
-initApp();
+// Initialize the app
+initApp()

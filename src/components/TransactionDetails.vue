@@ -325,9 +325,118 @@ function beginEdit(index) {
   transcriptSegments.value[index].editText = transcriptSegments.value[index].text;
 }
 
-function saveSegment({ index, text }) {
+//handle segment update
+function rebuildTranscriptionJson() {
+  if (!transaction.value?.transcription_json) return null;
+
+  // Start with the original JSON structure
+  const updatedJson = {
+    text: transcriptSegments.value.map(s => s.text).join(' '),
+    results: []
+  };
+
+  // Rebuild results from segments
+  transcriptSegments.value.forEach(segment => {
+    // Split the segment text into words
+    const segmentWords = segment.text.split(/\s+/).filter(w => w.trim());
+    
+    // Try to match with original words for timing
+    const words = [];
+    let originalWordIndex = 0;
+    
+    segmentWords.forEach((editedWord, idx) => {
+      // Find the corresponding original word (best effort matching)
+      const originalWord = segment.words[originalWordIndex] || segment.words[segment.words.length - 1];
+      
+      if (originalWord) {
+        words.push({
+          word: editedWord,
+          startOffset: originalWord.startOffset || {
+            seconds: Math.floor(originalWord.startTime || 0),
+            nanos: Math.floor(((originalWord.startTime || 0) % 1) * 1e9)
+          },
+          endOffset: originalWord.endOffset || {
+            seconds: Math.floor(originalWord.endTime || 0),
+            nanos: Math.floor(((originalWord.endTime || 0) % 1) * 1e9)
+          },
+          confidence: originalWord.confidence || 0.9,
+          speakerLabel: originalWord.speakerLabel || ""
+        });
+        originalWordIndex++;
+      }
+    });
+
+    if (words.length > 0) {
+      updatedJson.results.push({
+        words: words,
+        confidence: segment.words[0]?.confidence || 0.9,
+        transcript: segment.text
+      });
+    }
+  });
+
+  return updatedJson;
+}
+
+async function saveAllSegments() {
+  if (!transaction.value?.processing_id) {
+    saveStatus.value = { type: 'text-red-600', message: 'Processing ID not found' };
+    return;
+  }
+
+  isSavingTranscript.value = true;
+  saveStatus.value = null;
+
+  try {
+    // Rebuild the transcription JSON from edited segments
+    const updatedJson = rebuildTranscriptionJson();
+
+    if (!updatedJson) {
+      throw new Error('Failed to rebuild transcription JSON');
+    }
+
+    console.log('Saving updated transcription:', updatedJson);
+
+    // Send to backend
+    const response = await fetch(`${apiUrl.value}/update-transcription/${transaction.value.processing_id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transcription_json: updatedJson })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to save transcription');
+    }
+
+    const result = await response.json();
+
+    // Update local transaction data
+    transaction.value.transcription_json = updatedJson;
+    
+    // Update originalText for all segments to match current text
+    transcriptSegments.value.forEach(segment => {
+      segment.originalText = segment.text;
+    });
+
+    saveStatus.value = { type: 'text-green-600', message: 'Transcription saved successfully!' };
+    setTimeout(() => { saveStatus.value = null; }, 3000);
+
+  } catch (error) {
+    console.error('Error saving transcription:', error);
+    saveStatus.value = { type: 'text-red-600', message: `Failed to save: ${error.message}` };
+  } finally {
+    isSavingTranscript.value = false;
+  }
+}
+
+async function saveSegment({ index, text }) {
+  // Update the segment locally first
   transcriptSegments.value[index].text = text;
   transcriptSegments.value[index].isEditing = false;
+  
+  // Then save all segments (since we need to send the complete JSON)
+  await saveAllSegments();
 }
 
 function cancelEdit(index) {

@@ -48,7 +48,7 @@
                     </div>
                   </div>
                   <div class="flex items-center gap-2">
-                    <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileChange" />
+                    <input ref="fileInput" type="file" accept=".png, .jpeg, .jpg" class="hidden" @change="onFileChange" />
                     <button
                       type="button"
                       class="px-3 py-1.5 text-sm bg-white border border-primary/15 rounded-md shadow-sm hover:bg-primary/5 transition"
@@ -208,7 +208,7 @@ const avatarPath = ref('')       // storage path we saved to (for deletion)
 // You can centralize this if you prefer:
 const siteUrl = window.location.origin
 const passwordRedirectTo = `${siteUrl}/auth/reset-password`
-const emailRedirectTo = `${siteUrl}/auth/reset-password` // can be a generic /auth/callback too
+const emailRedirectTo = `${siteUrl}/auth/reset-password`
 
 /* Load current user + profile from DB */
 async function loadUser() {

@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore } from '../stores/auth'
 import Home from '../components/Home.vue';
 import AuthComponent from '../components/Authentication.vue';
 import Dashboard from '../components/Dashboard.vue';
@@ -14,8 +13,7 @@ import Login from '../components/Login.vue';
 import Test from '../components/Test.vue';
 import ResetPassword from '../components/views/reset-password.vue'; 
 import Upload from '../components/Upload.vue';
-import Payment from '../components/items/PayPalPayment.vue';
-import PaymentSuccess from '../components/views/PaymentSuccess.vue'; 
+import Payment from '../components/Paypal.vue';
 
 const routes = [
   {
@@ -85,12 +83,6 @@ const routes = [
     meta: {requiresAuth: true}
   },
   {
-    path: '/payment/success', // Add this new route
-    name: 'PaymentSuccess',
-    component: PaymentSuccess,
-    meta: { requiresAuth: true }
-  },
-  {
     path: '/pricing',
     name: 'Pricing',
     component: Pricing
@@ -110,7 +102,7 @@ const routes = [
   {
     path: '/auth/reset-password',
     name: 'ResetPassword',
-    component: ResetPassword // PUBLIC route; no requiresAuth
+    component: ResetPassword 
   },
   {
     path: '/test',
@@ -130,13 +122,16 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-  const auth = useAuthStore()
-  if (auth.loading) await auth.init()
-  if (to.meta.requiresAuth && !auth.isAuthed) {
-    next({ name: 'SignIn', query: { redirect: to.fullPath } })
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      next({ name: 'SignIn', query: { redirect: to.fullPath } });
+    } else {
+      next();
+    }
   } else {
-    next()
+    next();
   }
-})
+});
 
 export default router;
