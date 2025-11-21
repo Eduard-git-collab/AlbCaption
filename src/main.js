@@ -5,6 +5,9 @@ import router from './router'
 import { createPinia } from 'pinia'
 import { useAuthStore } from './stores/auth'
 
+// Import the example auth store (optional - for learning)
+import { useAuthExampleStore } from './examples/auth-learning/authExampleStore'
+
 const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
@@ -21,10 +24,17 @@ const initApp = async () => {
                          currentPath === '/' || 
                          currentPath.includes('/login') ||
                          currentPath.includes('/signin') ||
-                         currentPath.includes('/signup')
+                         currentPath.includes('/signup') ||
+                         currentPath.includes('/example-') // Add example routes as public for learning
     
     if (!isPublicRoute) {
       await authStore.init()
+    }
+
+    // Initialize example auth store if on example routes (for learning)
+    if (currentPath.includes('/example-')) {
+      const exampleAuthStore = useAuthExampleStore()
+      await exampleAuthStore.init()
     }
     
     app.mount('#app')

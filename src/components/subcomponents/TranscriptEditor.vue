@@ -1,3 +1,740 @@
+<script setup>
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import SegmentRow from './SegmentRow.vue'
+import apiClient from '@/stores/apiClient'
+
+const props = defineProps({
+  apiUrl: { type: String, required: true },
+  processingId: { type: String, required: true },
+  videoUrl: { type: String, default: null },
+  originalTranscriptionJson: { type: Object, default: null },
+  originalFilename: { type: String, default: '' }
+})
+
+const videoPlayer = ref(null)
+
+// UI state properties
+const isDownloadingSRT = ref(false)
+const isDownloadingVideo = ref(false)
+const downloadModal = ref(false)
+const isSavingTranscript = ref(false)
+const saveStatus = ref(null)
+const showSubtitleDropdown = ref(false)
+
+// Video playback properties
+const currentVideoTime = ref(0)
+const videoDuration = ref(0)
+const isVideoPlaying = ref(false)
+
+// Transcript related
+const transcriptSegments = ref([])
+const currentSegmentIndex = ref(-1)
+const maxWordsPerSegment = ref(15)
+const segmentOverlapThreshold = ref(1.5)
+const hasOriginalTranscription = ref(false)
+
+// Filename editing
+const originalFilenameLocal = ref(props.originalFilename || '')
+const isEditingFilename = ref(false)
+const editedFilename = ref('')
+const isSavingFilename = ref(false)
+const filenameError = ref(null)
+const filenameInput = ref(null)
+
+// Caption presets
+const captionPresets = [
+  {
+    id: 'classic',
+    name: 'Klasik',
+    description: 'E bardha në të zezë, poshtë',
+    fontSize: 72,
+    textColor: '#FFFFFF',
+    outlineColor: '#000000',
+    outlineWidth: 4,
+    hasBackground: false,
+    backgroundColor: '#000000',
+    position: 'bottom'
+  },
+  {
+    id: 'modern',
+    name: 'Modernu',
+    description: 'Jeshil i ndritshëm, poshtë',
+    fontSize: 72,
+    textColor: '#12998E',
+    outlineColor: '#000000',
+    outlineWidth: 3,
+    hasBackground: true,
+    backgroundColor: '#000000',
+    position: 'bottom'
+  },
+  {
+    id: 'bold',
+    name: 'I guxueshëm',
+    description: 'E bardha me kontur i trashë, mesme',
+    fontSize: 80,
+    textColor: '#FFFFFF',
+    outlineColor: '#000000',
+    outlineWidth: 6,
+    hasBackground: false,
+    backgroundColor: '#000000',
+    position: 'middle'
+  },
+  {
+    id: 'soft',
+    name: 'I butë',
+    description: 'Gri i lehtë, lart',
+    fontSize: 64,
+    textColor: '#E0E0E0',
+    outlineColor: '#333333',
+    outlineWidth: 2,
+    hasBackground: true,
+    backgroundColor: '#1A1A1A',
+    position: 'top'
+  }
+]
+
+const selectedPresetId = ref('classic')
+
+const currentPreset = computed(() => {
+  return captionPresets.find(p => p.id === selectedPresetId.value) || captionPresets[0]
+})
+
+const hasUnsavedChanges = computed(() => {
+  return transcriptSegments.value.some(s => s.originalText !== s.text || s.isEditing)
+})
+
+watch(() => props.originalTranscriptionJson, (newJson) => {
+  if (newJson) {
+    hasOriginalTranscription.value = true
+    createTranscriptSegments()
+    debugTranscriptionJson()
+  }
+}, { immediate: true, deep: true })
+
+onMounted(() => {
+  nextTick(() => {
+    if (videoPlayer.value) {
+      setupVideoEvents()
+    }
+  })
+})
+
+// Filename edit handlers
+function startEditingFilename() {
+  isEditingFilename.value = true
+  editedFilename.value = originalFilenameLocal.value || ''
+  filenameError.value = null
+  nextTick(() => filenameInput.value?.focus())
+}
+
+function cancelEditingFilename() {
+  isEditingFilename.value = false
+  editedFilename.value = ''
+  filenameError.value = null
+}
+
+async function saveFilename() {
+  if (!editedFilename.value.trim()) {
+    filenameError.value = 'Filename cannot be empty'
+    return
+  }
+  if (!props.processingId) {
+    filenameError.value = 'Processing ID not found'
+    return
+  }
+  isSavingFilename.value = true
+  filenameError.value = null
+  try {
+    const response = await fetch(`${props.apiUrl}/update-filename/${props.processingId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ original_filename: editedFilename.value.trim() })
+    })
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.message || 'Failed to update filename')
+    }
+    originalFilenameLocal.value = editedFilename.value.trim()
+    isEditingFilename.value = false
+    editedFilename.value = ''
+    saveStatus.value = { type: 'text-green-600', message: 'Filename updated successfully' }
+    setTimeout(() => { saveStatus.value = null }, 3000)
+  } catch (e) {
+    console.error('Error updating filename:', e)
+    filenameError.value = e.message
+  } finally {
+    isSavingFilename.value = false
+  }
+}
+
+function handleFilenameKeydown(event) {
+  if (event.key === 'Enter') saveFilename()
+  else if (event.key === 'Escape') cancelEditingFilename()
+}
+
+// Video events and controls
+function setupVideoEvents() {
+  const video = videoPlayer.value
+  if (!video) return
+  video.addEventListener('loadedmetadata', () => {
+    videoDuration.value = video.duration
+  })
+  video.addEventListener('durationchange', () => {
+    videoDuration.value = video.duration
+  })
+}
+
+function onVideoTimeUpdate() {
+  const video = videoPlayer.value
+  if (video) {
+    currentVideoTime.value = video.currentTime
+    updateCurrentSegment()
+  }
+}
+
+function onVideoSeeking() {
+  updateCurrentSegment()
+}
+
+function togglePlayback() {
+  const video = videoPlayer.value
+  if (!video) return
+  if (video.paused) video.play()
+  else video.pause()
+}
+
+function formatVideoTime(seconds) {
+  if (isNaN(seconds)) return '00:00'
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+}
+
+function skipBackward(seconds) {
+  const video = videoPlayer.value
+  if (!video) return
+  video.currentTime = Math.max(0, video.currentTime - seconds)
+}
+
+function skipForward(seconds) {
+  const video = videoPlayer.value
+  if (!video) return
+  video.currentTime = Math.min(video.duration, video.currentTime + seconds)
+}
+
+// Segments creation and controls
+function createTranscriptSegments() {
+  const json = props.originalTranscriptionJson
+  if (!json || !json.results) return
+
+  let allWords = []
+
+  json.results.forEach(result => {
+    if (result.words && Array.isArray(result.words)) {
+      const wordsFromResult = result.words.map(word => ({
+        text: word.word,
+        startTime: extractTimeInSeconds(word.startOffset),
+        endTime: extractTimeInSeconds(word.endOffset)
+      }))
+      allWords = [...allWords, ...wordsFromResult]
+    }
+  })
+
+  if (allWords.length === 0 && json.results[0] && json.results[0].alternatives) {
+    json.results.forEach(result => {
+      if (result.alternatives && result.alternatives[0] && result.alternatives[0].words) {
+        const wordsFromAlternative = result.alternatives[0].words.map(word => ({
+          text: word.word,
+          startTime: extractTimeInSeconds(word.startTime),
+          endTime: extractTimeInSeconds(word.endTime)
+        }))
+        allWords = [...allWords, ...wordsFromAlternative]
+      }
+    })
+  }
+
+  allWords.sort((a, b) => a.startTime - b.startTime)
+
+  const segments = []
+  let currentSegment = {
+    words: [],
+    startTime: 0,
+    endTime: 0,
+    text: '',
+    originalText: '',
+    editText: '',
+    isEditing: false
+  }
+
+  for (const word of allWords) {
+    if (currentSegment.words.length === 0) {
+      currentSegment.startTime = word.startTime
+      currentSegment.words.push(word)
+    } else if (
+      currentSegment.words.length >= maxWordsPerSegment.value ||
+      word.startTime - currentSegment.words[currentSegment.words.length - 1].endTime > segmentOverlapThreshold.value
+    ) {
+      currentSegment.endTime = currentSegment.words[currentSegment.words.length - 1].endTime
+      currentSegment.text = currentSegment.words.map(w => w.text).join(' ')
+      currentSegment.originalText = currentSegment.text
+      currentSegment.editText = currentSegment.text
+      segments.push(currentSegment)
+
+      currentSegment = {
+        words: [word],
+        startTime: word.startTime,
+        endTime: 0,
+        text: '',
+        originalText: '',
+        editText: '',
+        isEditing: false
+      }
+    } else {
+      currentSegment.words.push(word)
+    }
+  }
+
+  if (currentSegment.words.length > 0) {
+    currentSegment.endTime = currentSegment.words[currentSegment.words.length - 1].endTime
+    currentSegment.text = currentSegment.words.map(w => w.text).join(' ')
+    currentSegment.originalText = currentSegment.text
+    currentSegment.editText = currentSegment.text
+    segments.push(currentSegment)
+  }
+
+  transcriptSegments.value = segments
+}
+
+function debugTranscriptionJson() {
+  const json = props.originalTranscriptionJson
+  if (!json) return
+}
+
+function reprocessSegments() {
+  if (!hasOriginalTranscription.value) return
+  if (hasUnsavedChanges.value) {
+    if (!confirm('You have unsaved changes. Reprocessing segments will discard these changes. Continue?')) {
+      return
+    }
+  }
+  createTranscriptSegments()
+  saveStatus.value = { type: 'text-blue-600', message: 'Segments reprocessed with new settings' }
+  setTimeout(() => { saveStatus.value = null }, 3000)
+}
+
+function beginEdit(index) {
+  transcriptSegments.value.forEach((s, idx) => {
+    if (idx !== index && s.isEditing) {
+      s.isEditing = false
+      s.editText = s.text
+    }
+  })
+  transcriptSegments.value[index].isEditing = true
+  transcriptSegments.value[index].editText = transcriptSegments.value[index].text
+}
+
+function cancelEdit(index) {
+  transcriptSegments.value[index].isEditing = false
+  transcriptSegments.value[index].editText = transcriptSegments.value[index].text
+}
+
+function playSegment(segment) {
+  const video = videoPlayer.value
+  if (!video) return
+  video.currentTime = segment.startTime
+  video.play()
+}
+
+function playPreviousSegment() {
+  if (currentSegmentIndex.value > 0) {
+    playSegment(transcriptSegments.value[currentSegmentIndex.value - 1])
+  }
+}
+
+function playNextSegment() {
+  if (currentSegmentIndex.value < transcriptSegments.value.length - 1) {
+    playSegment(transcriptSegments.value[currentSegmentIndex.value + 1])
+  }
+}
+
+function updateCurrentSegment() {
+  const currentTime = currentVideoTime.value
+  let newIndex = -1
+
+  for (let i = 0; i < transcriptSegments.value.length; i++) {
+    const s = transcriptSegments.value[i]
+    if (currentTime >= s.startTime && currentTime <= s.endTime) {
+      newIndex = i
+      break
+    }
+  }
+  if (newIndex === -1) {
+    for (let i = 0; i < transcriptSegments.value.length; i++) {
+      if (currentTime < transcriptSegments.value[i].startTime) {
+        break
+      }
+      newIndex = i
+    }
+  }
+  currentSegmentIndex.value = newIndex
+  scrollToCurrentSegment()
+}
+
+function scrollToCurrentSegment() {
+  nextTick(() => {
+    if (currentSegmentIndex.value >= 0) {
+      const segments = document.querySelectorAll('.mb-4.border.border-gray-200.rounded-md')
+      if (segments && segments[currentSegmentIndex.value]) {
+        segments[currentSegmentIndex.value].scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }
+    }
+  })
+}
+
+function extractTimeInSeconds(timeObject) {
+  if (!timeObject) return 0
+  if (typeof timeObject === 'object') {
+    const seconds = typeof timeObject.seconds === 'string' ? parseInt(timeObject.seconds) : timeObject.seconds || 0
+    const nanos = timeObject.nanos || 0
+    return seconds + (nanos / 1_000_000_000)
+  } else if (typeof timeObject === 'string') {
+    if (timeObject.includes('s')) return parseFloat(timeObject.replace('s', ''))
+    if (timeObject.includes(':')) {
+      const parts = timeObject.split(':')
+      let seconds = 0
+      if (parts.length === 3) {
+        seconds = (parseInt(parts[0]) * 3600) + (parseInt(parts[1]) * 60) + parseFloat(parts[2])
+      } else if (parts.length === 2) {
+        seconds = (parseInt(parts[0]) * 60) + parseFloat(parts[1])
+      }
+      return seconds
+    }
+    return parseFloat(timeObject)
+  }
+  return Number(timeObject) || 0
+}
+
+// Save and export
+function rebuildTranscriptionJson() {
+  if (!props.originalTranscriptionJson) return null
+
+  // Start with the original JSON structure
+  const updatedJson = {
+    text: transcriptSegments.value.map(s => s.text).join(' '),
+    results: []
+  }
+
+  // Rebuild results from segments
+  transcriptSegments.value.forEach(segment => {
+    // Split the segment text into words
+    const segmentWords = segment.text.split(/\s+/).filter(w => w.trim())
+    
+    // Try to match with original words for timing
+    const words = []
+    let originalWordIndex = 0
+    
+    segmentWords.forEach((editedWord) => {
+      // Find the corresponding original word (best effort matching)
+      const originalWord = segment.words[originalWordIndex] || segment.words[segment.words.length - 1]
+      
+      if (originalWord) {
+        words.push({
+          word: editedWord,
+          startOffset: originalWord.startOffset || {
+            seconds: Math.floor(originalWord.startTime || 0),
+            nanos: Math.floor(((originalWord.startTime || 0) % 1) * 1e9)
+          },
+          endOffset: originalWord.endOffset || {
+            seconds: Math.floor(originalWord.endTime || 0),
+            nanos: Math.floor(((originalWord.endTime || 0) % 1) * 1e9)
+          },
+          confidence: originalWord.confidence || 0.9,
+          speakerLabel: originalWord.speakerLabel || ""
+        })
+        originalWordIndex++
+      }
+    })
+
+    if (words.length > 0) {
+      updatedJson.results.push({
+        words: words,
+        confidence: segment.words[0]?.confidence || 0.9,
+        transcript: segment.text
+      })
+    }
+  })
+
+  return updatedJson
+}
+
+async function saveAllSegments() {
+  if (!props.processingId) return
+  isSavingTranscript.value = true
+  saveStatus.value = null
+  try {
+    transcriptSegments.value.forEach((s) => {
+      if (s.isEditing) {
+        s.text = s.editText
+        s.isEditing = false
+      }
+    })
+    const fullText = transcriptSegments.value.map(s => s.text).join(' ')
+    const updatedTranscriptionJson = rebuildTranscriptionJson()
+
+    const response = await fetch(`${props.apiUrl}/update-transcript/${props.processingId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: fullText,
+        transcription_json: updatedTranscriptionJson
+      })
+    })
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.message || 'Failed to save transcript')
+    }
+    transcriptSegments.value.forEach(s => { s.originalText = s.text })
+    saveStatus.value = { type: 'text-green-600', message: 'All segments saved successfully' }
+    setTimeout(() => { saveStatus.value = null }, 3000)
+  } catch (e) {
+    console.error('Error saving transcript:', e)
+    saveStatus.value = { type: 'text-red-600', message: `Failed to save transcript: ${e.message}` }
+  } finally {
+    isSavingTranscript.value = false
+  }
+}
+
+function saveSegment({ index, text }) {
+  transcriptSegments.value[index].text = text
+  transcriptSegments.value[index].isEditing = false
+}
+
+async function downloadSubtitles(format) {
+  if (!props.processingId) return
+  if (hasUnsavedChanges.value) {
+    saveStatus.value = { type: 'text-red-600', message: 'Please save all transcript edits before downloading the subtitle file.' }
+    setTimeout(() => { saveStatus.value = null }, 2500)
+    return
+  }
+  isDownloadingSRT.value = true
+  showSubtitleDropdown.value = false
+  try {
+    const downloadUrl = `${props.apiUrl}/download-${format.toLowerCase()}/${props.processingId}?t=${Date.now()}`
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    const extension = format.toUpperCase()
+    link.download = `${originalFilenameLocal.value ? originalFilenameLocal.value.replace(/\.[^/.]+$/, '') : 'transcript'}.${extension}`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  } catch (e) {
+    console.error('Subtitle download error:', e)
+    saveStatus.value = { type: 'text-red-600', message: `Failed to download subtitle file: ${e.message || 'Unknown error'}` }
+  } finally {
+    isDownloadingSRT.value = false
+  }
+}
+
+function copyTranscript() {
+  const fullText = transcriptSegments.value.map(s => s.text).join(' ')
+  navigator.clipboard.writeText(fullText)
+    .then(() => {
+      saveStatus.value = { type: 'text-blue-600', message: 'Transkripti u kopjua' }
+      setTimeout(() => { saveStatus.value = null }, 2000)
+    })
+    .catch(err => {
+      console.error('Could not copy text: ', err)
+      saveStatus.value = { type: 'text-red-600', message: 'Kopjimi i transkriptit dështoi' }
+    })
+}
+
+function downloadEmbeddedCaptionsModalCall() {
+  downloadModal.value = true
+  selectedPresetId.value = 'classic'
+}
+
+function closeDownloadModal() {
+  downloadModal.value = false
+}
+
+function selectPreset(preset) {
+  selectedPresetId.value = preset.id
+}
+
+function getPreviewStyle() {
+  const preset = currentPreset.value
+  const w = preset.outlineWidth
+  const color = preset.outlineColor
+  
+  let textShadow = 'none'
+  if (w > 0) {
+    const shadows = []
+    for (let x = -w; x <= w; x++) {
+      for (let y = -w; y <= w; y++) {
+        if (x !== 0 || y !== 0) {
+          shadows.push(`${x}px ${y}px 0 ${color}`)
+        }
+      }
+    }
+    textShadow = shadows.join(', ')
+  }
+
+  let positionStyle = 'position: absolute; bottom: 20px;'
+  if (preset.position === 'top') {
+    positionStyle = 'position: absolute; top: 20px;'
+  } else if (preset.position === 'middle') {
+    positionStyle = 'position: absolute; top: 50%; transform: translateY(-50%);'
+  }
+
+  return {
+    fontSize: preset.fontSize + 'px',
+    color: preset.textColor,
+    textShadow,
+    padding: preset.hasBackground ? '12px 16px' : '0',
+    backgroundColor: preset.hasBackground ? preset.backgroundColor + '80' : 'transparent',
+    borderRadius: preset.hasBackground ? '4px' : '0',
+    ...Object.fromEntries(positionStyle.split(';').filter(Boolean).map(s => {
+      const [key, value] = s.split(':').map(x => x.trim())
+      return [key, value]
+    }))
+  }
+}
+
+function hexToRGB(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : { r: 255, g: 255, b: 255 }
+}
+
+function hexToASSColor(hex) {
+  const rgb = hexToRGB(hex)
+  return `&H${rgb.b.toString(16).padStart(2, '0')}${rgb.g.toString(16).padStart(2, '0')}${rgb.r.toString(16).padStart(2, '0')}&`
+}
+
+function buildTranscriptForRender() {
+  return {
+    segments: transcriptSegments.value.map(s => ({
+      startTime: s.startTime,
+      endTime: s.endTime,
+      text: s.text,
+      words: (s.words || []).map(w => ({
+        text: w.text,
+        startTime: w.startTime,
+        endTime: w.endTime
+      }))
+    }))
+  }
+}
+
+async function downloadWithSelectedStyle() {
+  if (hasUnsavedChanges.value) {
+    saveStatus.value = { type: 'text-red-600', message: 'Please save all transcript edits before downloading the video.' }
+    setTimeout(() => { saveStatus.value = null }, 2500)
+    return
+  }
+  if (!props.videoUrl) {
+    saveStatus.value = { type: 'text-red-600', message: 'Video URL is missing.' }
+    setTimeout(() => { saveStatus.value = null }, 2500)
+    return
+  }
+  
+  isDownloadingVideo.value = true
+  saveStatus.value = { type: 'text-blue-600', message: 'Duke përpunuar videon...' }
+  
+  try {
+    const preset = currentPreset.value
+    
+    const positionMap = {
+      top: 8,
+      middle: 5,
+      bottom: 2
+    }
+
+    const style = {
+      fontName: 'Poppins',
+      fontSize: preset.fontSize,
+      outline: preset.outlineWidth,
+      borderStyle: 1,
+      alignment: positionMap[preset.position],
+      karaoke: true,
+      primaryColour: hexToASSColor(preset.textColor),
+      secondaryColour: hexToASSColor(preset.textColor),
+      outlineColour: hexToASSColor(preset.outlineColor),
+      backColour: preset.hasBackground ? hexToASSColor(preset.backgroundColor) : '&H80000000&'
+    }
+
+    // Build transcript segments array directly
+    const segments = transcriptSegments.value.map(s => ({
+      startTime: s.startTime,
+      endTime: s.endTime,
+      text: s.text
+    }))
+
+    // Determine source video dimensions and pass them to the render API.
+    let outputWidth = 1280
+    let outputHeight = 720
+    const videoEl = videoPlayer.value
+    if (videoEl) {
+      if (videoEl.videoWidth && videoEl.videoHeight) {
+        outputWidth = videoEl.videoWidth
+        outputHeight = videoEl.videoHeight
+      } else if (videoEl.clientWidth && videoEl.clientHeight) {
+        outputWidth = Math.round(videoEl.clientWidth)
+        outputHeight = Math.round(videoEl.clientHeight)
+      }
+    }
+
+    console.log('Sending request with:', {
+      videoPath: props.videoUrl,
+      segments: segments.length,
+      style,
+      outputDimensions: { width: outputWidth, height: outputHeight }
+    })
+
+    const response = await apiClient.post(
+      `/render-captioned-video`,
+      {
+        videoPath: props.videoUrl,
+        transcript: {
+          segments: segments
+        },
+        style,
+        output: {
+          width: outputWidth,
+          height: outputHeight
+        }
+      },
+      {
+        responseType: 'blob'
+      }
+    )
+
+    const blob = response.data
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    const baseName = (props.originalFilename || 'video').replace(/\.[^/.]+$/, '')
+    link.href = url
+    link.download = `${baseName}-captioned.mp4`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    closeDownloadModal()
+    saveStatus.value = { type: 'text-green-600', message: 'Video shkarkuar me sukses!' }
+    setTimeout(() => { saveStatus.value = null }, 2500)
+  } catch (error) {
+    console.error('Error downloading video:', error)
+    saveStatus.value = { type: 'text-red-600', message: `Gabim: ${error.message}` }
+  } finally {
+    isDownloadingVideo.value = false
+  }
+}
+</script>
+
 <template>
   <div class="max-w-6xl mx-auto font-poppins">
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -15,17 +752,40 @@
               </svg>
               Kopjo
             </button>
-            <button 
-              @click="downloadSRT" 
-              class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center"
-              :disabled="isDownloadingSRT || hasUnsavedChanges"
-              :class="{ 'opacity-50 cursor-not-allowed': isDownloadingSRT || hasUnsavedChanges }"
-            >
-              <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              {{ isDownloadingSRT ? 'Downloading...' : 'Shkarko SRT/VTT' }}
-            </button>
+
+            <!-- Subtitle Download Dropdown -->
+            <div class="relative">
+              <button 
+                @click="showSubtitleDropdown = !showSubtitleDropdown"
+                class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center"
+                :disabled="isDownloadingSRT || hasUnsavedChanges"
+                :class="{ 'opacity-50 cursor-not-allowed': isDownloadingSRT || hasUnsavedChanges }"
+              >
+                <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                {{ isDownloadingSRT ? 'Downloading...' : 'Shkarko Titra' }}
+              </button>
+              
+              <!-- Dropdown Menu -->
+              <div 
+                v-if="showSubtitleDropdown"
+                class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-50"
+              >
+                <button
+                  @click="downloadSubtitles('srt')"
+                  class="w-full text-left px-4 py-2 text-xs text-primary hover:bg-[#F4F9F7] transition-colors border-b border-gray-100 last:border-b-0"
+                >
+                  SRT
+                </button>
+                <button
+                  @click="downloadSubtitles('vtt')"
+                  class="w-full text-left px-4 py-2 text-xs text-primary hover:bg-[#F4F9F7] transition-colors"
+                >
+                  VTT
+                </button>
+              </div>
+            </div>
 
             <!--Download embedded captions (burned-in) -->
             <button
@@ -34,7 +794,7 @@
               :disabled="isDownloadingVideo || hasUnsavedChanges"
               :class="{ 'opacity-50 cursor-not-allowed': isDownloadingVideo || hasUnsavedChanges }"
             >
-              {{ isDownloadingVideo ? 'Downloading...' : 'Download embedded captions' }}
+              {{ isDownloadingVideo ? 'Downloading...' : 'Shkarko me titra' }}
             </button>
 
             <button 
@@ -262,570 +1022,92 @@
       </div>
     </div>
   </div>  
+  
+  <!-- Download Embedded Captions Modal -->
   <teleport to="body">
-    <div 
-      v-if="downloadModal" 
-      class="fixed inset-0 z-[1000] flex items-center justify-center">
-    <!-- Backdrop -->
-    <div
-      class="absolute inset-0 bg-black/30 backdrop-blur-sm"
-      @click="closeDownloadModal"
-    />
-    <!-- Content wrapper -->
-    <div class="w-full h-full md:w-[1020px] md:h-[595px] px-4 md:px-8 py-6 relative z-10">
-      <div class="w-full h-full bg-white relative rounded-xl shadow-xl overflow-hidden">
-        <!-- Close button -->
-        <button
-          class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 cursor-pointer z-20"
-          @click="closeDownloadModal"
-          aria-label="Mbyll"
-        >
-          ✕
-        </button>
-        <button
-        @click="downloadEmbeddedCaptions"
-        class="text-xl text-primary bg-secondary">Download</button>
+    <transition name="fade">
+      <div 
+        v-if="downloadModal" 
+        class="fixed inset-0 z-[1000] bg-black/50 flex items-center justify-center p-4"
+      >
+        <!-- Modal -->
+        <div class="w-full max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden">
+          <!-- Header -->
+          <div class="bg-primary px-6 py-4 flex items-center justify-between">
+            <h2 class="text-xl font-bold text-white">Shkarko videon me titra</h2>
+            <button
+              @click="closeDownloadModal"
+              class="text-white hover:text-gray-200"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l12 12M18 6L6 18"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Content -->
+          <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Left: Presets -->
+            <div class="space-y-3">
+              <label class="block text-sm font-medium text-primary mb-3">Zgjedhni stilin</label>
+              <div class="space-y-2">
+                <button
+                  v-for="preset in captionPresets"
+                  :key="preset.id"
+                  @click="selectPreset(preset)"
+                  class="w-full text-left px-4 py-3 border-2 rounded transition-all"
+                  :class="selectedPresetId === preset.id 
+                    ? 'border-secondary bg-secondary/10' 
+                    : 'border-gray-200 hover:border-gray-300'"
+                >
+                  <p class="font-medium text-primary text-sm">{{ preset.name }}</p>
+                  <p class="text-xs text-gray-600 mt-1">{{ preset.description }}</p>
+                </button>
+              </div>
+            </div>
+
+            <!-- Right: Preview -->
+            <div class="flex flex-col gap-3">
+              <p class="text-sm text-gray-600">Paraqitje paraprakisht</p>
+              <div class="flex-1 bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center relative min-h-64">
+                <!-- Preview background -->
+                <div class="absolute inset-0 bg-gradient-to-b from-gray-800 to-black opacity-60"></div>
+                
+                <!-- Caption preview based on position -->
+                <div 
+                  class="relative px-4 font-bold text-center w-full"
+                  :style="getPreviewStyle()"
+                >
+                  Këtu shfaqen titrat
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-3">
+            <button
+              @click="closeDownloadModal"
+              class="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
+              :disabled="isDownloadingVideo"
+            >
+              Anulo
+            </button>
+            <button
+              @click="downloadWithSelectedStyle"
+              class="px-4 py-2 text-sm bg-secondary text-primary rounded hover:bg-[#7dd87b] disabled:opacity-50 font-medium"
+              :disabled="isDownloadingVideo"
+            >
+              {{ isDownloadingVideo ? 'Duke shkarkuar...' : 'Shkarko videon' }}
+            </button>
+          </div>
+        </div>
       </div>
-      </div>
-    </div>
-  </teleport> 
+    </transition>
+  </teleport>
 </template>
 
-<script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
-import SegmentRow from './SegmentRow.vue'
-
-const props = defineProps({
-  apiUrl: { type: String, required: true },
-  processingId: { type: String, required: true },
-  videoUrl: { type: String, default: null },
-  originalTranscriptionJson: { type: Object, default: null },
-  originalFilename: { type: String, default: '' }
-})
-
-const videoPlayer = ref(null)
-
-// UI state properties
-const isDownloadingSRT = ref(false)
-const isDownloadingVideo = ref(false)
-const downloadModal = ref(false);
-const isSavingTranscript = ref(false)
-const saveStatus = ref(null)
-
-// Video playback properties
-const currentVideoTime = ref(0)
-const videoDuration = ref(0)
-const isVideoPlaying = ref(false)
-
-// Transcript related
-const transcriptSegments = ref([])
-const currentSegmentIndex = ref(-1)
-const maxWordsPerSegment = ref(15)
-const segmentOverlapThreshold = ref(1.5)
-const hasOriginalTranscription = ref(false)
-
-// Filename editing
-const originalFilenameLocal = ref(props.originalFilename || '')
-const isEditingFilename = ref(false)
-const editedFilename = ref('')
-const isSavingFilename = ref(false)
-const filenameError = ref(null)
-const filenameInput = ref(null)
-
-const hasUnsavedChanges = computed(() => {
-  return transcriptSegments.value.some(s => s.originalText !== s.text || s.isEditing)
-})
-
-watch(() => props.originalTranscriptionJson, (newJson) => {
-  if (newJson) {
-    hasOriginalTranscription.value = true
-    createTranscriptSegments()
-    debugTranscriptionJson()
-  }
-}, { immediate: true, deep: true })
-
-onMounted(() => {
-  nextTick(() => {
-    if (videoPlayer.value) {
-      setupVideoEvents()
-    }
-  })
-})
-
-// Filename edit handlers
-function startEditingFilename() {
-  isEditingFilename.value = true
-  editedFilename.value = originalFilenameLocal.value || ''
-  filenameError.value = null
-  nextTick(() => filenameInput.value?.focus())
-}
-
-function cancelEditingFilename() {
-  isEditingFilename.value = false
-  editedFilename.value = ''
-  filenameError.value = null
-}
-
-async function saveFilename() {
-  if (!editedFilename.value.trim()) {
-    filenameError.value = 'Filename cannot be empty'
-    return
-  }
-  if (!props.processingId) {
-    filenameError.value = 'Processing ID not found'
-    return
-  }
-  isSavingFilename.value = true
-  filenameError.value = null
-  try {
-    const response = await fetch(`${props.apiUrl}/update-filename/${props.processingId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ original_filename: editedFilename.value.trim() })
-    })
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || 'Failed to update filename')
-    }
-    originalFilenameLocal.value = editedFilename.value.trim()
-    isEditingFilename.value = false
-    editedFilename.value = ''
-    saveStatus.value = { type: 'text-green-600', message: 'Filename updated successfully' }
-    setTimeout(() => { saveStatus.value = null }, 3000)
-  } catch (e) {
-    console.error('Error updating filename:', e)
-    filenameError.value = e.message
-  } finally {
-    isSavingFilename.value = false
-  }
-}
-
-function handleFilenameKeydown(event) {
-  if (event.key === 'Enter') saveFilename()
-  else if (event.key === 'Escape') cancelEditingFilename()
-}
-
-// Video events and controls
-function setupVideoEvents() {
-  const video = videoPlayer.value
-  if (!video) return
-  video.addEventListener('loadedmetadata', () => {
-    videoDuration.value = video.duration
-  })
-  video.addEventListener('durationchange', () => {
-    videoDuration.value = video.duration
-  })
-}
-function onVideoTimeUpdate() {
-  const video = videoPlayer.value
-  if (video) {
-    currentVideoTime.value = video.currentTime
-    updateCurrentSegment()
-  }
-}
-function onVideoSeeking() {
-  updateCurrentSegment()
-}
-function togglePlayback() {
-  const video = videoPlayer.value
-  if (!video) return
-  if (video.paused) video.play()
-  else video.pause()
-}
-function formatVideoTime(seconds) {
-  if (isNaN(seconds)) return '00:00'
-  const mins = Math.floor(seconds / 60)
-  const secs = Math.floor(seconds % 60)
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-}
-function skipBackward(seconds) {
-  const video = videoPlayer.value
-  if (!video) return
-  video.currentTime = Math.max(0, video.currentTime - seconds)
-}
-function skipForward(seconds) {
-  const video = videoPlayer.value
-  if (!video) return
-  video.currentTime = Math.min(video.duration, video.currentTime + seconds)
-}
-
-// Segments creation and controls
-function createTranscriptSegments() {
-  const json = props.originalTranscriptionJson
-  if (!json || !json.results) return
-
-  let allWords = []
-
-  json.results.forEach(result => {
-    if (result.words && Array.isArray(result.words)) {
-      const wordsFromResult = result.words.map(word => ({
-        text: word.word,
-        startTime: extractTimeInSeconds(word.startOffset),
-        endTime: extractTimeInSeconds(word.endOffset)
-      }))
-      allWords = [...allWords, ...wordsFromResult]
-    }
-  })
-
-  if (allWords.length === 0 && json.results[0] && json.results[0].alternatives) {
-    json.results.forEach(result => {
-      if (result.alternatives && result.alternatives[0] && result.alternatives[0].words) {
-        const wordsFromAlternative = result.alternatives[0].words.map(word => ({
-          text: word.word,
-          startTime: extractTimeInSeconds(word.startTime),
-          endTime: extractTimeInSeconds(word.endTime)
-        }))
-        allWords = [...allWords, ...wordsFromAlternative]
-      }
-    })
-  }
-
-  allWords.sort((a, b) => a.startTime - b.startTime)
-
-  const segments = []
-  let currentSegment = {
-    words: [],
-    startTime: 0,
-    endTime: 0,
-    text: '',
-    originalText: '',
-    editText: '',
-    isEditing: false
-  }
-
-  for (const word of allWords) {
-    if (currentSegment.words.length === 0) {
-      currentSegment.startTime = word.startTime
-      currentSegment.words.push(word)
-    } else if (
-      currentSegment.words.length >= maxWordsPerSegment.value ||
-      word.startTime - currentSegment.words[currentSegment.words.length - 1].endTime > segmentOverlapThreshold.value
-    ) {
-      currentSegment.endTime = currentSegment.words[currentSegment.words.length - 1].endTime
-      currentSegment.text = currentSegment.words.map(w => w.text).join(' ')
-      currentSegment.originalText = currentSegment.text
-      currentSegment.editText = currentSegment.text
-      segments.push(currentSegment)
-
-      currentSegment = {
-        words: [word],
-        startTime: word.startTime,
-        endTime: 0,
-        text: '',
-        originalText: '',
-        editText: '',
-        isEditing: false
-      }
-    } else {
-      currentSegment.words.push(word)
-    }
-  }
-
-  if (currentSegment.words.length > 0) {
-    currentSegment.endTime = currentSegment.words[currentSegment.words.length - 1].endTime
-    currentSegment.text = currentSegment.words.map(w => w.text).join(' ')
-    currentSegment.originalText = currentSegment.text
-    currentSegment.editText = currentSegment.text
-    segments.push(currentSegment)
-  }
-
-  transcriptSegments.value = segments
-  // console.log(`Created ${segments.length} segments from ${allWords.length} words`)
-}
-
-function debugTranscriptionJson() {
-  const json = props.originalTranscriptionJson
-  if (!json) return
-  // Optional: keep logs for debugging if needed
-}
-
-function reprocessSegments() {
-  if (!hasOriginalTranscription.value) return
-  if (hasUnsavedChanges.value) {
-    if (!confirm('You have unsaved changes. Reprocessing segments will discard these changes. Continue?')) {
-      return
-    }
-  }
-  createTranscriptSegments()
-  saveStatus.value = { type: 'text-blue-600', message: 'Segments reprocessed with new settings' }
-  setTimeout(() => { saveStatus.value = null }, 3000)
-}
-
-function beginEdit(index) {
-  transcriptSegments.value.forEach((s, idx) => {
-    if (idx !== index && s.isEditing) {
-      s.isEditing = false
-      s.editText = s.text
-    }
-  })
-  transcriptSegments.value[index].isEditing = true
-  transcriptSegments.value[index].editText = transcriptSegments.value[index].text
-}
-function saveSegment({ index, text }) {
-  transcriptSegments.value[index].text = text
-  transcriptSegments.value[index].isEditing = false
-}
-function cancelEdit(index) {
-  transcriptSegments.value[index].isEditing = false
-  transcriptSegments.value[index].editText = transcriptSegments.value[index].text
-}
-
-function playSegment(segment) {
-  const video = videoPlayer.value
-  if (!video) return
-  video.currentTime = segment.startTime
-  video.play()
-}
-
-function playPreviousSegment() {
-  if (currentSegmentIndex.value > 0) {
-    playSegment(transcriptSegments.value[currentSegmentIndex.value - 1])
-  }
-}
-function playNextSegment() {
-  if (currentSegmentIndex.value < transcriptSegments.value.length - 1) {
-    playSegment(transcriptSegments.value[currentSegmentIndex.value + 1])
-  }
-}
-
-function updateCurrentSegment() {
-  const currentTime = currentVideoTime.value
-  let newIndex = -1
-
-  for (let i = 0; i < transcriptSegments.value.length; i++) {
-    const s = transcriptSegments.value[i]
-    if (currentTime >= s.startTime && currentTime <= s.endTime) {
-      newIndex = i
-      break
-    }
-  }
-  if (newIndex === -1) {
-    for (let i = 0; i < transcriptSegments.value.length; i++) {
-      if (currentTime < transcriptSegments.value[i].startTime) {
-        break
-      }
-      newIndex = i
-    }
-  }
-  currentSegmentIndex.value = newIndex
-  scrollToCurrentSegment()
-}
-
-function scrollToCurrentSegment() {
-  nextTick(() => {
-    if (currentSegmentIndex.value >= 0) {
-      const segments = document.querySelectorAll('.mb-4.border.border-gray-200.rounded-md')
-      if (segments && segments[currentSegmentIndex.value]) {
-        segments[currentSegmentIndex.value].scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-      }
-    }
-  })
-}
-
-function extractTimeInSeconds(timeObject) {
-  if (!timeObject) return 0
-  if (typeof timeObject === 'object') {
-    const seconds = typeof timeObject.seconds === 'string' ? parseInt(timeObject.seconds) : timeObject.seconds || 0
-    const nanos = timeObject.nanos || 0
-    return seconds + (nanos / 1_000_000_000)
-  } else if (typeof timeObject === 'string') {
-    if (timeObject.includes('s')) return parseFloat(timeObject.replace('s', ''))
-    if (timeObject.includes(':')) {
-      const parts = timeObject.split(':')
-      let seconds = 0
-      if (parts.length === 3) {
-        seconds = (parseInt(parts[0]) * 3600) + (parseInt(parts[1]) * 60) + parseFloat(parts[2])
-      } else if (parts.length === 2) {
-        seconds = (parseInt(parts[0]) * 60) + parseFloat(parts[1])
-      }
-      return seconds
-    }
-    return parseFloat(timeObject)
-  }
-  return Number(timeObject) || 0
-}
-
-// Save and export
-async function saveAllSegments() {
-  if (!props.processingId) return
-  isSavingTranscript.value = true
-  saveStatus.value = null
-  try {
-    // Ensure any editing segment saves its current changes
-    transcriptSegments.value.forEach((s) => {
-      if (s.isEditing) {
-        s.text = s.editText
-        s.isEditing = false
-      }
-    })
-    const fullText = transcriptSegments.value.map(s => s.text).join(' ')
-    const updatedTranscriptionJson = createUpdatedTranscriptionJsonFromSegments()
-
-    const response = await fetch(`${props.apiUrl}/update-transcript/${props.processingId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        text: fullText,
-        transcription_json: updatedTranscriptionJson
-      })
-    })
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || 'Failed to save transcript')
-    }
-    transcriptSegments.value.forEach(s => { s.originalText = s.text })
-    saveStatus.value = { type: 'text-green-600', message: 'All segments saved successfully' }
-    setTimeout(() => { saveStatus.value = null }, 3000)
-  } catch (e) {
-    console.error('Error saving transcript:', e)
-    saveStatus.value = { type: 'text-red-600', message: `Failed to save transcript: ${e.message}` }
-  } finally {
-    isSavingTranscript.value = false
-  }
-}
-
-function createUpdatedTranscriptionJsonFromSegments() {
-  const fullText = transcriptSegments.value.map(s => s.text).join(' ')
-  const original = props.originalTranscriptionJson
-  if (!original) {
-    return {
-      text: fullText,
-      results: [{ transcript: fullText, confidence: 1.0 }]
-    }
-  }
-  const updated = JSON.parse(JSON.stringify(original))
-  updated.text = fullText
-  if (updated.results && updated.results.length > 0) {
-    updated.results.forEach(result => {
-      if (result.transcript) result.transcript = fullText
-      if (result.alternatives && result.alternatives.length > 0) {
-        result.alternatives[0].transcript = fullText
-      }
-    })
-  }
-  return updated
-}
-
-async function downloadSRT() {
-  if (!props.processingId) return
-  if (hasUnsavedChanges.value) {
-    saveStatus.value = { type: 'text-red-600', message: 'Please save all transcript edits before downloading the SRT file.' }
-    setTimeout(() => { saveStatus.value = null }, 2500)
-    return
-  }
-  isDownloadingSRT.value = true
-  try {
-    const downloadUrl = `${props.apiUrl}/download-srt/${props.processingId}?t=${Date.now()}`
-    const link = document.createElement('a')
-    link.href = downloadUrl
-    link.download = `${originalFilenameLocal.value ? originalFilenameLocal.value.replace(/\.[^/.]+$/, '') : 'transcript'}.srt`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  } catch (e) {
-    console.error('SRT download error:', e)
-    saveStatus.value = { type: 'text-red-600', message: `Failed to download SRT file: ${e.message || 'Unknown error'}` }
-  } finally {
-    isDownloadingSRT.value = false
-  }
-}
-
-function copyTranscript() {
-  const fullText = transcriptSegments.value.map(s => s.text).join(' ')
-  navigator.clipboard.writeText(fullText)
-    .then(() => {
-      saveStatus.value = { type: 'text-blue-600', message: 'Transcript copied to clipboard' }
-      setTimeout(() => { saveStatus.value = null }, 2000)
-    })
-    .catch(err => {
-      console.error('Could not copy text: ', err)
-      saveStatus.value = { type: 'text-red-600', message: 'Failed to copy transcript' }
-    })
-}
-
-const downloadEmbeddedCaptionsModalCall = () =>{
-  downloadModal.value = true;
-  console.log(downloadModal.value);
-}
-
-function buildTranscriptForRender() {
-  return {
-    segments: transcriptSegments.value.map(s => ({
-      startTime: s.startTime,
-      endTime: s.endTime,
-      text: s.text,
-      words: (s.words || []).map(w => ({
-        text: w.text,
-        startTime: w.startTime,
-        endTime: w.endTime
-      }))
-    }))
-  };
-}
-
-async function downloadEmbeddedCaptions() {
-  if (hasUnsavedChanges.value) {
-    saveStatus.value = { type: 'text-red-600', message: 'Please save all transcript edits before downloading the video.' };
-    setTimeout(() => { saveStatus.value = null }, 2500);
-    return;
-  }
-  if (!props.videoUrl) {
-    saveStatus.value = { type: 'text-red-600', message: 'Video URL is missing.' };
-    setTimeout(() => { saveStatus.value = null }, 2500);
-    return;
-  }
-  isDownloadingVideo.value = true;
-  try {
-    const transcript = buildTranscriptForRender();
-    const res = await fetch(`${props.apiUrl}/render-captioned-video`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        videoPath: props.videoUrl,
-        transcript,
-        style: {
-          fontName: "Poppins",
-          fontSize: 72,
-          outline: 6,
-          borderStyle: 3,
-          alignment: 2,
-          karaoke: true,
-          primaryColour: "&H009EE29F&",
-          secondaryColour: "&H8C9EE29F&",
-          outlineColour: "&H00000000&",
-          backColour: "&HB37B8410&"
-        },
-        output: { width: 1080, height: 1920 }
-      })
-    });
-    if (!res.ok) {
-      let err = {};
-      try { err = await res.json(); } catch {}
-      throw new Error(err.error || `Render failed (${res.status})`);
-    }
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const base = (props.originalFilename || '').replace(/\.[^/.]+$/, '') || 'video';
-    a.href = url;
-    a.download = `${base}-captioned.mp4`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    saveStatus.value = { type: 'text-green-600', message: 'Video downloaded successfully' };
-    setTimeout(() => { saveStatus.value = null }, 3000);
-  } catch (e) {
-    console.error(e);
-    saveStatus.value = { type: 'text-red-600', message: e.message || 'Unknown error' };
-  } finally {
-    isDownloadingVideo.value = false;
-  }
-}
-</script>
-
 <style scoped>
-/* Range inputs */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -852,5 +1134,15 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
   border: 2px solid white;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

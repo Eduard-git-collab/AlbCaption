@@ -22,6 +22,20 @@
     />
 
     <div class="min-h-screen relative w-full">
+      <!-- Back Button -->
+      <div v-if="$route.path === '/upload'"  class="sticky top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-sm border-b border-primary/10 py-3 px-4">
+        <div class="container mx-auto flex items-center">
+          <div @click="$router.go(-1)"
+            class="inline-flex cursor-pointer items-center gap-2 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-all duration-200 group"
+          >
+            <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span>Kthehu</span>
+          </div>
+        </div>
+      </div>
+
       <div class="container mx-auto px-4 py-6">
         <!-- File Upload Section -->
         <FileUploader
@@ -50,10 +64,11 @@
 </template>
 
 <script>
-import ModalDialog from './items/ModalDialog.vue'
-import ProcessingOverlay from './subcomponents/ProcessingOverlay.vue'
+import ModalDialog from './items/ModalDialog.vue';
+import ProcessingOverlay from './subcomponents/ProcessingOverlay.vue';
 import FileUploader from './subcomponents/FileUploader.vue'
 import TranscriptEditor from './subcomponents/TranscriptEditor.vue'
+import { RouterLink } from 'vue-router';
 
 export default {
   name: 'VideoUpload',
@@ -61,8 +76,9 @@ export default {
     ModalDialog,
     ProcessingOverlay,
     FileUploader,
-    TranscriptEditor
-  },
+    TranscriptEditor,
+    RouterLink
+},
   data() {
     return {
       // Modal dialog properties

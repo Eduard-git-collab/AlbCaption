@@ -1,7 +1,7 @@
 <script setup>
 import { defineProps, defineEmits, computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { supabase } from '../../lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 import Logo_lines from '../logos/Logo_lines.vue'
 import PaypalSubscribeButton from '../PaypalSubscribeButton.vue'
 

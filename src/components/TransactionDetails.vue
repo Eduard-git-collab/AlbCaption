@@ -1,8 +1,9 @@
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { supabase } from '../lib/supabaseClient';
-import SegmentRow from './subcomponents/SegmentRow.vue';
+import { supabase } from '@/lib/supabaseClient';
+import SegmentRow from '@/components/subcomponents/SegmentRow.vue';
+import apiClient from '@/stores/apiClient'
 
 const route = useRoute();
 const router = useRouter();
@@ -16,9 +17,14 @@ const videoPlayer = ref(null);
 // UI state properties
 const isDownloadingSRT = ref(false);
 const isDownloadingVideo = ref(false);
-const downloadModal = ref (true);
+const downloadModal = ref(false);
 const isSavingTranscript = ref(false);
-const saveStatus = ref(null);
+const showSubtitleDropdown = ref(false);
+
+// Message/Alert state
+const showSaveStatus = ref(false);
+const saveStatusMessage = ref('');
+const isSaveError = ref(false);
 
 // Video playback properties
 const currentVideoTime = ref(0);
@@ -40,12 +46,82 @@ const isSavingFilename = ref(false);
 const filenameError = ref(null);
 const filenameInput = ref(null);
 
-// API URL - you'll need to configure this based on your environment
+// Caption presets
+const captionPresets = [
+  {
+    id: 'classic',
+    name: 'Klasik',
+    description: 'E bardha në të zezë, poshtë',
+    fontSize: 72,
+    textColor: '#FFFFFF',
+    outlineColor: '#000000',
+    outlineWidth: 4,
+    hasBackground: false,
+    backgroundColor: '#000000',
+    position: 'bottom'
+  },
+  {
+    id: 'modern',
+    name: 'Modernu',
+    description: 'Jeshil i ndritshëm, poshtë',
+    fontSize: 72,
+    textColor: '#12998E',
+    outlineColor: '#000000',
+    outlineWidth: 3,
+    hasBackground: true,
+    backgroundColor: '#000000',
+    position: 'bottom'
+  },
+  {
+    id: 'bold',
+    name: 'I guxueshëm',
+    description: 'E bardha me kontur i trashë, mesme',
+    fontSize: 80,
+    textColor: '#FFFFFF',
+    outlineColor: '#000000',
+    outlineWidth: 6,
+    hasBackground: false,
+    backgroundColor: '#000000',
+    position: 'middle'
+  },
+  {
+    id: 'soft',
+    name: 'I butë',
+    description: 'Gri i lehtë, lart',
+    fontSize: 64,
+    textColor: '#E0E0E0',
+    outlineColor: '#333333',
+    outlineWidth: 2,
+    hasBackground: true,
+    backgroundColor: '#1A1A1A',
+    position: 'top'
+  }
+]
+
+const selectedPresetId = ref('classic');
+
+const currentPreset = computed(() => {
+  return captionPresets.find(p => p.id === selectedPresetId.value) || captionPresets[0]
+})
+
+// API URL
 const apiUrl = ref(import.meta.env.VITE_API_URL || 'http://localhost:8000');
 
 const hasUnsavedChanges = computed(() => {
   return transcriptSegments.value.some(s => s.originalText !== s.text || s.isEditing);
 });
+
+// Helper function to show status message
+const showMessage = (message, isError = false) => {
+  saveStatusMessage.value = message;
+  isSaveError.value = isError;
+  showSaveStatus.value = true;
+  setTimeout(() => {
+    showSaveStatus.value = false;
+    saveStatusMessage.value = '';
+    isSaveError.value = false;
+  }, 2500);
+};
 
 // Watch for transaction changes to initialize editor
 watch(transaction, (newTransaction) => {
@@ -153,8 +229,7 @@ async function saveFilename() {
     transaction.value.original_filename = editedFilename.value.trim();
     isEditingFilename.value = false;
     editedFilename.value = '';
-    saveStatus.value = { type: 'text-green-600', message: 'Filename updated successfully' };
-    setTimeout(() => { saveStatus.value = null; }, 3000);
+    showMessage('Filename updated successfully');
   } catch (e) {
     console.error('Error updating filename:', e);
     filenameError.value = e.message;
@@ -310,8 +385,7 @@ function reprocessSegments() {
     }
   }
   createTranscriptSegments();
-  saveStatus.value = { type: 'text-blue-600', message: 'Segments reprocessed with new settings' };
-  setTimeout(() => { saveStatus.value = null; }, 3000);
+  showMessage('Segments reprocessed with new settings');
 }
 
 function beginEdit(index) {
@@ -344,7 +418,7 @@ function rebuildTranscriptionJson() {
     const words = [];
     let originalWordIndex = 0;
     
-    segmentWords.forEach((editedWord, idx) => {
+    segmentWords.forEach((editedWord) => {
       // Find the corresponding original word (best effort matching)
       const originalWord = segment.words[originalWordIndex] || segment.words[segment.words.length - 1];
       
@@ -380,15 +454,13 @@ function rebuildTranscriptionJson() {
 
 async function saveAllSegments() {
   if (!transaction.value?.processing_id) {
-    saveStatus.value = { type: 'text-red-600', message: 'Processing ID not found' };
+    showMessage('Processing ID not found', true);
     return;
   }
 
   isSavingTranscript.value = true;
-  saveStatus.value = null;
 
   try {
-    // Rebuild the transcription JSON from edited segments
     const updatedJson = rebuildTranscriptionJson();
 
     if (!updatedJson) {
@@ -397,46 +469,59 @@ async function saveAllSegments() {
 
     console.log('Saving updated transcription:', updatedJson);
 
-    // Send to backend
-    const response = await fetch(`${apiUrl.value}/update-transcription/${transaction.value.processing_id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transcription_json: updatedJson })
-    });
+    // Save to API
+    const response = await apiClient.post(
+      `/update-transcription/${transaction.value.processing_id}`,
+      { transcription_json: updatedJson }
+    );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to save transcription');
+    const result = response.data;
+    
+    // Fetch updated transaction data from Supabase
+    const { data: updatedTransaction, error: fetchError } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('processing_id', transaction.value.processing_id)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching updated transaction:', fetchError);
+      throw new Error(`Failed to fetch updated data: ${fetchError.message}`);
     }
 
-    const result = await response.json();
+    if (updatedTransaction) {
+      // Update the local transaction object with fresh data
+      transaction.value = {
+        ...updatedTransaction,
+        video_url: transaction.value.video_url // preserve video URL if needed
+      };
 
-    // Update local transaction data
-    transaction.value.transcription_json = updatedJson;
+      // Recreate segments from the updated transcription JSON
+      if (updatedTransaction.transcription_json) {
+        createTranscriptSegments(updatedTransaction.transcription_json);
+      }
+
+      // Reset editing state for all segments
+      transcriptSegments.value.forEach(segment => {
+        segment.isEditing = false;
+      });
+
+      console.log('Transaction and segments updated successfully');
+    }
     
-    // Update originalText for all segments to match current text
-    transcriptSegments.value.forEach(segment => {
-      segment.originalText = segment.text;
-    });
-
-    saveStatus.value = { type: 'text-green-600', message: 'Transcription saved successfully!' };
-    setTimeout(() => { saveStatus.value = null; }, 3000);
-
+    showMessage('Transcription saved successfully');
+    
   } catch (error) {
     console.error('Error saving transcription:', error);
-    saveStatus.value = { type: 'text-red-600', message: `Failed to save: ${error.message}` };
+    showMessage(`Error: ${error.message}`, true);
   } finally {
     isSavingTranscript.value = false;
   }
 }
 
-async function saveSegment({ index, text }) {
-  // Update the segment locally first
+function saveSegment({ index, text }) {
   transcriptSegments.value[index].text = text;
   transcriptSegments.value[index].isEditing = false;
-  
-  // Then save all segments (since we need to send the complete JSON)
-  await saveAllSegments();
 }
 
 function cancelEdit(index) {
@@ -520,28 +605,28 @@ function extractTimeInSeconds(timeObject) {
   return Number(timeObject) || 0;
 }
 
-async function downloadSRT() {
+async function downloadSubtitles(format) {
   if (!transaction.value?.processing_id) return;
   
   if (hasUnsavedChanges.value) {
-    saveStatus.value = { type: 'text-red-600', message: 'Please save all transcript edits before downloading the SRT file.' };
-    setTimeout(() => { saveStatus.value = null; }, 2500);
+    showMessage('Please save all transcript edits before downloading the subtitle file.', true);
     return;
   }
 
   isDownloadingSRT.value = true;
+  showSubtitleDropdown.value = false;
   
   try {
-    const downloadUrl = `${apiUrl.value}/download-srt/${transaction.value.processing_id}?t=${Date.now()}`;
+    const downloadUrl = `${apiUrl.value}/download-${format.toLowerCase()}/${transaction.value.processing_id}?t=${Date.now()}`;
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = `${originalFilenameLocal.value ? originalFilenameLocal.value.replace(/\.[^/.]+$/, '') : 'transcript'}.srt`;
+    link.download = `${originalFilenameLocal.value ? originalFilenameLocal.value.replace(/\.[^/.]+$/, '') : 'transcript'}.${format.toUpperCase()}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   } catch (e) {
-    console.error('SRT download error:', e);
-    saveStatus.value = { type: 'text-red-600', message: `Failed to download SRT file: ${e.message || 'Unknown error'}` };
+    console.error('Subtitle download error:', e);
+    showMessage(`Failed to download subtitle file: ${e.message || 'Unknown error'}`, true);
   } finally {
     isDownloadingSRT.value = false;
   }
@@ -551,21 +636,78 @@ function copyTranscript() {
   const fullText = transcriptSegments.value.map(s => s.text).join(' ');
   navigator.clipboard.writeText(fullText)
     .then(() => {
-      saveStatus.value = { type: 'text-blue-600', message: 'Transcript copied to clipboard' };
-      setTimeout(() => { saveStatus.value = null; }, 2000);
+      showMessage('Transkripti u kopjua me sukses');
     })
     .catch(err => {
       console.error('Could not copy text: ', err);
-      saveStatus.value = { type: 'text-red-600', message: 'Failed to copy transcript' };
+      showMessage('Kopjimi i transkriptit dështoi', true);
     });
 }
 
-const downloadEmbeddedCaptionsModal = () =>{
-  downloadModal.value = true
+function downloadEmbeddedCaptionsModalCall() {
+  downloadModal.value = true;
+  selectedPresetId.value = 'classic';
 }
 
-const closeDownloadModal = () =>{
-  downloadModal.value = false
+function closeDownloadModal() {
+  downloadModal.value = false;
+}
+
+function selectPreset(preset) {
+  selectedPresetId.value = preset.id;
+}
+
+function getPreviewStyle() {
+  const preset = currentPreset.value;
+  const w = preset.outlineWidth;
+  const color = preset.outlineColor;
+  
+  let textShadow = 'none';
+  if (w > 0) {
+    const shadows = [];
+    for (let x = -w; x <= w; x++) {
+      for (let y = -w; y <= w; y++) {
+        if (x !== 0 || y !== 0) {
+          shadows.push(`${x}px ${y}px 0 ${color}`);
+        }
+      }
+    }
+    textShadow = shadows.join(', ');
+  }
+
+  let positionStyle = 'position: absolute; bottom: 20px;';
+  if (preset.position === 'top') {
+    positionStyle = 'position: absolute; top: 20px;';
+  } else if (preset.position === 'middle') {
+    positionStyle = 'position: absolute; top: 50%; transform: translateY(-50%);';
+  }
+
+  return {
+    fontSize: preset.fontSize + 'px',
+    color: preset.textColor,
+    textShadow,
+    padding: preset.hasBackground ? '12px 16px' : '0',
+    backgroundColor: preset.hasBackground ? preset.backgroundColor + '80' : 'transparent',
+    borderRadius: preset.hasBackground ? '4px' : '0',
+    ...Object.fromEntries(positionStyle.split(';').filter(Boolean).map(s => {
+      const [key, value] = s.split(':').map(x => x.trim());
+      return [key, value];
+    }))
+  };
+}
+
+function hexToRGB(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : { r: 255, g: 255, b: 255 };
+}
+
+function hexToASSColor(hex) {
+  const rgb = hexToRGB(hex);
+  return `&H${rgb.b.toString(16).padStart(2, '0')}${rgb.g.toString(16).padStart(2, '0')}${rgb.r.toString(16).padStart(2, '0')}&`;
 }
 
 function buildTranscriptForRender() {
@@ -583,67 +725,146 @@ function buildTranscriptForRender() {
   };
 }
 
-async function downloadEmbeddedCaptions() {
+async function downloadWithSelectedStyle() {
   if (hasUnsavedChanges.value) {
-    saveStatus.value = { type: 'text-red-600', message: 'Please save all transcript edits before downloading the video.' };
-    setTimeout(() => { saveStatus.value = null }, 2500);
+    showMessage('Please save all transcript edits before downloading the video.', true);
     return;
   }
-  if (!props.videoUrl) {
-    saveStatus.value = { type: 'text-red-600', message: 'Video URL is missing.' };
-    setTimeout(() => { saveStatus.value = null }, 2500);
+  if (!transaction.value?.video_url) {
+    showMessage('Video URL is missing.', true);
     return;
   }
+  
   isDownloadingVideo.value = true;
+  showMessage('Duke përpunuar videon...');
+  
   try {
-    const transcript = buildTranscriptForRender();
-    const res = await fetch(`${props.apiUrl}/render-captioned-video`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        videoPath: props.videoUrl,
-        transcript,
-        style: { fontName: 'Noto Sans', fontSize: 72, outline: 6, borderStyle: 1, alignment: 2, karaoke: true },
-        output: { width: 1080, height: 1920 }
-      })
-    });
-    if (!res.ok) {
-      let err = {};
-      try { err = await res.json(); } catch {}
-      throw new Error(err.error || `Render failed (${res.status})`);
+    const preset = currentPreset.value;
+    
+    const positionMap = {
+      top: 8,
+      middle: 5,
+      bottom: 2
+    };
+
+    const style = {
+      fontName: 'Poppins',
+      fontSize: preset.fontSize,
+      outline: preset.outlineWidth,
+      borderStyle: 1,
+      alignment: positionMap[preset.position],
+      karaoke: true,
+      primaryColour: hexToASSColor(preset.textColor),
+      secondaryColour: hexToASSColor(preset.textColor),
+      outlineColour: hexToASSColor(preset.outlineColor),
+      backColour: preset.hasBackground ? hexToASSColor(preset.backgroundColor) : '&H80000000&'
+    };
+
+    // Build transcript segments array directly
+    const segments = transcriptSegments.value.map(s => ({
+      startTime: s.startTime,
+      endTime: s.endTime,
+      text: s.text
+    }));
+
+    // Determine source video dimensions
+    let outputWidth = 1280;
+    let outputHeight = 720;
+    const videoEl = videoPlayer.value;
+    if (videoEl) {
+      if (videoEl.videoWidth && videoEl.videoHeight) {
+        outputWidth = videoEl.videoWidth;
+        outputHeight = videoEl.videoHeight;
+      } else if (videoEl.clientWidth && videoEl.clientHeight) {
+        outputWidth = Math.round(videoEl.clientWidth);
+        outputHeight = Math.round(videoEl.clientHeight);
+      }
     }
-    const blob = await res.blob();
+
+    console.log('Sending request with:', {
+      videoPath: transaction.value.video_url,
+      segments: segments.length,
+      style,
+      outputDimensions: { width: outputWidth, height: outputHeight }
+    });
+
+    const response = await apiClient.post(
+      `/render-captioned-video`,
+      {
+        videoPath: transaction.value.video_url,
+        transcript: {
+          segments: segments
+        },
+        style,
+        output: {
+          width: outputWidth,
+          height: outputHeight
+        }
+      },
+      {
+        responseType: 'blob'
+      }
+    );
+
+    const blob = response.data;
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const base = (props.originalFilename || '').replace(/\.[^/.]+$/, '') || 'video';
-    a.href = url;
-    a.download = `${base}-captioned.mp4`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    const link = document.createElement('a');
+    const baseName = (transaction.value.original_filename || 'video').replace(/\.[^/.]+$/, '');
+    link.href = url;
+    link.download = `${baseName}-captioned.mp4`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    saveStatus.value = { type: 'text-green-600', message: 'Video downloaded successfully' };
-    setTimeout(() => { saveStatus.value = null }, 3000);
-  } catch (e) {
-    console.error(e);
-    saveStatus.value = { type: 'text-red-600', message: e.message || 'Unknown error' };
+
+    closeDownloadModal();
+    showMessage('Video shkarkuar me sukses!');
+  } catch (error) {
+    console.error('Error downloading video:', error);
+    showMessage(`Gabim: ${error.message}`, true);
   } finally {
     isDownloadingVideo.value = false;
   }
 }
-
 </script>
 
 <template>
+  <div
+    v-if="showSaveStatus"
+    class="fixed top-0 flex justify-center h-fit w-full z-100 p-3 duration-300 transition-all"
+    :class="showSaveStatus ? 'translate-y-[30px]' : '-translate-y-[100px]'"
+  >
+    <div 
+      class="w-fit h-fit p-3 rounded-xl flex items-center border justify-center text-sm font-poppins"
+      :class="isSaveError ? 'bg-red-300 border-red-500 text-red-700' : 'bg-secondary/85 border-secondary text-[#12998e]'"
+    >
+      {{ saveStatusMessage }} 
+    </div>
+  </div>
+
+  <div class="sticky top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-sm border-b border-primary/10 py-3 px-4">
+    <div class="container mx-auto flex items-center">
+      <div @click="$router.go(-1)"
+        class="inline-flex cursor-pointer items-center gap-2 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-all duration-200 group"
+      >
+        <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span>Kthehu</span>
+      </div>
+    </div>
+  </div>
+  
   <div class="min-h-screen text-white font-poppins p-6">
     <div class="container mx-auto">
       <div v-if="loading" class="text-center py-24 text-xl text-[#92a3bb]">
-        Loading transaction details...
+        Duke mbledhur të dhënat e transkriptit
       </div>
       <div v-else-if="unauthorized" class="text-center py-24 text-red-400 text-xl">
-        Unauthorized. You do not have permission to view this transaction.
+        Ky veprim është i pa autorizuar. Nuk keni të drejtat për të parë transkriptin. 
       </div>
       <div v-else-if="transaction" class="max-w-6xl mx-auto font-poppins">
+
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <!-- Transcript Panel -->
           <div class="lg:col-span-3 bg-white rounded-lg shadow-md overflow-hidden">
@@ -659,26 +880,49 @@ async function downloadEmbeddedCaptions() {
                   </svg>
                   Kopjo
                 </button>
-                <button 
-                  @click="downloadSRT" 
-                  class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center"
-                  :disabled="isDownloadingSRT || hasUnsavedChanges"
-                  :class="{ 'opacity-50 cursor-not-allowed': isDownloadingSRT || hasUnsavedChanges }"
-                >
-                  <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  {{ isDownloadingSRT ? 'Downloading...' : 'Shkarko SRT/VTT' }}
-                </button>
 
-                <!--Download embedded captions (burned-in) -->
+                <!-- Subtitle Download Dropdown -->
+                <div class="relative">
+                  <button 
+                    @click="showSubtitleDropdown = !showSubtitleDropdown"
+                    class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center"
+                    :disabled="isDownloadingSRT || hasUnsavedChanges"
+                    :class="{ 'opacity-50 cursor-not-allowed': isDownloadingSRT || hasUnsavedChanges }"
+                  >
+                    <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    {{ isDownloadingSRT ? 'Downloading...' : 'Shkarko Titra' }}
+                  </button>
+                  
+                  <!-- Dropdown Menu -->
+                  <div 
+                    v-if="showSubtitleDropdown"
+                    class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-50"
+                  >
+                    <button
+                      @click="downloadSubtitles('srt')"
+                      class="w-full text-left px-4 py-2 text-xs text-primary hover:bg-[#F4F9F7] transition-colors border-b border-gray-100 last:border-b-0"
+                    >
+                      SRT
+                    </button>
+                    <button
+                      @click="downloadSubtitles('vtt')"
+                      class="w-full text-left px-4 py-2 text-xs text-primary hover:bg-[#F4F9F7] transition-colors"
+                    >
+                      VTT
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Download embedded captions (burned-in) -->
                 <button
-                  @click="downloadEmbeddedCaptionsModal"
+                  @click="downloadEmbeddedCaptionsModalCall"
                   class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center"
                   :disabled="isDownloadingVideo || hasUnsavedChanges"
                   :class="{ 'opacity-50 cursor-not-allowed': isDownloadingVideo || hasUnsavedChanges }"
                 >
-                  {{ isDownloadingVideo ? 'Downloading...' : 'Download embedded captions' }}
+                  {{ isDownloadingVideo ? 'Downloading...' : 'Shkarko me titra' }}
                 </button>
 
                 <button 
@@ -710,9 +954,6 @@ async function downloadEmbeddedCaptions() {
                   @save="saveSegment"
                   @cancel-edit="cancelEdit"
                 />
-                <p v-if="saveStatus" class="text-sm mt-2" :class="saveStatus.type">
-                  {{ saveStatus.message }}
-                </p>
               </div>
             </div>
           </div>
@@ -911,34 +1152,92 @@ async function downloadEmbeddedCaptions() {
       </div>
     </div>
   </div>
+
+  <!-- Download Embedded Captions Modal -->
   <teleport to="body">
-    <div 
-      v-if="downloadModal" 
-      class="fixed inset-0 z-[1000] flex items-center justify-center">
-    <!-- Backdrop -->
-    <div
-      class="absolute inset-0 bg-black/30 backdrop-blur-sm"
-      @click="closeDownloadModal"
-    />
-    <!-- Content wrapper -->
-    <div class="w-full h-full md:w-[1020px] md:h-[595px] px-4 md:px-8 py-6 relative z-10">
-      <div class="w-full h-full bg-white relative rounded-xl shadow-xl overflow-hidden">
-        <!-- Close button -->
-        <button
-          class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 cursor-pointer z-20"
-          @click="closeDownloadModal"
-          aria-label="Mbyll"
-        >
-          ✕
-        </button>
+    <transition name="fade">
+      <div 
+        v-if="downloadModal" 
+        class="fixed inset-0 z-[1000] bg-black/50 flex items-center justify-center p-4"
+      >
+        <!-- Modal -->
+        <div class="w-full max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden">
+          <!-- Header -->
+          <div class="bg-primary px-6 py-4 flex items-center justify-between">
+            <h2 class="text-xl font-bold text-white">Shkarko videon me titra</h2>
+            <button
+              @click="closeDownloadModal"
+              class="text-white hover:text-gray-200"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l12 12M18 6L6 18"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Content -->
+          <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Left: Presets -->
+            <div class="space-y-3">
+              <label class="block text-sm font-medium text-primary mb-3">Zgjedhni stilin</label>
+              <div class="space-y-2">
+                <button
+                  v-for="preset in captionPresets"
+                  :key="preset.id"
+                  @click="selectPreset(preset)"
+                  class="w-full text-left px-4 py-3 border-2 rounded transition-all"
+                  :class="selectedPresetId === preset.id 
+                    ? 'border-secondary bg-secondary/10' 
+                    : 'border-gray-200 hover:border-gray-300'"
+                >
+                  <p class="font-medium text-primary text-sm">{{ preset.name }}</p>
+                  <p class="text-xs text-gray-600 mt-1">{{ preset.description }}</p>
+                </button>
+              </div>
+            </div>
+
+            <!-- Right: Preview -->
+            <div class="flex flex-col gap-3">
+              <p class="text-sm text-gray-600">Paraqitje paraprakisht</p>
+              <div class="flex-1 bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center relative min-h-64">
+                <!-- Preview background -->
+                <div class="absolute inset-0 bg-gradient-to-b from-gray-800 to-black opacity-60"></div>
+                
+                <!-- Caption preview based on position -->
+                <div 
+                  class="relative px-4 font-bold text-center w-full"
+                  :style="getPreviewStyle()"
+                >
+                  Këtu shfaqen titrat
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-3">
+            <button
+              @click="closeDownloadModal"
+              class="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
+              :disabled="isDownloadingVideo"
+            >
+              Anulo
+            </button>
+            <button
+              @click="downloadWithSelectedStyle"
+              class="px-4 py-2 text-sm bg-secondary text-primary rounded hover:bg-[#7dd87b] disabled:opacity-50 font-medium"
+              :disabled="isDownloadingVideo"
+            >
+              {{ isDownloadingVideo ? 'Duke shkarkuar...' : 'Shkarko videon' }}
+            </button>
+          </div>
+        </div>
       </div>
-      </div>
-    </div>
-  </teleport> 
+    </transition>
+  </teleport>
 </template>
 
 <style scoped>
-/* Range inputs */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -965,5 +1264,15 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
   border: 2px solid white;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

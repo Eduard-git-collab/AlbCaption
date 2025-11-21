@@ -40,7 +40,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Albcaptions_logo_nobg from './components/logos/Albcaption_logo_inv_nobg.vue';
-import { supabase } from './lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
 const session = ref(null);
 const route = useRoute();

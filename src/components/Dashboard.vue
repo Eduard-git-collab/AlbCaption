@@ -1,8 +1,9 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import ConfirmModal from './items/ModalDialog.vue';
+import apiClient from '@/stores/apiClient';
 
 const router = useRouter();
 const loading = ref(true);
@@ -712,24 +713,18 @@ const confirmDeactivate = async () => {
   deactivateLoading.value = true;
   deactivateError.value = null;
   try {
-    // Delete from custom users table
-    const { error } = await supabase
-      .from('users')
-      .delete()
-      .eq('id', userData.value.id);
-
-    if (error) {
-      deactivateError.value = error.message || 'Failed to deactivate account.';
-      return;
-    }
-
-    // Optionally sign user out (recommended)
+    const response = await apiClient.post('/auth/deactivate-account')
+    
+    console.log('[DEACTIVATE] Success:', response.data);
+    
+    // Sign out after successful deletion
     await supabase.auth.signOut();
-
-    // Redirect to home or goodbye page
+    
+    // Redirect to home
     router.push('/');
 
   } catch (err) {
+    console.error('[DEACTIVATE] Error:', err);
     deactivateError.value = err.message || 'Failed to deactivate account.';
   } finally {
     deactivateLoading.value = false;
@@ -810,7 +805,7 @@ const confirmCancelSubscription = async () => {
   cancelSubscriptionError.value = null;
   
   try {
-    const response = await fetch('https://96b5-31-22-56-9.ngrok-free.app/api/paypal/cancel', {
+    const response = await fetch('https://5abb6ed80357.ngrok-free.app/api/paypal/cancel', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

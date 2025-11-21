@@ -171,7 +171,7 @@
 
 <script setup>
 import { ref, reactive, watch, onMounted, onBeforeUnmount } from 'vue'
-import { supabase } from '../../lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 
 const props = defineProps({
   open: { type: Boolean, default: false }
@@ -282,28 +282,6 @@ async function changePassword() {
   }
 }
 
-/* Request email change (sends confirmation email(s)) */
-async function promptAndChangeEmail() {
-  if (busy.value) return
-  const newEmail = window.prompt('Shkruani emailin e ri:')
-  if (!newEmail) return
-  busy.value = true
-  status.value = 'Duke dërguar konfirmimin e emailit...'
-  try {
-    const { error } = await supabase.auth.updateUser(
-      { email: newEmail },
-      { emailRedirectTo }
-    )
-    if (error) throw error
-    // If "Secure email change" is enabled in Supabase, emails go to both old and new addresses.
-    status.value = 'Dërguam një email konfirmimi për ndryshimin e emailit. Ju lutemi kontrolloni emailin tuaj.'
-  } catch (err) {
-    status.value = err.message || 'Ndryshimi i emailit dështoi.'
-  } finally {
-    busy.value = false
-  }
-}
-
 /* Avatar upload/remove */
 async function onFileChange(e) {
   const file = e.target.files?.[0]
@@ -316,13 +294,15 @@ async function onFileChange(e) {
   status.value = 'Duke ngarkuar...'
   try {
     const ext = file.name.split('.').pop()
-    const path = `avatars/${sessionUser.value.id}-${Date.now()}.${ext}`
+    const fileName = `${sessionUser.value.id}-${Date.now()}.${ext}`
+    const path = `${fileName}`
 
     const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
     if (upErr) throw upErr
 
     const { data: pub } = supabase.storage.from('avatars').getPublicUrl(path)
 
+    // Store only the path relative to bucket root
     const { error: updErr } = await supabase
       .from('users')
       .update({ avatar_url: pub.publicUrl, avatar_path: path })
@@ -348,7 +328,11 @@ async function removeAvatar() {
   busy.value = true
   status.value = 'Duke fshir...'
   try {
-    await supabase.storage.from('avatars').remove([avatarPath.value])
+    const { error: deleteError } = await supabase.storage.from('avatars').remove([avatarPath.value])
+    if (deleteError) {
+      console.error('Delete error:', deleteError)
+      throw deleteError
+    }
     await supabase.from('users').update({ avatar_url: null, avatar_path: null }).eq('id', sessionUser.value.id)
     avatarPreview.value = ''
     avatarPath.value = ''

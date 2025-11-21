@@ -1,25 +1,38 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../components/Home.vue';
 import AuthComponent from '../components/Authentication.vue';
-import Dashboard from '../components/Dashboard.vue';
 import ConfirmationPage from '../components/ConfirmationPage.vue';
 import TransactionDetails from '../components/TransactionDetails.vue';
-import { supabase } from '../lib/supabaseClient';
+import AccountActivation from '../components/views/AccountActivation.vue';
+import { supabase } from '@/lib/supabaseClient';
 import Paypal from '../components/Paypal.vue';
 import Pricing from '../components/Payment.vue';
-import NewDashboard from '../components/NewDashboard.vue';
 import NotFound from '../components/views/NotFound.vue';
 import Login from '../components/Login.vue';
 import Test from '../components/Test.vue';
 import ResetPassword from '../components/views/reset-password.vue'; 
 import Upload from '../components/Upload.vue';
 import Payment from '../components/Paypal.vue';
+import PaymentSuccess from '../components/views/PaymentSuccess.vue';
+
+// Import example routes
+import exampleRoutes, { setupExampleRouteGuard } from '../examples/auth-learning/exampleRouter'
 
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/payment/success',
+    name: 'PaymentSuccess',
+    component: PaymentSuccess
+  },
+  {
+    path: '/payment/error',
+    name: 'PaymentError',
+    component: PaymentSuccess
   },
   {
     path: '/signup',
@@ -95,11 +108,6 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/dashboard',
-    name: 'NewDashboard',
-    component: NewDashboard
-  },
-  {
     path: '/auth/reset-password',
     name: 'ResetPassword',
     component: ResetPassword 
@@ -109,6 +117,15 @@ const routes = [
     name: 'Test',
     component: Test
   },
+  {
+    path: '/account-activation',
+    name: 'Activate Account',
+    component: AccountActivation,
+  },
+  
+  // Add example routes here
+  ...exampleRoutes,
+  
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
@@ -133,5 +150,8 @@ router.beforeEach(async (to, from, next) => {
     next();
   }
 });
+
+// Setup example route guards
+setupExampleRouteGuard(router)
 
 export default router;

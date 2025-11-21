@@ -532,7 +532,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import Albcaptions_logo from './logos/Albcaptions_Logo_inv.vue';
 import Time from './items/Time.vue';
 import VideoIcon from './items/Video.vue';

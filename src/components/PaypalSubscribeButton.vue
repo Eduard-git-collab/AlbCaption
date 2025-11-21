@@ -1,8 +1,10 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 import PayPalLogo from './svg/PayPalLogo.vue'
 import axios from 'axios'
+import apiClient from '@/stores/apiClient'
+
 
 const props = defineProps({
   planId: { type: String, required: true }
@@ -29,17 +31,16 @@ async function createPayPalSubscription() {
   try {
     console.log(`Creating subscription for plan: ${props.planId}`)
     
-    // Use relative URL instead of hardcoded localhost
-    const response = await axios.post('http://localhost:3000/api/paypal/create-subscription', {
-      planId: props.planId,
-      userID: uid
-    })
+    const response = await apiClient.post(
+      '/api/paypal/create-subscription',
+      {
+        planId: props.planId
+      }
+    )
 
     console.log('Subscription creation response:', response.data)
 
     if (response.data.approvalUrl) {
-      // Redirect to PayPal for approval
-      console.log('Redirecting to PayPal:', response.data.approvalUrl)
       window.location.href = response.data.approvalUrl
     } else {
       throw new Error('No approval URL received')

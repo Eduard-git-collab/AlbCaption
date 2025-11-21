@@ -150,7 +150,7 @@ const handleModalClick = (event) => {
 
 <template>
   <div 
-    class="relative z-50" 
+    class="relative z-[100000]" 
     aria-labelledby="modal-title" 
     role="dialog" 
     aria-modal="true"

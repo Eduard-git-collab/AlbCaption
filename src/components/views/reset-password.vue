@@ -100,7 +100,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { supabase } from '../../lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 import logo_lines from '../logos/Logo_lines.vue'
 
 const newPassword = ref('')

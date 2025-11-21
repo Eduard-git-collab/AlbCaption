@@ -1,6 +1,6 @@
 <template>
   
-  <div
+  <!-- <div
     class="fixed top-0 flex justify-center h-fit w-full z-100 p-3 duration-300 transition-all"
     :class="showSuccessAlert ?'translate-y-[30px]':'-translate-y-[100px]'"
   >
@@ -10,7 +10,20 @@
     >
     {{ successAlertMessage }} 
     </div>
+  </div> -->
+  <div
+    v-if="showDeletionError"
+    class="fixed top-0 flex justify-center h-fit w-full z-100 p-3 duration-300 transition-all"
+    :class="showDeletionError ? 'translate-y-[30px]' : '-translate-y-[100px]'"
+  >
+    <div 
+      class="w-fit h-fit p-3 rounded-xl flex items-center border justify-center text-sm font-poppins"
+      :class="isError ? 'bg-red-300 border-red-500 text-red-700' : 'bg-[#ffffff]/75 border-secondary text-[#12998e]'"
+    >
+      {{ showDeletionErrorMessage }} 
+    </div>
   </div>
+  
 
   <div class="w-screen h-screen bg-white">
     <div class="p-3 w-full h-full">
@@ -181,7 +194,7 @@
               >
                 <button
                   class="inline-flex items-center px-3 py-1.5 text-[11px] font-medium text-primary bg-secondary rounded-md ring-1 ring-primary/10 cursor-pointer transition-colors hover:bg-[#7dd87b] hover:ring-primary/20"
-                  @click="$emit('upgrade')"
+                  @click.prevent="promptConfigProfile"
                 >
                   Përditëso planin
                 </button>
@@ -191,7 +204,7 @@
           </div>
         </div>
       </div>
-      <section class="w-full p-3 z-10 relative">
+      <section v-if="!isAdmin()" class="w-full p-3 z-10 relative">
         <div class="flex items-center justify-between">
           <div class="w-fit h-fit flex gap-3 items-center">
             <h2 class="text-primary text-kollektif-bold text-lg">Transkriptet e fundit</h2>
@@ -425,25 +438,14 @@
                   <!-- Actions -->
                   <td class="px-3 md:px-4 py-2">
                     <div class="flex justify-end gap-2">
-                      <button
-                        class="px-2.5 py-1.5 text-xs md:text-sm bg-secondary text-primary rounded-md ring-1 ring-primary/10 hover:bg-[#7dd87b] transition-colors cursor-pointer"
-                        @click="goToDetails(t.id)"
-                      >
-                        Edito
-                      </button>
-                      <button
-                        class="px-2.5 py-1.5 text-xs md:text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors cursor-pointer"
-                        @click="promptDelete(t)"
-                      >
-                        Fshi
-                      </button>
+                      <edit @click.prevent="goToDetails(t.id)" class="w-5 h-5"/>
+                      <trash @click.prevent="promptDelete(t)" class="w-5 h-5"/>
                     </div>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-
           <!-- Empty state for all transcriptions -->
           <div
             v-else
@@ -451,6 +453,128 @@
           >
             <p class="text-sm md:text-base font-medium">Nuk u gjëndën transkripte</p>
             <p class="text-xs md:text-sm mt-1">Provoni të ndryshoni filtrat ose të <RouterLink to="/upload" class="text-secondary font-bold">krijoni</RouterLink> një transkript të ri.</p>
+          </div>
+        </div>
+      </section>
+      <!-- Admin Panel Section -->
+      <section v-if="isAdmin()" class="w-full p-3 z-10 relative mt-6">
+        <div class="bg-white rounded-xl ring-1 ring-primary/10 p-6">
+          <h2 class="text-primary text-kollektif-bold text-lg mb-6">Admin Panel</h2>
+          
+          <!-- Tabs -->
+          <div class="flex gap-2 mb-6 border-b border-primary/10 justify-between">
+            <div class="flex gap-2">
+              <button
+              @click="adminTab = 'users'"
+              :class="adminTab === 'users' ? 'border-b-2 border-secondary text-secondary' : 'text-primary/60'"
+              class="pb-2 px-4 font-poppins text-sm transition-colors"
+            >
+              Users ({{ allUsers.length }})
+            </button>
+            <button
+              @click="adminTab = 'roles'"
+              :class="adminTab === 'roles' ? 'border-b-2 border-secondary text-secondary' : 'text-primary/60'"
+              class="pb-2 px-4 font-poppins text-sm transition-colors"
+            >
+              Roles ({{ roles.length }})
+            </button>
+            </div>
+            <div class="flex gap-2 mb-2">
+              <a
+              @click.prevent="promptRoleModal"
+              :class="adminTab === 'roles' ? 'bg-primary text-secondary rounded-md px-4 py-2 hover:text-primary hover:bg-secondary cursor-pointer' : 'hidden'"
+              class="font-poppins text-sm transition-colors"
+              >
+                Krijo Rol
+              </a>
+            </div>
+          </div>
+
+          <!-- Users Table -->
+          <div v-if="adminTab === 'users'" class="overflow-x-auto">
+            <div v-if="allUsersLoading" class="flex justify-center py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary"></div>
+            </div>
+            
+            <table v-else-if="allUsers.length > 0" class="min-w-full divide-y divide-primary/10">
+              <thead class="bg-secondary/10">
+                <tr>
+                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Username</th>
+                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Name</th>
+                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Email</th>
+                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Role</th>
+                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Created</th>
+                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Veprime</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-primary/10">
+                <tr v-for="user in allUsers" :key="user.id" class="hover:bg-secondary/5">
+                  <td class="px-4 py-3 text-sm text-primary/80">{{ user.username }}</td>
+                  <td class="px-4 py-3 text-sm text-primary">{{ user.name }} {{ user.surname }}</td>
+                  <td class="px-4 py-3 text-sm text-primary/80">{{ user.email }}</td>
+                  <td class="px-4 py-3 text-sm">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                      :class="{
+                        'bg-purple-100 text-purple-800': user.role_name === 'admin',
+                        'bg-blue-100 text-blue-800': user.role_name === 'pro',
+                        'bg-green-100 text-green-800': user.role_name === 'business',
+                        'bg-yellow-100 text-yellow-800': user.role_name === 'starter',
+                        'bg-gray-100 text-gray-800': user.role_name === 'free'
+                      }"
+                    >
+                      {{ user.role_name || 'N/A' }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-sm text-primary/80">{{ formatDateShort(user.created_at) }}</td>
+                  <td class="px-4 py-3 flex items-center justify-center gap-3"> 
+                    <edit @click.prevent="assignRole(user)" class="w-5 h-5"/>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div v-else class="text-center py-8 text-primary/60">
+              <p class="text-sm">No users found</p>
+            </div>
+          </div>
+
+          <!-- Roles Table -->
+          <div v-if="adminTab === 'roles'" class="overflow-x-auto">
+            <div v-if="rolesLoading" class="flex justify-center py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary"></div>
+            </div>
+            
+            <table v-else-if="roles.length > 0" class="min-w-full divide-y divide-primary/10">
+              <thead class="bg-secondary/10">
+                <tr>
+                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Roli</th>
+                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Çmimi</th>
+                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Video/muaj</th>
+                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Minuta/muaj</th>
+                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Kohëzgjatja max.</th>
+                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Përmasa(MB)</th>
+                  <th scope="col" class="px-4 py-2 text-center text-xs font-semibold text-primary/80">Veprime</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-primary/10">
+                <tr v-for="role in roles" :key="role.id" class="hover:bg-secondary/5">
+                  <td class="px-4 py-3 text-sm font-medium text-primary text-left">{{ role.name }}</td>
+                  <td class="px-4 py-3 text-sm text-primary/80 text-left">€ {{ role.price }}<span class="text-[9px] text-primary/30"> .00</span></td>
+                  <td class="px-4 py-3 text-sm text-primary/80 text-center">{{ role.videos_per_month }}</td>
+                  <td class="px-4 py-3 text-sm text-primary/80 text-center">{{ role.total_minutes_per_month }}<span class="text-[9px] text-primary/30 subscript"> /min</span></td>
+                  <td class="px-4 py-3 text-sm text-primary/80 text-center">{{ role.max_video_duration }}<span class="text-[9px] text-primary/30 subscript"> /min</span></td>
+                  <td class="px-4 py-3 text-sm text-primary/80 text-center">{{ role.max_file_size_mb }}<span class="text-[9px] text-primary/30 subscript"> /mb</span></td>
+                  <td class="px-4 py-3 flex items-center justify-center gap-3"> 
+                    <edit @click.prevent="editRole(role)" class="w-5 h-5"/>
+                    <trash @click.prevent="deleteRole(role)" class="w-5 h-5"/>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div v-else class="text-center py-8 text-primary/60">
+              <p class="text-sm">No roles found</p>
+            </div>
           </div>
         </div>
       </section>
@@ -561,7 +685,7 @@
       <RouterLink to="/contact" class="dropdown-item">
         <span>Kontakt</span>
       </RouterLink>
-      <a href="#" class="dropdown-item">
+      <a href="" class="dropdown-item" @click.prevent="promptReportBugModal">
         <span>Raporto një problem</span>
       </a>
     </div>
@@ -574,10 +698,10 @@
       @mouseenter="handleProfileMouseEnter"
       @mouseleave="handleProfileMouseLeave"
     >
-    <a href="#" class="dropdown-item" @click.prevent="promptEditProfile">
+    <a href="" class="dropdown-item" @click.prevent="promptEditProfile">
       <span>Profili im</span>
     </a>
-      <a href="#" class="dropdown-item">
+      <a href="#" class="dropdown-item" @click.prevent="promptConfigProfile">
         <span>Konfigurime</span>
       </a>
       <div class="dropdown-divider"></div>
@@ -594,26 +718,48 @@
         </button>
       </div>
     </div>
+
   </Teleport>
 
   <!-- Modals -->
   
   <ConfirmModal
-    v-if="showDeleteModal"
-    :title="'Fshirje Transkripti'"
-    :message="`Jeni të sigurt që doni të fshini '${transactionToDelete?.original_filename}'? Ky veprim nuk mund të zhbëhet.`"
-    icon="warning"
-    confirm-text="Fshi"
-    confirm-variant="danger"
-    cancel-text="Anulo"
-    :show-footer="true"
-    @confirm="confirmDelete"
-    @cancel="cancelDelete"
-    @close="cancelDelete"
->
+      v-if="showDeactivateModal"
+      :title="'Deactivate Account'"
+      :message="'Are you sure you want to permanently delete your account? This action cannot be undone.'"
+      icon="warning"
+      confirm-text="Deactivate"
+      confirm-variant="danger"
+      cancel-text="Cancel"
+      :show-footer="true"
+      @confirm="confirmDeactivate"
+      @cancel="cancelDeactivate"
+      @close="cancelDeactivate"
+    >
     <template #body>
-    <p v-if="deleteError" class="text-red-600 mb-2">{{ deleteError }}</p>
-    <p v-if="deleteLoading" class="text-gray-500">Deleting...</p>
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Je tu bo gabim</h3>
+            <div class="mt-2 text-sm text-red-700">
+              <p>Do humbesh:</p>
+              <ul class="list-disc list-inside mt-1">
+                <li>Te <span class="text-3xl">gjithe</span> dhenat e tua</li>
+                <li>Gjithe transkriptimet</li>
+                <li>1 sufllaqe mish patate</li>
+                <li>1 dhalle</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p v-if="deactivateError" class="text-red-600 mb-2">{{ deactivateError }}</p>
+      <p v-if="deactivateLoading" class="text-gray-500">Deleting account...</p>
     </template>
   </ConfirmModal>
 
@@ -623,6 +769,40 @@
     successAlertMessage = 'Profili u përditsua me sukses!';
     setTimeout(()=>{ showSuccessAlert.value=false; successAlertMessage='' }, 2500)"   
   />
+  <ReportBugModal 
+    v-model:open="showReportBugModal"
+  />
+  <ConfigsModal
+    v-model:open="showConfigsModal"
+  />
+
+  <!-- Admin Modals -->
+  <RoleModal
+    v-model:open="showRoleModal"
+    :role="selectedRole"
+    @saved="handleSaved"
+  />
+
+  <UserEditModal
+    v-model:open="showUserEditModal"  
+    :user="selectedUser"
+    @saved="handleUserUpdated"
+  />
+
+  <!-- Role Deletion Modal-->
+  <DeleteModal 
+    v-if="DeletemodalVisible" 
+    title="Kujdes"
+    :message="DeletemodalMessage"
+    icon="warning"
+    confirm-text="Fshi"
+    cancel-text="Anulo"
+    confirm-variant="danger"
+    size="md"
+    @confirm="handleRoleDelete"
+    @cancel="DeletemodalVisible = false"
+    @close="DeletemodalVisible = false"
+  />
   
 </template>
 
@@ -630,9 +810,17 @@
 import albcaptions_logo_nobg_inv from './logos/Albcaption_logo_nobg.vue'
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { supabase } from '../lib/supabaseClient';
-import ConfirmModal from './items/ModalDialog.vue';
+import { supabase } from '@/lib/supabaseClient';
+import ConfigsModal from './items/ConfigsModal.vue';
+import ConfirmModal  from './items/ModalDialog.vue';
+import DeleteModal  from './items/ModalDialog.vue';
 import ProfileModal from './items/ProfileModal.vue';
+import edit from './svg/edit.vue';
+import trash from './svg/trash.vue';
+import RoleModal from './items/RoleModal.vue';
+import UserEditModal from './items/UserEditModal.vue';
+import ReportBugModal from './items/ReportBugModal.vue';
+import apiClient from '@/stores/apiClient';
 
 const baseName = (name) => (name ? name.replace(/\.[^/.]+$/, '') : 'Video')
 const formatDateShort = (d) => {
@@ -671,6 +859,7 @@ const userTrans = ref([]);
 const allUsers = ref([]); 
 const showSuccessAlert = ref(false);
 const successAlertMessage = ref('');
+const adminTab = ref('users')
 
 // Search and Filter State
 const searchFilename = ref('');
@@ -711,30 +900,12 @@ const hasActiveSubscription = ref(false);
 //Roles states
 const roles = ref([]);
 const rolesLoading = ref(false);
-const showRoleModal = ref(false);
-const roleModalLoading = ref(false);
-const roleModalError = ref(null);
-const editingRole = ref(null);
-
-// Modal state for Role creation
-const showCreateRoleModal = ref(false);
-const createRoleLoading = ref(false);
-const createRoleError = ref(null);
-const newRole = ref({
-  name: '',
-  price: 0,
-  videos_per_month: 0,
-  total_aminutes_per_month: 0,
-  max_video_duration: 0,
-  max_file_size_mb: 0,
-  srt_exports_per_month: 0,
-  is_admin: false
-});
-// Modal state for role deletion
-const showDeleteRoleModal = ref(false);
-const roleToDelete = ref(null);
-const deleteRoleLoading = ref(false);
-const deleteRoleError = ref(null);
+const DeletemodalVisible = ref(false);
+const DeletemodalMessage=ref('');
+const selectedRole = ref(null);
+const showDeletionError = ref(false);
+const isError = ref(false);
+const showDeletionErrorMessage = ref('');
 
 //User update states
 const showEditProfileModal = ref(false);
@@ -743,9 +914,33 @@ const editProfileForm = ref({
   name: '',
   surname: ''
 });
+const selectedUser = ref(null);
+const showUserEditModal = ref(false)
 const editProfileLoading = ref(false);
 const editProfileError = ref(null);
 const editProfileSuccess = ref(null);
+
+const assignRole = (user) => {
+  selectedUser.value = user
+  showUserEditModal.value = true
+}
+
+const handleUserUpdated = async () => {
+  showUserEditModal.value = false
+  selectedUser.value = null
+  await getAllUsers() 
+  showSuccessAlert.value = true
+  successAlertMessage.value = 'Roli i përdoruesit u përditësua me sukses!'
+  setTimeout(() => {
+    showSuccessAlert.value = false
+    successAlertMessage.value = ''
+  }, 3000)
+}
+
+//Modal states
+const showReportBugModal = ref(false);
+const showConfigsModal = ref(false);
+const showRoleModal = ref(false);
 
 // Password change form state
 const showPasswordFields = ref(false);
@@ -941,84 +1136,86 @@ const promptEditProfile = () => {
   
 };
 
-const closeEditProfileModal = () => {
-  showEditProfileModal.value = false;
+const promptReportBugModal = () => {
+  showReportBugModal.value = true;
 };
 
-// Save profile changes
-const saveProfile = async () => {
-  editProfileLoading.value = true;
-  editProfileError.value = null;
-  editProfileSuccess.value = null;
-  try {
-    const { error } = await supabase
-      .from('users')
-      .update({
-        username: editProfileForm.value.username,
-        name: editProfileForm.value.name,
-        surname: editProfileForm.value.surname
-      })
-      .eq('id', userData.value.id);
-    if (error) throw error;
-    editProfileSuccess.value = 'Profile updated!';
-    userData.value.username = editProfileForm.value.username;
-    userData.value.name = editProfileForm.value.name;
-    userData.value.surname = editProfileForm.value.surname;
+const promptConfigProfile = () => {
+  showConfigsModal.value = true;
+};
+
+const promptRoleModal = () => {
+  selectedRole.value = null
+  showRoleModal.value = true;
+};
+
+async function editRole(role) {
+  selectedRole.value = role;
+  showRoleModal.value = true;
+}
+
+async function deleteRole(role) {
+  selectedRole.value = role.id;
+  DeletemodalVisible.value = true;
+  DeletemodalMessage.value = `Jeni të sigurt që doni të fshini rolin '${role.name}'? Ky veprim nuk mund të zhbëhet.`;
+}
+
+async function handleSaved() {
+  selectedRole.value = null
+  showRoleModal.value = false
+  await getAllRoles()
+}
+
+async function handleRoleDelete() {
+  const roleId = selectedRole.value;
+  console.log('Checking users with role ID:', roleId);
+  
+  const { data: roleModalData, error: roleModalError, count } = await supabase
+    .from('users')
+    .select("*", { count: "exact", head: true })
+    .eq('role', roleId);
+    
+  if (roleModalError) {
+    console.error('Error checking users with role:', roleModalError);
+    DeletemodalMessage.value = 'Gabim gjatë verifikimit të përdoruesve me këtë rol.';
+    return;
+  }
+  if (count > 0) {
+    showDeletionError.value = true;
+    isError.value = true;
+    showDeletionErrorMessage.value = 'Nuk mund të fshihet roli, përdorues janë të lidhur me të.';
+    console.log('Cannot delete role, users are associated with it.');
     setTimeout(() => {
-      showEditProfileModal.value = false;
-      editProfileSuccess.value = null;
-    }, 1200);
-  } catch (err) {
-    editProfileError.value = err.message || 'Failed to update profile.';
-  } finally {
-    editProfileLoading.value = false;
-  }
-};
-
-// Password change logic
-const changePassword = async () => {
-  passwordLoading.value = true;
-  passwordError.value = null;
-  passwordSuccess.value = null;
-  if (!passwordForm.value.current || !passwordForm.value.new || !passwordForm.value.confirm) {
-    passwordError.value = 'All password fields are required.';
-    passwordLoading.value = false;
+      showDeletionError.value = false;
+      isError.value = false;
+      showDeletionErrorMessage.value = '';
+    }, 3000);
     return;
   }
-  if (passwordForm.value.new !== passwordForm.value.confirm) {
-    passwordError.value = 'New password and confirmation do not match.';
-    passwordLoading.value = false;
+  const { error: deleteError } = await supabase
+    .from('roles')
+    .delete()
+    .eq('id', roleId);
+    
+  if (deleteError) {
+    console.error('Error deleting role:', deleteError);
+    DeletemodalMessage.value = 'Gabim gjatë fshirjes së rolit.';
     return;
   }
-  try {
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: userData.value.email,
-      password: passwordForm.value.current
-    });
-    if (signInError) {
-      passwordError.value = 'Current password is incorrect.';
-      passwordLoading.value = false;
-      return;
-    }
-    const { error: pwdError } = await supabase.auth.updateUser({
-      password: passwordForm.value.new
-    });
-    if (pwdError) {
-      passwordError.value = pwdError.message || 'Failed to update password.';
-    } else {
-      passwordSuccess.value = 'Password updated!';
-      passwordForm.value = { current: '', new: '', confirm: '' };
-      setTimeout(() => {
-        showPasswordFields.value = false;
-        passwordSuccess.value = null;
-      }, 1200);
-    }
-  } catch (err) {
-    passwordError.value = err.message || 'Failed to update password.';
-  } finally {
-    passwordLoading.value = false;
-  }
-};
+  
+  console.log('Role deleted successfully');
+  DeletemodalVisible.value = false;
+  selectedRole.value = null;
+  showDeletionError.value = true;
+  isError.value = false;
+  showDeletionErrorMessage.value = 'Roli u fshi me sukses.';
+  setTimeout(() => {
+      showDeletionError.value = false;
+      isError.value = false;
+      showDeletionErrorMessage.value = '';
+    }, 3000);
+  await getAllRoles();
+}
 
 const goToDetails = (id) => {
   router.push(`/transaction/${id}`);
@@ -1040,26 +1237,6 @@ const formatFileSize = (bytes) => {
   return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
 };
 
-// Clear all filters
-const clearFilters = () => {
-  searchFilename.value = '';
-  dateFrom.value = '';
-  dateTo.value = '';
-  durationMin.value = '';
-  durationMax.value = '';
-  sortBy.value = 'created_at';
-  sortOrder.value = 'desc';
-};
-
-// Set date presets
-const setDatePreset = (days) => {
-  const today = new Date();
-  const pastDate = new Date();
-  pastDate.setDate(today.getDate() - days);
-  
-  dateFrom.value = pastDate.toISOString().split('T')[0];
-  dateTo.value = today.toISOString().split('T')[0];
-};
 
 // Function to load user data with debugging
 const loadUserData = async () => {
@@ -1067,101 +1244,54 @@ const loadUserData = async () => {
   authError.value = null;
 
   try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-    if (sessionError) {
-      authError.value = "Error retrieving session";
-      return;
-    }
-
-    if (!session) {
-      authError.value = "No active session found";
-      return;
-    }
-
-    const user = session.user;
-
-    const { data: dbUser, error: dbError } = await supabase
-      .from('users')
-      .select(`
-        *,
-        roles!users_role_fkey (
-          id,
-          name,
-          price,
-          videos_per_month,
-          total_minutes_per_month,
-          max_video_duration,
-          max_file_size_mb,
-          srt_exports_per_month,
-          is_admin
-        )
-      `)
-      .eq('id', user.id)
-      .single();
-
-    if (dbError || !dbUser) {
-      authError.value = "User profile not found in the database.";
-      userData.value = null;
-      return;
-    }
-
-    if (!dbUser.name || !dbUser.surname || !dbUser.username || !dbUser.role) {
-      authError.value = "Incomplete user profile data. Please contact support.";
-      userData.value = null;
-      return;
-    }
-
+    console.log('[DASHBOARD] Fetching user profile...');
+    const response = await apiClient.get('/auth/user-profile')
+    
     userData.value = {
-      ...dbUser,
-      email: user.email,
-      roleName: dbUser.roles?.name || 'Unknown Role'
+      ...response.data,
+      name: response.data.name,
+      surname: response.data.surname,
+      email: response.data.email,
+      username: response.data.username,
+      roleName: response.data.roleName
     };
-
-    console.log("User data loaded successfully:", userData.value);
+    
+    console.log('[DASHBOARD] ✓ User profile loaded:', userData.value);
 
   } catch (error) {
-    authError.value = error.message;
+    console.error('[DASHBOARD] Error loading profile:', error);
+    authError.value = error.message || 'Failed to load user profile';
     userData.value = null;
   } finally {
     loading.value = false;
   }
 };
 
+
 // Function to load user role details
 const getUserRoleDetails = async () => {
   userRoleDetailsLoading.value = true;
   userRoleDetailsError.value = null;
+  
   try {
     if (!userData.value?.id) return;
-    const { data, error } = await supabase
-      .from('user_role_details')
-      .select('*')
-      .eq('id', userData.value.id)
-      .single();
-    if (error) throw error;
-    userRoleDetails.value = data;
+    
+    console.log('[DASHBOARD] Fetching role details...');
+    const response = await apiClient.get('/auth/user-role-details')
+    
+    userRoleDetails.value = response.data;
+    
+    console.log('[DASHBOARD] ✓ Role details loaded:', userRoleDetails.value);
+
   } catch (error) {
-    userRoleDetailsError.value = error.message || 'Failed to fetch user role details.';
+    console.error('[DASHBOARD] Error loading role details:', error);
+    userRoleDetailsError.value = error.message || 'Failed to fetch role details';
     userRoleDetails.value = null;
   } finally {
     userRoleDetailsLoading.value = false;
   }
 };
 
-//Function to load all roles (admin only)
-const getAllRoles = async () => {
-  rolesLoading.value = true;
-  try {
-    const { data, error } = await supabase.from('roles').select('*').order('created_at', { ascending: false });
-    if (error) throw error;
-    roles.value = data || [];
-  } catch (error) {
-    roles.value = [];
-  } finally {
-    rolesLoading.value = false;
-  }
-};
 
 //Function to load users 5 most recent transcripts
 const getRecentTranscripts = async () => {
@@ -1185,233 +1315,68 @@ const getRecentTranscripts = async () => {
   }
 }
 
-// Open modal for editing a role
-const openRoleModal = (role) => {
-  editingRole.value = { ...role };
-  showRoleModal.value = true;
-  roleModalError.value = null;
-};
-
-const closeRoleModal = () => {
-  editingRole.value = null;
-  showRoleModal.value = false;
-  roleModalError.value = null;
-};
-
-// Save changes to a role
-const saveRole = async () => {
-  if (!editingRole.value) return;
-  roleModalLoading.value = true;
-  roleModalError.value = null;
-  try {
-    const updateData = { ...editingRole.value };
-    delete updateData.id;
-    delete updateData.created_at;
-    updateData.updated_at = new Date().toISOString();
-
-    const { error } = await supabase.from('roles')
-      .update(updateData)
-      .eq('id', editingRole.value.id);
-    if (error) throw error;
-
-    await getAllRoles();
-    closeRoleModal();
-    showSuccessAlert.value = true;
-    successAlertMessage.value = `Role '${editingRole.value.name}' updated successfully.`;
-    setTimeout(() => {
-      showSuccessAlert.value = false;
-      successAlertMessage.value = '';
-    }, 2500);
-  } catch (err) {
-    roleModalError.value = err.message || 'Failed to update role.';
-  } finally {
-    roleModalLoading.value = false;
-  }
-};
-
-// NEW: Functions for creating a new role
-const openCreateRoleModal = () => {
-  newRole.value = {
-    name: '',
-    price: 0,
-    videos_per_month: 0,
-    total_minutes_per_month: 0,
-    max_video_duration: 0,
-    max_file_size_mb: 0,
-    srt_exports_per_month: 0,
-    is_admin: false
-  };
-  showCreateRoleModal.value = true;
-  createRoleError.value = null;
-};
-
-const closeCreateRoleModal = () => {
-  showCreateRoleModal.value = false;
-  createRoleError.value = null;
-};
-
-const createRole = async () => {
-  createRoleLoading.value = true;
-  createRoleError.value = null;
-  
-  try {
-    if (!newRole.value.name.trim()) {
-      createRoleError.value = 'Role name is required.';
-      createRoleLoading.value = false;
-      return;
-    }
-
-    const insertData = {
-      ...newRole.value,
-      name: newRole.value.name.trim(),
-      updated_at: new Date().toISOString()
-    };
-
-    const { error } = await supabase
-      .from('roles')
-      .insert([insertData]);
-    
-    if (error) {
-      if (error.code === '23505') {
-        createRoleError.value = 'A role with this name already exists.';
-      } else {
-        throw error;
-      }
-      return;
-    }
-
-    await getAllRoles();
-    closeCreateRoleModal();
-    showSuccessAlert.value = true;
-    successAlertMessage.value = `Role '${newRole.value.name}' created successfully.`;
-    setTimeout(() => {
-      showSuccessAlert.value = false;
-      successAlertMessage.value = '';
-    }, 2500);
-  } catch (err) {
-    createRoleError.value = err.message || 'Failed to create role.';
-  } finally {
-    createRoleLoading.value = false;
-  }
-};
-
-// Role deletion logic
-const promptDeleteRole = (role) => {
-  roleToDelete.value = role;
-  showDeleteRoleModal.value = true;
-  deleteRoleError.value = null;
-};
-
-const confirmDeleteRole = async () => {
-  if (!roleToDelete.value) return;
-  deleteRoleLoading.value = true;
-  deleteRoleError.value = null;
-  
-  try {
-    const { data: usersWithRole, error: checkError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('role', roleToDelete.value.id)
-      .limit(1);
-    
-    if (checkError) {
-      deleteRoleError.value = 'Error checking role usage.';
-      return;
-    }
-    
-    if (usersWithRole && usersWithRole.length > 0) {
-      deleteRoleError.value = 'Cannot delete role: it is currently assigned to users.';
-      return;
-    }
-
-    const { error } = await supabase
-      .from('roles')
-      .delete()
-      .eq('id', roleToDelete.value.id);
-    
-    if (error) {
-      deleteRoleError.value = error.message || 'Failed to delete role.';
-    } else {
-      roles.value = roles.value.filter(r => r.id !== roleToDelete.value.id);
-      showDeleteRoleModal.value = false;
-      roleToDelete.value = null;
-      showSuccessAlert.value = true;
-      successAlertMessage.value = `Role '${roleToDelete.value.name}' deleted successfully.`;
-      setTimeout(() => {
-        showSuccessAlert.value = false;
-        successAlertMessage.value = '';
-      }, 3000);
-    }
-  } catch (err) {
-    deleteRoleError.value = err.message || 'Failed to delete role.';
-  } finally {
-    deleteRoleLoading.value = false;
-  }
-};
-
-const cancelDeleteRole = () => {
-  showDeleteRoleModal.value = false;
-  roleToDelete.value = null;
-  deleteRoleError.value = null;
-};
-
 // Function to get user transcripts
 async function getTranscripts() {
   transcriptsLoading.value = true;
+  
   try {
-    if (!userData.value?.id) {
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from('transactions')
-      .select(`
-        *,
-        videos (id, video_url)
-      `)
-      .eq('user_id', userData.value.id)
-      .order('created_at', { ascending: false });
-    if (error) {
-      return;
-    }
+    console.log('[DASHBOARD] Fetching transcripts...');
+    const response = await apiClient.get('/auth/user-transcripts')
     
-    userTrans.value = data.map(transaction => ({
+    userTrans.value = response.data.map(transaction => ({
       ...transaction,
       video_url: transaction.videos?.video_url || null,
     }));
+    
+    console.log('[DASHBOARD] ✓ Transcripts loaded:', userTrans.value.length);
+
   } catch (error) {
+    console.error('[DASHBOARD] Error loading transcripts:', error);
+    // Continue anyway - don't block the dashboard
   } finally {
     transcriptsLoading.value = false;
   }
 }
 
+
 // Updated function to get all users from your custom users table (excluding current user)
+const getAllRoles = async () => {
+  rolesLoading.value = true;
+  
+  try {
+    console.log('[DASHBOARD] Fetching all roles (admin)...');
+    const response = await apiClient.get('/auth/admin/roles')
+    
+    roles.value = response.data || [];
+    
+    console.log('[DASHBOARD] ✓ Roles loaded:', roles.value.length);
+
+  } catch (error) {
+    console.error('[DASHBOARD] Error loading roles:', error);
+    roles.value = [];
+  } finally {
+    rolesLoading.value = false;
+  }
+};
+
 async function getAllUsers() {
   if (userData.value?.role !== 'd61d7768-a279-420b-a0ce-b65483794329') {
-    return;
+    return; // Not admin
   }
   
   allUsersLoading.value = true;
+  
   try {
-    const { data, error } = await supabase
-      .from('users')
-      .select(`*,
-        roles (
-          name
-          )
-        `) 
-      .neq('id', userData.value.id)
-      .order('created_at', { ascending: false });
+    console.log('[DASHBOARD] Fetching all users (admin)...');
+    const response = await apiClient.get('/auth/admin/users')
     
-    if (error) {
-      console.error('Error fetching users:', error);
-      return;
-    }
-
-    allUsers.value = data || [];
+    allUsers.value = response.data || [];
+    
+    console.log('[DASHBOARD] ✓ Users loaded:', allUsers.value.length);
     
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error('[DASHBOARD] Error loading users:', error);
+    allUsers.value = [];
   } finally {
     allUsersLoading.value = false;
   }
@@ -1516,75 +1481,6 @@ const promptDelete = (transaction) => {
   deleteError.value = null;
 };
 
-const confirmDelete = async () => {
-  if (!transactionToDelete.value) return;
-  
-  const transactionId = transactionToDelete.value.id;
-  const videoUrl = transactionToDelete.value.video_url;
-  
-  deleteLoading.value = true;
-  deleteError.value = null;
-  
-  try {
-    if (videoUrl) {
-      const url = new URL(videoUrl);
-      const pathParts = url.pathname.split('/');
-      const videosIndex = pathParts.findIndex(part => part === 'videos');
-      
-      if (videosIndex > -1 && videosIndex < pathParts.length - 1) {
-        const filePath = pathParts.slice(videosIndex + 1).join('/');
-        const videoFileName = filePath.split('/').pop(); 
-        const baseFileNameOnly = videoFileName.replace(/\.[^/.]+$/, '');
-
-        const filesToDelete = [
-          filePath,
-          `user-uploads/extractions/${baseFileNameOnly}-transcript.json`,
-          `user-uploads/extractions/${baseFileNameOnly}.wav`
-        ];
-
-        const { error: storageError } = await supabase.storage
-            .from('videos')
-            .remove(filesToDelete);
-
-        if (storageError) {
-            deleteError.value = `Failed to delete video file: ${storageError.message}`;
-            return;
-        }
-      }
-    }
-
-    const { error } = await supabase
-      .from('transactions')
-      .delete()
-      .eq('id', transactionId);
-      
-    if (error) {
-      deleteError.value = error.message || 'Fshirja e transkriptit dështoi.';
-    } else {
-      userTrans.value = userTrans.value.filter(t => t.id !== transactionId);
-      showDeleteModal.value = false;
-      transactionToDelete.value = null;
-      showSuccessAlert.value = true;
-      successAlertMessage.value = 'Transkripti u fshi me sukses.';
-      setTimeout(() => {
-        showSuccessAlert.value = false;
-      }, 2500);
-      setTimeout(() => {
-        successAlertMessage.value = ''; 
-      }, 4000);
-    }
-  } catch (err) {
-    deleteError.value = err.message || 'Failed to delete transaction.';
-  } finally {
-    deleteLoading.value = false;
-  }
-};
-
-const cancelDelete = () => {
-  showDeleteModal.value = false;
-  transactionToDelete.value = null;
-  deleteError.value = null;
-};
 
 const checkActiveSubscription = async () => {
   if (!userData.value?.id) return;
@@ -1602,56 +1498,6 @@ const checkActiveSubscription = async () => {
   }
 };
 
-const promptCancelSubscription = () => {
-  showCancelSubscriptionModal.value = true;
-  cancelSubscriptionError.value = null;
-};
-
-const confirmCancelSubscription = async () => {
-  cancelSubscriptionLoading.value = true;
-  cancelSubscriptionError.value = null;
-  
-  try {
-    const response = await fetch('https://96b5-31-22-56-9.ngrok-free.app/api/paypal/cancel', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userID: userData.value.id
-      })
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      cancelSubscriptionError.value = result.error || 'Failed to cancel subscription';
-      return;
-    }
-
-    hasActiveSubscription.value = false;
-    showCancelSubscriptionModal.value = false;
-    
-    await loadUserData();
-    
-    showSuccessAlert.value = true;
-    successAlertMessage.value = 'Subscription cancelled successfully. You have been downgraded to the free plan.';
-    setTimeout(() => {
-      showSuccessAlert.value = false;
-      successAlertMessage.value = '';
-    }, 5000);
-
-  } catch (err) {
-    cancelSubscriptionError.value = err.message || 'Failed to cancel subscription';
-  } finally {
-    cancelSubscriptionLoading.value = false;
-  }
-};
-
-const cancelCancelSubscription = () => {
-  showCancelSubscriptionModal.value = false;
-  cancelSubscriptionError.value = null;
-};
 
 const handleSignOut = async () => {
   await supabase.auth.signOut();

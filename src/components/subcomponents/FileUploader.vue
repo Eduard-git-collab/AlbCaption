@@ -96,7 +96,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import apiClient from '../../stores/apiClient'
 
 const props = defineProps({
   apiUrl: { type: String, required: true }
@@ -187,7 +188,7 @@ function formatFileSize(bytes) {
 // Auth and role
 async function getCurrentUser() {
   try {
-    const { supabase } = await import('../../lib/supabaseClient')
+    const { supabase } = await import('@/lib/supabaseClient')
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
     if (sessionError || !session) return null
 
@@ -205,7 +206,7 @@ async function getCurrentUser() {
 async function fetchUserRole() {
   try {
     if (!userId.value) return
-    const { supabase } = await import('../../lib/supabaseClient')
+    const { supabase } = await import('@/lib/supabaseClient')
     const { data, error } = await supabase
       .from('users')
       .select(`
@@ -234,6 +235,11 @@ async function fetchUserRole() {
   }
 }
 
+// Fetch the user's role on load so max file size is correct before file selection
+onMounted(() => {
+  getCurrentUser()
+})
+
 // Upload flow
 async function checkAuthAndUpload() {
   if (!file.value) return
@@ -258,45 +264,19 @@ async function uploadFile() {
   try {
     const formData = new FormData()
     formData.append('video', file.value)
-    formData.append('userId', userId.value || 'no-user-id')
-    formData.append('userName', userName.value || 'Anonymous')
 
-    const xhr = new XMLHttpRequest()
-
-    xhr.upload.addEventListener('progress', (event) => {
-      if (event.lengthComputable) {
-        uploadProgress.value = Math.round((event.loaded / event.total) * 100)
-      }
-    })
-
-    const response = await new Promise((resolve, reject) => {
-      xhr.open('POST', `${props.apiUrl}/upload-video`, true)
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          resolve(JSON.parse(xhr.responseText))
-        } else {
-          let errorData = null
-          try {
-            errorData = JSON.parse(xhr.responseText)
-          } catch {
-            errorData = { message: xhr.statusText }
-          }
-          const err = new Error(errorData.message || `HTTP error ${xhr.status}`)
-          err.status = xhr.status
-          err.data = errorData
-          reject(err)
+    const response = await apiClient.post('/upload-video', formData, {
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.lengthComputable) {
+          uploadProgress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100)
         }
       }
-      xhr.onerror = () => reject(new Error('Network error occurred'))
-      xhr.send(formData)
     })
 
     emit('state-change', 'processing')
 
-    const processingId = response.processingId
-    const videoUrl = response.videoUrl
-
-    // Poll for processing status and steps
+    const processingId = response.data.processingId
+    const videoUrl = response.data.videoUrl
     await pollProcessingStatus(processingId)
 
     // Fetch full transcription JSON
@@ -310,10 +290,10 @@ async function uploadFile() {
     })
   } catch (error) {
     console.error('Upload error:', error)
-    if (error.status === 403 && error.data) {
+    if (error.response?.status === 403 && error.response?.data) {
       quotaError.value = {
-        errors: error.data.message ? error.data.message.split('; ') : ['Quota limit exceeded'],
-        quotaInfo: error.data.quotaInfo || null
+        errors: error.response.data.message ? error.response.data.message.split('; ') : ['Quota limit exceeded'],
+        quotaInfo: error.response.data.quotaInfo || null
       }
       errorMessage.value = 'Upload quota exceeded. Please check the details below.'
     } else {
@@ -352,8 +332,12 @@ function pollProcessingStatus(processingId) {
 }
 
 async function fetchTranscriptionJson(processingId) {
-  const res = await fetch(`${props.apiUrl}/transcriptions/${processingId}`)
-  if (!res.ok) throw new Error(`Failed to fetch transcription: ${res.statusText}`)
-  return res.json()
+  try {
+    const response = await apiClient.get(`/transcriptions/${processingId}`)
+    return response.data
+  } catch (error) {
+    console.error('Error fetching transcription:', error)
+    throw new Error(`Failed to fetch transcription: ${error.message}`)
+  }
 }
 </script>
