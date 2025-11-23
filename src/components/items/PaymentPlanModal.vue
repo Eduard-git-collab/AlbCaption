@@ -87,7 +87,7 @@
   import { ref, watch, onMounted, onUnmounted } from 'vue'
   import { useRouter } from 'vue-router'
   import toggle from '../subcomponents/Toggle.vue'
-  import PricingCard from './PricingCardModal.vue'
+  import PricingCard from './pricingcardmodal.vue'
   import PricingCardEnterprise from './PricingCardEnterpriseModal.vue'
   
   // props / emits
