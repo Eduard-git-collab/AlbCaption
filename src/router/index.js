@@ -5,10 +5,8 @@ import ConfirmationPage from '../components/ConfirmationPage.vue';
 import TransactionDetails from '../components/TransactionDetails.vue';
 import AccountActivation from '../components/views/AccountActivation.vue';
 import { supabase } from '@/lib/supabaseClient';
-import Paypal from '../components/Paypal.vue';
 import Pricing from '../components/Payment.vue';
 import NotFound from '../components/views/NotFound.vue';
-import Login from '../components/Login.vue';
 import Usage from '../components/Usage.vue'
 import Test from '../components/Test.vue';
 import ResetPassword from '../components/views/reset-password.vue'; 
@@ -56,11 +54,6 @@ const routes = [
       if (data.session) next('/dashboard');
       else next();
     }
-  },
-  {
-    path: '/login',
-    name: 'Login',
-    component: Login
   },
   {
     path: '/usage',
