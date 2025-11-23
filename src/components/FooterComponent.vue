@@ -92,7 +92,7 @@
 </template>
   
 <script setup>
-import albcaption_logo_inv_nobg from './logos/albcaption_logo_inv_nobg.vue';
+import albcaption_logo_inv_nobg from './logos/Albcaption_logo_inv_nobg.vue';
 import albcaption_logo_nobg from './logos/albcaption_logo_nobg.vue';
 import gmail_logo from './logos/gmail.vue';
 import facebook_logo from './logos/facebook.vue';
