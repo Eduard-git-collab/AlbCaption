@@ -101,13 +101,6 @@ const routes = [
     name: 'Pricing',
     component: Pricing
   },
-  { 
-    path: '/paypal/:planId', 
-    name: 'Paypal',
-    component: Paypal,
-    props: true,
-    meta: { requiresAuth: true }
-  },
   {
     path: '/auth/reset-password',
     name: 'ResetPassword',

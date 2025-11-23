@@ -165,11 +165,13 @@ watch(isLoading, (newVal) => {
 });
 
 // Watch route to enable/disable loading screen logic
+// UPDATED: Now calls startLoading() every time we hit '/'
 watch(
   () => route.path,
   (path) => {
     if (path === '/') {
       isHome.value = true;
+      startLoading();
     } else {
       isHome.value = false;
       isLoading.value = false; // Hide immediately if navigating away
@@ -223,21 +225,15 @@ const throttledHandleScroll = () => {
 
 // --- LIFECYCLE ---
 onMounted(async () => {
-  // 1. Trigger Loading ONLY if landing on Home
-  if (window.location.pathname === '/') {
-    isHome.value = true;
-    startLoading();
-  }
-
-  // 2. Auth Session
+  // 1. Auth Session
   const { data } = await supabase.auth.getSession();
   session.value = data.session;
   
-  // 3. Scroll Listeners
+  // 2. Scroll Listeners
   window.addEventListener('scroll', throttledHandleScroll, { passive: true });
   lastScrollY.value = window.scrollY;
   
-  // 4. Auth State
+  // 3. Auth State
   supabase.auth.onAuthStateChange((event, currentSession) => {
     session.value = currentSession;
     

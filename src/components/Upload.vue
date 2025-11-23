@@ -25,14 +25,14 @@
       <!-- Back Button -->
       <div v-if="$route.path === '/upload'"  class="sticky top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-sm border-b border-primary/10 py-3 px-4">
         <div class="container mx-auto flex items-center">
-          <div @click="$router.go(-1)"
+          <RouterLink to="/"
             class="inline-flex cursor-pointer items-center gap-2 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-all duration-200 group"
           >
             <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
             <span>Kthehu</span>
-          </div>
+          </RouterLink>
         </div>
       </div>
 
