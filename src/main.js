@@ -5,9 +5,6 @@ import router from './router'
 import { createPinia } from 'pinia'
 import { useAuthStore } from './stores/auth'
 
-// Import the example auth store (optional - for learning)
-import { useAuthExampleStore } from './examples/auth-learning/authExampleStore'
-
 const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
