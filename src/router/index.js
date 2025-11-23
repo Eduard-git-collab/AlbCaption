@@ -80,12 +80,6 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path:'/payment',
-    name: 'Payment',
-    component: Payment,
-    meta: {requiresAuth: true}
-  },
-  {
     path: '/pricing',
     name: 'Pricing',
     component: Pricing
@@ -130,7 +124,5 @@ router.beforeEach(async (to, from, next) => {
   }
 });
 
-// Setup example route guards
-setupExampleRouteGuard(router)
 
 export default router;
