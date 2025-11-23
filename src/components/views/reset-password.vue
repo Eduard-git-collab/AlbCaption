@@ -1,17 +1,17 @@
 <template>
-  <div class="w-screen h-screen bg-primary overflow-hidden">
-    <div class="w-full h-full relative">
+  <div class="w-full min-h-screen bg-primary overflow-y-auto overflow-x-hidden">
+    <div class="w-full h-full relative flex flex-col">
       <!-- Background SVG lines -->
-      <div class="absolute bottom-0 left-0 z-0 w-full h-full pointer-events-none">
+      <div class="fixed bottom-0 left-0 z-0 w-full h-full pointer-events-none">
         <div class="w-full h-full flex items-end lg:block">
-          <logo_lines class="h-1/2 w-full pointer-events-none" />
+          <logo_lines class="h-1/2 w-full pointer-events-none text-secondary/10" />
         </div>
       </div>
 
       <!-- Main content -->
-      <div class="relative z-10 w-full flex justify-center h-full items-center sm:items-center md:items-center lg:items-start xl:items-start">
-        <div class="p-4 sm:p-6 md:p-8 lg:p-10 my-8 sm:my-0 md:my-0 lg:my-16 xl:my-20 text-secondary flex items-center w-full sm:w-11/12 md:w-5/6 lg:w-3/4 xl:w-3/4 h-fit justify-center text-center lg:text-left">
-          <div class="max-w-3xl w-full">
+      <div class="relative z-10 w-full flex-grow flex justify-center items-center py-12 px-4">
+        <div class="w-full max-w-3xl text-secondary flex flex-col items-center lg:items-start text-center lg:text-left">
+          
             <!-- Loading -->
             <template v-if="!ready">
               <div class="text-kollektif-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight mt-2">
@@ -24,23 +24,23 @@
 
             <!-- Invalid/Expired -->
             <template v-else-if="isInvalid">
-              <div class="text-kollektif-bold text-6xl sm:text-7xl md:text-8xl leading-none">Link i pavlefshëm</div>
-              <h1 class="text-kollektif-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl leading-tight mt-2">
+              <div class="text-kollektif-bold text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-none text-red-400">Link i pavlefshëm</div>
+              <h1 class="text-kollektif-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight mt-4">
                 Linku i email-it ka skaduar ose është i pavlefshëm
               </h1>
-              <p class="font-poppins text-lg sm:text-xl md:text-2xl lg:text-2xl font-normal mt-3 sm:mt-4 md:mt-5 opacity-90">
+              <p class="font-poppins text-lg sm:text-xl font-normal mt-4 opacity-90 max-w-2xl">
                 {{ errorMessage || 'Përdorni "Harrove fjalëkalimin?" për të kërkuar një link të ri rikuperimi.' }}
               </p>
-              <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
+              <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start w-full">
                 <router-link
                   to="/signin"
-                  class="inline-flex items-center justify-center rounded-full bg-secondary text-primary px-5 sm:px-6 py-3 sm:py-3.5 font-poppins font-medium hover:bg-white transition-colors"
+                  class="w-full sm:w-auto inline-flex items-center justify-center rounded-full bg-secondary text-primary px-8 py-3.5 font-poppins font-medium hover:bg-white transition-colors"
                 >
                   Shko te hyrja
                 </router-link>
                 <a
                   href="mailto:hello@albcaptions.com"
-                  class="inline-flex items-center justify-center rounded-full border border-secondary text-secondary px-5 sm:px-6 py-3 sm:py-3.5 font-poppins font-medium hover:bg-secondary hover:text-primary transition-colors"
+                  class="w-full sm:w-auto inline-flex items-center justify-center rounded-full border border-secondary text-secondary px-8 py-3.5 font-poppins font-medium hover:bg-secondary hover:text-primary transition-colors"
                 >
                   Na kontakto
                 </a>
@@ -49,27 +49,27 @@
 
             <!-- Valid -->
             <template v-else>
-              <div class="text-kollektif-bold text-5xl sm:text-6xl md:text-7xl leading-none">Rivendos fjalëkalimin</div>
-              <h2 class="text-kollektif-bold text-2xl sm:text-3xl md:text-4xl leading-tight mt-2">
+              <div class="text-kollektif-bold text-4xl sm:text-6xl md:text-7xl leading-none">Rivendos fjalëkalimin</div>
+              <h2 class="text-kollektif-bold text-2xl sm:text-3xl leading-tight mt-4">
                 Vendosni fjalëkalimin e ri
               </h2>
-              <p class="font-poppins text-lg sm:text-xl md:text-2xl font-normal mt-4 opacity-90">
+              <p class="font-poppins text-lg sm:text-xl font-normal mt-2 opacity-90">
                 Ju lutemi zgjidhni një fjalëkalim të sigurt (min 8 karaktere).
               </p>
 
-              <form class="mt-6 sm:mt-8 max-w-xl" @submit.prevent="submit">
+              <form class="mt-8 w-full max-w-xl lg:mx-0 mx-auto" @submit.prevent="submit">
                 <div class="space-y-4">
                   <input
                     v-model.trim="newPassword"
                     type="password"
                     minlength="8"
                     required
-                    class="w-full rounded-full bg-white/10 border border-secondary/40 focus:border-secondary focus:ring-2 focus:ring-secondary/30 px-6 py-3 text-white placeholder:text-white/60 outline-none"
+                    class="w-full rounded-full bg-white/10 border border-secondary/40 focus:border-secondary focus:ring-2 focus:ring-secondary/30 px-6 py-4 text-white placeholder:text-white/60 outline-none transition-all"
                     placeholder="Fjalëkalim i ri"
                   />
                   <button
                     type="submit"
-                    class="inline-flex items-center justify-center rounded-full bg-secondary text-primary px-6 py-3 font-poppins font-medium hover:bg-white transition-colors disabled:opacity-60"
+                    class="w-full inline-flex items-center justify-center rounded-full bg-secondary text-primary px-8 py-3.5 font-poppins font-medium hover:bg-white transition-colors disabled:opacity-60 shadow-lg shadow-secondary/10"
                     :disabled="busy"
                   >
                     <span v-if="busy">Duke ruajtur…</span>
@@ -77,21 +77,20 @@
                   </button>
                 </div>
 
-                <p v-if="status" class="font-poppins text-base mt-4 opacity-90">
+                <p v-if="status" class="font-poppins text-base mt-4 opacity-90 text-center lg:text-left">
                   {{ status }}
                 </p>
 
-                <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <router-link
                     to="/signin"
-                    class="inline-flex items-center justify-center rounded-full border border-secondary text-secondary px-5 sm:px-6 py-3 sm:py-3.5 font-poppins font-medium hover:bg-secondary hover:text-primary transition-colors"
+                    class="w-full sm:w-auto inline-flex items-center justify-center rounded-full border border-secondary text-secondary px-8 py-3.5 font-poppins font-medium hover:bg-secondary hover:text-primary transition-colors"
                   >
                     Kthehu te hyrja
                   </router-link>
                 </div>
               </form>
             </template>
-          </div>
         </div>
       </div>
     </div>

@@ -355,7 +355,6 @@ const handleSignUp = async (e) => {
 
     throw new Error('Regjistrimi dështoi - përgjigje e papritur nga serveri');
   } catch (err) {
-    console.error("Sign up error:", err);
     if (err.response?.data?.error) {
       error.value = err.response.data.error;
     } else {
@@ -400,7 +399,6 @@ const handleSignIn = async (e) => {
 
     throw new Error('Hyrja dështoi - përgjigje e papritur nga serveri');
   } catch (err) {
-    console.error("Sign in error:", err);
     
     // Check for inactive account (403 status)
     if (err.response?.status === 403) {

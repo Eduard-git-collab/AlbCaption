@@ -1,201 +1,191 @@
 <template>
-  <div class="w-screen h-fit">
-    <!-- Hero -->
-    <div class="bg-primary w-screen h-screen">
-      <div class="w-full h-full p-6">
-        <div class="w-full h-full flex flex-row gap-4">
-          <div class="w-5/9 h-full flex flex-col justify-center gap-4">
-            <div class="w-full h-1/2 flex flex-col gap-2">
-              <h1 class="text-secondary text-5xl/14 text-kollektif-bold my-3">
-                Shkurto post-produksionin deri në 88%, Transkripto Automatikisht Gjuhën Shqipe
-              </h1>
-              <span class="text-white text-md font-poppins font-light w-2/3 leading-7">
-                Tërhiq vëmëndjen, rrit shikimet. Fuqizuar nga AI për skuadra dhe influencera. 
-              </span>
-              <div class="w-full flex flex-row">
-              <router-link 
-                to="/signup" 
-                class="w-64 h-12 bg-secondary hover:bg-transparent hover:border hover:border-secondary text-primary hover:text-white text-lg rounded-full flex items-center justify-center transition-colors"
-              >
-                Provo Falas
-              </router-link>
-            </div>
-            </div>
-            
-          </div>
-          <div class="w-4/9 h-full flex items-center">
-            <Hero_svg class="w-full h-auto"/>
-          </div>
+  <!-- Hero Section -->
+    <div class="relative w-full min-h-screen bg-primary overflow-visible flex flex-col items-center justify-start">
+      
+      <!-- Background Lines - No animation needed (static BG) -->
+      <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="w-full h-full flex items-end justify-center">
+          <logo_lines class="w-full h-2/3  md:translate-y-1/3 object-cover text-secondary/20" />
         </div>
       </div>
-    </div>
-    
-    <!-- Section 2 -->
-    <div class="w-screen h-fit">
-      <div class="w-full h-full px-6 py-12 my-10">
-          <div class="h-fit w-full flex flex-row items-center justify-between px-12 my-4">
-              <h1 class="text-8xl w-5/7 text-kollektif-bold text-primary">
-                  69% e postimeve
-              </h1>
-              <span class="w-2/7 text-sm font-poppins font-light">
-                  Gjasat janë që, nëse po publikon një video të pa titruar, audienca jote nuk ka për ta parë. 69% e shikuesëve ne ambjente publike ose zyra përdorin rrjete sociale me zërin e fikur. 25% e përdoruesve e bejnë këtë dhe në ambjente private. Titrat janë kthyer në një domosdoshmeri për bizneset dhe influencerat.
-              </span>
-          </div>
-          <div class="h-fit w-full flex flex-row items-center px-12 my-4">
-              <img src="../assets/images/pexels-amina-filkins-5427978.png" class="h-32 w-92 object-cover object-bottom rounded-full mr-8">
-              <h1 class="text-8xl w-5/7 text-kollektif-bold text-primary">
-                  në rrjete sociale
-              </h1>
-          </div>
-          <div class="h-fit w-full flex flex-row items-center px-12 my-6">
-              <h1 class="text-8xl w-full text-kollektif-bold text-primary relative">
-                  shikohen 
-                  <span class="relative inline-block">
-                      me zërin e fikur
-                      <Curved_line class="overflow-visible"/>
-                  </span>
-              </h1>
-          </div>
-      </div>
-      <div class="my-42 w-full h-fit px-6">
-        <div class="w-full h-fit flex justify-center items-center flex-row gap-8 px-12 my-42">
-            <div class="w-2/5">
-              <img src="../assets/images/pexels-mart-production-7679465.jpg" class="shadow-gray-500 shadow-2xl h-96 w-full object-cover object-bottom rounded-lg">
-            </div>
-            <div class="w-3/5 h-fit flex flex-col gap-4 justify-end items-end">
-              <h1 class="text-6xl/18 text-kollektif-bold text-primary text-right">
-                Bizneset Moderne Kerkojne Zgjidhje Praktike
-              </h1>
-              <span class="font-poppins font-normal text-primary text-right w-4/5 leading-6">
-                Nëse po përpiqesh të ndërtosh një audiencë në TikTok, Instagram apo YouTube për të shitur produkte ose për të rritur ndikimin tënd, titrimi manual i videove mund të të kushtojë orë të tëra. Orë që mund t'i shpenzosh për të krijuar videon e radhës, për të rritur biznesin apo për të kontaktuar klientin tënd të ardhshëm.
-              </span>
-              <button class="cursor-pointer group relative h-12 overflow-hidden overflow-x-hidden rounded-full bg-primary px-8 py-2 text-neutral-50">
-                <span class="relative font-poppins z-10">Regjistrohu Tani</span>
-                <span class="absolute inset-0 overflow-hidden rounded-full">
-                  <span class="absolute left-0 aspect-square w-full origin-center -translate-x-full rounded-full bg-secondary transition-all duration-500 group-hover:-translate-x-0 group-hover:scale-150"></span>
-                </span>
-              </button>
-            </div>
-        </div>
-        <div class="w-full h-fit flex justify-center items-center flex-row gap-8 px-12 my-42">
-          <div class="w-3/5 h-fit flex flex-col gap-4 justify-start items-start">
-            <h1 class="text-6xl/16 text-kollektif-bold text-primary text-left">
-              Nuk ka rëndesi thelbi i videos nëse askush nuk po e shikon
-            </h1>
-            <span class="font-poppins font-normal text-primary text-left w-4/5 leading-6">
-              Audiencat nuk ndërtohen për një ditë. Suksesi në rrjetet sociale kërkon strategji dhe mjete specifike për të tërhequr vëmendjen dhe për të mbajtur audiencën të angazhuar. 
-            </span>
-          </div>
-          <div class="w-2/5">
-            <img src="../assets/images/pexels-mart-production-7679465.jpg" class="shadow-gray-500 shadow-2xl h-96 w-full object-cover object-bottom rounded-lg">
+
+      <div class="relative z-10 w-full flex flex-col items-center pt-28 sm:pt-32 lg:pt-36 px-4">
+        
+        <div class="w-full flex flex-col items-center text-center max-w-[90rem]">
+          
+          <!-- Headline: Fade Up -->
+          <h1 
+            data-aos="fade-up"
+            class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-secondary leading-tight mb-6 max-w-5xl"
+          >
+            Shkurto post-produksionin deri në 88%, Transkripto Automatikisht Gjuhën Shqipe
+          </h1>
+
+          <!-- Subhead: Fade Up + 100ms Delay -->
+          <h2 
+            data-aos="fade-up"
+            data-aos-delay="100"
+            class="text-base sm:text-lg lg:text-xl text-secondary/90 font-poppins mb-8 max-w-3xl leading-relaxed"
+          >
+            Tërhiq vëmëndjen, rrit shikimet. Fuqizuar nga AI për skuadra dhe influencera.
+          </h2>
+
+          <!-- Button: Fade Up + 200ms Delay -->
+          <div 
+            data-aos="fade-up"
+            data-aos-delay="200"
+            class="flex justify-center mb-12 lg:mb-16"
+          >
+            <RouterLink 
+              to="/signup" 
+              class="group relative inline-flex items-center justify-center px-8 py-3 text-lg font-bold text-primary bg-secondary rounded-lg border-2 border-secondary overflow-hidden transition-all duration-300 hover:bg-transparent hover:text-secondary"
+            >
+              <span class="relative z-10">Provo falas</span>
+            </RouterLink>
           </div>
         </div>
-        <div class="w-full h-fit flex justify-center items-center flex-row gap-8 px-12 my-42">
-          <div class="w-2/5">
-            <img src="../assets/images/pexels-mart-production-7679465.jpg" class="shadow-gray-500 shadow-2xl h-96 w-full object-cover object-bottom rounded-lg">
-          </div>
-          <div class="w-3/5 h-fit flex flex-col gap-4 justify-end items-end">
-            <h1 class="text-6xl/18 text-kollektif-bold text-primary text-right">
-              98% saktësi në çdo dialekt nga AlbCaptions
-            </h1>
-            <span class="text-md font-poppins font-normal text-primary text-right w-4/5 leading-6">
-              AlbCaptions përdor një proces të automatizuar që konverton zërin në titra dhe i sinkronizon ato me videon përkatëse. Me ndihmën e Inteligjencës Artificiale, sistemi ynë realizon pjesën më të madhe të punës, duke e bërë procesin të shpejtë dhe jashtëzakonisht të saktë (deri në 98%).
-            Për 2% që mbetet, AlbCaptions ofron mjete të integruara për redaktim manual, ku përdoruesit mund të korrigjojnë tekstin me lehtësi dhe të arrijnë rezultate 100% të sakta.
-            </span>
-            
-          </div>
-      </div>
+
+        <!-- Hero Image: Fade Up + 300ms Delay -->
+        <div 
+          data-aos="fade-up"
+          data-aos-delay="300"
+          class="w-[90%] sm:w-[85%] max-w-6xl z-20 transform translate-y-[15%] lg:translate-y-[20%]"
+        >
+          <img 
+            src="https://htoujjoglfzjvyovryuc.supabase.co/storage/v1/object/public/assets/Herobg.webp" 
+            loading="lazy"
+            alt="Dashboard Preview"
+            class="w-full h-auto rounded-xl shadow-2xl border-4 border-white/10 bg-white object-cover"
+          />
+        </div>
+
       </div>
     </div>
 
-    <div class="w-screen h-fit py-32 ">
-      <div class="w-full px-6">
-        <div class="w-full flex flex-col items-center space-y-16">
-          <div class="flex space-x-4">
-            <div class="w-4 h-4 bg-secondary rounded-full "></div>
-            <div class="w-4 h-4 bg-primary rounded-full "></div>
-            <div class="w-4 h-4 bg-secondary rounded-full "></div>
-          </div>
-          
-          <div class="w-full max-w-4xl mx-auto text-center space-y-12">
-            <h2 class="text-6xl text-kollektif-bold text-primary">
-              Teknologjia
-            </h2>
+    <!-- Stats Section -->
+    <div class="w-full relative py-24 lg:py-48 overflow-hidden bg-white">
+      <div class="w-full max-w-[95rem] mx-auto px-6 lg:px-12 flex flex-col gap-8 lg:gap-10">
+        
+        <!-- Row 1 -->
+        <div class="flex flex-col lg:flex-row items-center lg:items-center justify-between gap-6">
+            <!-- Added delay="200" so it doesn't trigger instantly -->
+            <h1 
+                data-aos="fade-up"
+                data-aos-delay="200"
+                class="text-4xl sm:text-6xl lg:text-8xl text-kollektif-bold text-primary whitespace-nowrap text-center lg:text-left"
+            >
+                <strong class="text-secondary"> 69% </strong> e postimeve
+            </h1>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-16">
-              <div class="space-y-4">
-                <div class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto">
-                  <lightning class="w-8 h-8 text-primary"/>
-                </div>
-                <h3 class="text-xl text-kollektif-bold text-primary">Titra automatike</h3>
-                <p class="text-sm font-poppins text-gray-600">
-                  AlbCaptions përdor teknologji të avancuar për të titruar automatikisht video dhe audio në gjuhën shqipe.
-                </p>
-              </div>
-              
-              <div class="space-y-4">
-                <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto">
-                  <svg class="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                  </svg>
-                </div>
-                <h3 class="text-xl text-kollektif-bold text-primary">Redaktim Manual</h3>
-                <p class="text-sm font-poppins text-gray-600">
-                  Redakto titrat e gjeneruara automatikisht, njësoj si të redaktosh një email.
-                </p>
-              </div>
-              
-              <div class="space-y-4">
-                <div class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto">
-                  <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                  </svg>
-                </div>
-                <h3 class="text-xl text-kollektif-bold text-primary">Formate standarde</h3>
-                <p class="text-sm font-poppins text-gray-600">
-                  SRT, VTT, TXT - të përputhshme me CapCut, Premiere Pro, DaVinci Resolve
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div class="w-full max-w-md mx-auto">
-            <div class="h-px bg-gradient-to-r from-transparent via-secondary to-transparent"></div>
-          </div>
+            <span 
+                data-aos="fade-up"
+                data-aos-delay="300"
+                class="text-sm sm:text-base font-poppins font-light text-primary/80 w-full lg:w-[30%] max-w-lg leading-relaxed text-center lg:text-left"
+            >
+                Gjasat janë që, nëse po publikon një video të pa titruar, audienca jote nuk ka për ta parë. 69% e shikuesëve ne ambjente publike ose zyra përdorin rrjete sociale me zërin e fikur.
+            </span>
         </div>
+
+        <!-- Row 2 -->
+        <div class="flex flex-col lg:flex-row items-center lg:items-center gap-6 lg:gap-12">
+            <img 
+              data-aos="zoom-in"
+              data-aos-delay="200"
+              src="https://htoujjoglfzjvyovryuc.supabase.co/storage/v1/object/public/assets/pexels-amina-filkins-5427978.webp" 
+              alt="Person using social media on phone"
+              loading="lazy"
+              class="h-24 sm:h-32 w-full lg:w-96 object-cover object-bottom rounded-full shadow-md"
+            >
+            <h1 
+                data-aos="fade-up"
+                data-aos-delay="300"
+                class="text-4xl sm:text-6xl lg:text-8xl text-kollektif-bold text-primary whitespace-nowrap text-center lg:text-left"
+            >
+                në rrjete sociale
+            </h1>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="flex flex-row items-center justify-center lg:justify-start mt-2 lg:mt-4">
+            <!-- Added fade-up and delay to the final text block -->
+            <h1 
+                data-aos="fade-up"
+                data-aos-delay="400"
+                class="text-4xl sm:text-6xl lg:text-8xl w-full text-kollektif-bold text-primary relative leading-tight text-center lg:text-left"
+            >
+                shikohen 
+                <span class="relative inline-block">
+                    me zërin e fikur
+                    <Curved_line 
+                      data-aos="fade-in" 
+                      data-aos-delay="600" 
+                      class="overflow-visible absolute left-0 w-full top-full mt-1"
+                    />
+                </span>
+            </h1>
+        </div>
+
       </div>
     </div>
-  </div>
-  <Upload />
-  <Payment />
-  <FAQ/>
-  <FooterComponent />
+
+    <StackedCards class="my-20"/>
+    <BentoGrid class="my-20"/>
+    <Upload />
+    <Payment />
+
+    <!-- 
+      FAQ + Footer Stacking Logic 
+      - We wrap FAQ in a generic container.
+      - We place Footer AFTER it.
+      - GSAP will pin FAQ, allowing Footer to slide over.
+    -->
+    <div class="relative">
+      <!-- Z-Index 0: Stays behind when pinned -->
+      <div ref="faqContainer" class="relative z-0">
+        <FAQ/>
+      </div>
+
+      <!-- Z-Index 50: Slides OVER the pinned FAQ -->
+      <div class="relative z-50 shadow-2xl">
+        <FooterComponent />
+      </div>
+    </div>
+
 </template>
 
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Logo_lines from './logos/Logo_lines.vue';
+import Curved_line from './items/Curved_line.vue';
 import Upload from './Upload.vue';
 import FooterComponent from './FooterComponent.vue';
-import Hero_svg from './items/Hero_svg.vue';
-import Curved_line from './items/Curved_line.vue';
 import Payment from './Payment.vue';
-import lightning from './items/lightning.vue';
 import FAQ from './FAQ.vue';
+import BentoGrid from './subcomponents/BentoGrid.vue';
+import StackedCards from './subcomponents/StackedCards.vue';
+
+gsap.registerPlugin(ScrollTrigger);
+
+const faqContainer = ref(null);
+let ctx;
+
+onMounted(() => {
+  ctx = gsap.context(() => {
+    // Logic: Pin the FAQ section so the Footer slides over it
+    ScrollTrigger.create({
+      trigger: faqContainer.value,
+      start: "top top",     // When top of FAQ hits top of viewport
+      end: "bottom top",    // Pin until the bottom of FAQ hits top (effectively 100vh duration if h-screen)
+      pin: true,            // Pin the FAQ
+      pinSpacing: false,    // Important: allows the Footer to overlap instead of being pushed down
+      scrub: true
+    });
+  });
+});
+
+onUnmounted(() => {
+  if (ctx) ctx.revert();
+});
 </script>
-
-<style scoped>
-.card{
-  background: #052B28;
-  background: -webkit-linear-gradient(45deg, rgba(5, 43, 40, 1) 0%, rgba(159, 226, 158, 1) 100%);
-  background: -moz-linear-gradient(45deg, rgba(5, 43, 40, 1) 0%, rgba(159, 226, 158, 1) 100%);
-  background: linear-gradient(45deg, rgba(5, 43, 40, 1) 0%, rgba(159, 226, 158, 1) 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#052B28", endColorstr="#9FE29E", GradientType=0);
-}
-
-.card_2{
-  background: #052B28;
-  background: -webkit-linear-gradient(-45deg, rgba(5, 43, 40, 1) 0%, rgba(159, 226, 158, 1) 100%);
-  background: -moz-linear-gradient(-45deg, rgba(5, 43, 40, 1) 0%, rgba(159, 226, 158, 1) 100%);
-  background: linear-gradient(-45deg, rgba(5, 43, 40, 1) 0%, rgba(159, 226, 158, 1) 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#052B28", endColorstr="#9FE29E", GradientType=0);
-}
-</style>

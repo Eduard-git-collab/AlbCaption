@@ -48,7 +48,6 @@ export const useAuthStore = defineStore('auth', {
         // Set up auth state listener (only once)
         if (!this.authSubscription) {
           const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log('Auth state change:', event)
             this.session = session
             this.user = session?.user ?? null
             

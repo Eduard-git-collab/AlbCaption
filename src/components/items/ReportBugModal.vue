@@ -223,8 +223,6 @@ async function handleSubmitReport() {
       formData.append('attachment', selectedFile.value)
     }
 
-    console.log('[BUG-REPORT] Submitting bug report...')
-    
     const response = await apiClient.post('/auth/report-bug', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -232,7 +230,6 @@ async function handleSubmitReport() {
     })
 
     if (response.data.success) {
-      console.log('[BUG-REPORT] ✓ Report submitted:', response.data.reportId)
       successMessage.value = 'Raporti u dërgua me sukses! Faleminderit për përshtypjet tuaja.'
       
       setTimeout(() => {
@@ -250,7 +247,7 @@ async function handleSubmitReport() {
     } else if (error.response?.status === 401) {
       errorMessage.value = 'Ju duhet të jeni i regjistruar për të dërguar një raport'
     } else {
-      errorMessage.value = error.message || 'Gabim gjatë dërgimit të raportit. Provoni përsëri.'
+      errorMessage.value = error.message || 'Gabim gjatë dërgimit të raportit. Provo përsëri.'
     }
   } finally {
     busy.value = false

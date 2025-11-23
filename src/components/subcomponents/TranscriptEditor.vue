@@ -505,8 +505,9 @@ async function saveAllSegments() {
 }
 
 function saveSegment({ index, text }) {
-  transcriptSegments.value[index].text = text
-  transcriptSegments.value[index].isEditing = false
+  transcriptSegments.value[index].text = text;
+  transcriptSegments.value[index].isEditing = false;
+  saveAllSegments();
 }
 
 async function downloadSubtitles(format) {
@@ -686,13 +687,6 @@ async function downloadWithSelectedStyle() {
         outputHeight = Math.round(videoEl.clientHeight)
       }
     }
-
-    console.log('Sending request with:', {
-      videoPath: props.videoUrl,
-      segments: segments.length,
-      style,
-      outputDimensions: { width: outputWidth, height: outputHeight }
-    })
 
     const response = await apiClient.post(
       `/render-captioned-video`,

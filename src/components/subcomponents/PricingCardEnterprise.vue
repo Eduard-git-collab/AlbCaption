@@ -91,7 +91,7 @@
               @click="$emit('contact-enterprise')"
               class="w-full bg-secondary text-primary font-semibold px-6 py-3 rounded-full hover:bg-white transition-all shadow-lg transform hover:scale-105"
             >
-              Hajde flasim
+              Na Kontakto
             </button>
             
             <button 

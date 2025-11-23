@@ -3,7 +3,8 @@ import { supabase } from '@/lib/supabaseClient'
 
 // Create axios instance
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000'
+  baseURL: import.meta.env.VITE_API_URL || 'https://albcaptions-api-488229739417.europe-west4.run.app'
+  //baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000'
 })
 
 // Session cache to avoid repeated getSession() calls
@@ -15,7 +16,6 @@ const CACHE_DURATION = 5000 // 5 seconds
 supabase.auth.onAuthStateChange((event, session) => {
   cachedSession = session
   sessionCacheTime = Date.now()
-  console.log('[API] Auth state changed:', event)
 })
 
 // Helper to get session with caching
@@ -24,7 +24,6 @@ async function getSessionWithCache() {
   
   // Return cached session if still valid
   if (cachedSession && sessionCacheTime && (now - sessionCacheTime) < CACHE_DURATION) {
-    console.log('[API] Using cached session')
     return cachedSession
   }
   
@@ -45,7 +44,6 @@ apiClient.interceptors.request.use(
       if (session?.access_token) {
         config.headers.Authorization = `Bearer ${session.access_token}`
         config.headers['X-User-ID'] = session.user?.id
-        console.log('[API] ✓ Token attached to request:', config.url)
       } else {
         console.warn('[API] ⚠️ No session token available for:', config.url)
       }
@@ -95,14 +93,12 @@ apiClient.interceptors.response.use(
           // Update cache with new session
           cachedSession = data.session
           sessionCacheTime = Date.now()
-          console.log('[API] ✓ Session refreshed successfully')
         }
         
         // Retry the original request with new token
         const session = await getSessionWithCache()
         if (session?.access_token) {
           originalRequest.headers.Authorization = `Bearer ${session.access_token}`
-          console.log('[API] Retrying request with new token:', originalRequest.url)
           return apiClient.request(originalRequest)
         }
       } catch (refreshError) {

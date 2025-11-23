@@ -122,7 +122,7 @@ const goToHome = () => {
       </div>
       
       <div class="text-sm text-gray-100">
-        <p class="mb-4">Emaili nuk gjëndet? Klikoni spam folder, ose provoni:</p>
+        <p class="mb-4">Emaili nuk gjëndet? Klikoni spam folder, ose provo:</p>
         <div class="flex justify-center gap-4">
           <button 
             @click="goToHome" 

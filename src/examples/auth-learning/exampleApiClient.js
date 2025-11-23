@@ -3,7 +3,8 @@ import { useAuthExampleStore } from './authExampleStore'
 
 // Create axios instance
 const exampleApiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000'
+  baseURL: import.meta.env.VITE_API_URL || 'https://albcaptions-api-488229739417.europe-west4.run.app'
+  //baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000'
 })
 
 // Request interceptor - attach JWT token

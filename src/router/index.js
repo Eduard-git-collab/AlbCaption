@@ -9,6 +9,7 @@ import Paypal from '../components/Paypal.vue';
 import Pricing from '../components/Payment.vue';
 import NotFound from '../components/views/NotFound.vue';
 import Login from '../components/Login.vue';
+import Usage from '../components/Usage.vue'
 import Test from '../components/Test.vue';
 import ResetPassword from '../components/views/reset-password.vue'; 
 import Upload from '../components/Upload.vue';
@@ -64,7 +65,7 @@ const routes = [
   {
     path: '/usage',
     name: 'Usage',
-    component: Login
+    component: Usage
   },
   {
     path: '/dashboard',

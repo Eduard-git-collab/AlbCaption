@@ -21,20 +21,30 @@ const toggle = (index) => {
 </script>
 
 <template>
-    <div class="w-screen h-screen">
-      <div class="w-full h-full relative">
-        <div class="w-full h-full absolute z-0">
-          <steps class="rounded-3xl p-3"/>
+    <!-- Outer container forces full viewport height -->
+    <div class="w-full h-screen relative overflow-hidden bg-white">
+      
+      <!-- Background SVG: Forces full height/width behind content -->
+      <div class="absolute inset-0 z-0 w-full h-full pointer-events-none">
+        <!-- object-cover ensures the SVG fills the area without distortion gaps -->
+        <steps class="w-full h-full object-cover opacity-50 lg:opacity-100"/>
+      </div>
+
+      <!-- Main Content Layout -->
+      <div class="w-full h-full flex flex-col lg:flex-row relative z-10">
+        
+        <!-- Left Side: Title -->
+        <!-- Mobile: Takes top space. Desktop: Takes left 40% -->
+        <div class="w-full lg:w-2/5 h-auto lg:h-full p-6 lg:p-0 flex items-center justify-center shrink-0">
+          <h1 class="text-4xl sm:text-5xl lg:text-7xl text-primary text-center text-kollektif-bold leading-tight">
+            Pyetje të shpeshta
+          </h1>
         </div>
-        <div class="w-full h-full flex flex-row gap-3 relative z-10">
-          <div class="w-2/5 h-full p-3">
-            <div class="w-full h-full flex items-center justify-center flex-col">
-              <div class="w-full h-1/3 flex items-center justify-center">
-                <h1 class="text-7xl text-primary text-center text-kollektif-bold">Pyetje të shpeshta</h1>
-              </div>
-            </div>
-          </div>
-          <div class="w-3/5 h-full flex justify-center flex-col gap-2 p-3 overflow-y-auto relative z-10">
+
+        <!-- Right Side: Scrollable List -->
+        <!-- Mobile: Takes remaining height. Desktop: Takes right 60% -->
+        <div class="w-full lg:w-3/5 h-full flex flex-col justify-center items-center p-4 lg:p-12 overflow-y-auto no-scrollbar">
+          <div class="w-full max-w-2xl flex flex-col gap-3 pb-20 lg:pb-0">
             <faqItem
               v-for="(faq, index) in faqs"
               :key="index"
@@ -45,6 +55,20 @@ const toggle = (index) => {
             />
           </div>
         </div>
+
       </div>
     </div>
   </template>
+
+<style scoped>
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+</style>

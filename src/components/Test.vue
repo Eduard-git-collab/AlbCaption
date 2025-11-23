@@ -452,7 +452,7 @@
             class="flex flex-col items-center justify-center h-48 text-primary/60 bg-white rounded-xl ring-1 ring-primary/10"
           >
             <p class="text-sm md:text-base font-medium">Nuk u gjëndën transkripte</p>
-            <p class="text-xs md:text-sm mt-1">Provoni të ndryshoni filtrat ose të <RouterLink to="/upload" class="text-secondary font-bold">krijoni</RouterLink> një transkript të ri.</p>
+            <p class="text-xs md:text-sm mt-1">Provo ndryshoimin e filtrave ose <RouterLink to="/upload" class="text-secondary font-bold">krijo</RouterLink> një transkript të ri.</p>
           </div>
         </div>
       </section>
@@ -1168,7 +1168,6 @@ async function handleSaved() {
 
 async function handleRoleDelete() {
   const roleId = selectedRole.value;
-  console.log('Checking users with role ID:', roleId);
   
   const { data: roleModalData, error: roleModalError, count } = await supabase
     .from('users')
@@ -1176,7 +1175,7 @@ async function handleRoleDelete() {
     .eq('role', roleId);
     
   if (roleModalError) {
-    console.error('Error checking users with role:', roleModalError);
+    ('Error checking users with role:', roleModalError);
     DeletemodalMessage.value = 'Gabim gjatë verifikimit të përdoruesve me këtë rol.';
     return;
   }
@@ -1184,7 +1183,6 @@ async function handleRoleDelete() {
     showDeletionError.value = true;
     isError.value = true;
     showDeletionErrorMessage.value = 'Nuk mund të fshihet roli, përdorues janë të lidhur me të.';
-    console.log('Cannot delete role, users are associated with it.');
     setTimeout(() => {
       showDeletionError.value = false;
       isError.value = false;
@@ -1203,7 +1201,6 @@ async function handleRoleDelete() {
     return;
   }
   
-  console.log('Role deleted successfully');
   DeletemodalVisible.value = false;
   selectedRole.value = null;
   showDeletionError.value = true;
@@ -1244,7 +1241,6 @@ const loadUserData = async () => {
   authError.value = null;
 
   try {
-    console.log('[DASHBOARD] Fetching user profile...');
     const response = await apiClient.get('/auth/user-profile')
     
     userData.value = {
@@ -1256,7 +1252,6 @@ const loadUserData = async () => {
       roleName: response.data.roleName
     };
     
-    console.log('[DASHBOARD] ✓ User profile loaded:', userData.value);
 
   } catch (error) {
     console.error('[DASHBOARD] Error loading profile:', error);
@@ -1276,12 +1271,10 @@ const getUserRoleDetails = async () => {
   try {
     if (!userData.value?.id) return;
     
-    console.log('[DASHBOARD] Fetching role details...');
     const response = await apiClient.get('/auth/user-role-details')
     
     userRoleDetails.value = response.data;
-    
-    console.log('[DASHBOARD] ✓ Role details loaded:', userRoleDetails.value);
+  
 
   } catch (error) {
     console.error('[DASHBOARD] Error loading role details:', error);
@@ -1320,15 +1313,12 @@ async function getTranscripts() {
   transcriptsLoading.value = true;
   
   try {
-    console.log('[DASHBOARD] Fetching transcripts...');
     const response = await apiClient.get('/auth/user-transcripts')
     
     userTrans.value = response.data.map(transaction => ({
       ...transaction,
       video_url: transaction.videos?.video_url || null,
     }));
-    
-    console.log('[DASHBOARD] ✓ Transcripts loaded:', userTrans.value.length);
 
   } catch (error) {
     console.error('[DASHBOARD] Error loading transcripts:', error);
@@ -1344,12 +1334,9 @@ const getAllRoles = async () => {
   rolesLoading.value = true;
   
   try {
-    console.log('[DASHBOARD] Fetching all roles (admin)...');
     const response = await apiClient.get('/auth/admin/roles')
     
     roles.value = response.data || [];
-    
-    console.log('[DASHBOARD] ✓ Roles loaded:', roles.value.length);
 
   } catch (error) {
     console.error('[DASHBOARD] Error loading roles:', error);
@@ -1367,12 +1354,9 @@ async function getAllUsers() {
   allUsersLoading.value = true;
   
   try {
-    console.log('[DASHBOARD] Fetching all users (admin)...');
     const response = await apiClient.get('/auth/admin/users')
     
     allUsers.value = response.data || [];
-    
-    console.log('[DASHBOARD] ✓ Users loaded:', allUsers.value.length);
     
   } catch (error) {
     console.error('[DASHBOARD] Error loading users:', error);

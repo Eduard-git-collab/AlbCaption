@@ -36,18 +36,28 @@
         </div>
       </div>
 
-      <div class="container mx-auto px-4 py-6">
+      <!-- 
+        UPDATED CONTAINER:
+        - When !isComplete: Use absolute positioning to center the uploader without affecting sticky header flow.
+        - pointer-events-none ensures the absolute overlay doesn't block clicks on the header.
+      -->
+      <div 
+        class="container mx-auto px-4 py-6"
+        :class="!isComplete ? 'absolute inset-0 flex items-center justify-center pointer-events-none' : 'h-fit my-auto'"
+      >
         <!-- File Upload Section -->
-        <FileUploader
-          v-if="!isComplete"
-          :api-url="apiUrl"
-          @auth-required="onAuthRequired"
-          @upload-start="onUploadStart"
-          @state-change="onStateChange"
-          @processing-step="onProcessingStep"
-          @upload-error="onUploadError"
-          @upload-complete="onUploadComplete"
-        />
+        <!-- Added pointer-events-auto to restore interactivity for the uploader -->
+        <div v-if="!isComplete" class="w-full max-w-5xl pointer-events-auto">
+          <FileUploader
+            :api-url="apiUrl"
+            @auth-required="onAuthRequired"
+            @upload-start="onUploadStart"
+            @state-change="onStateChange"
+            @processing-step="onProcessingStep"
+            @upload-error="onUploadError"
+            @upload-complete="onUploadComplete"
+          />
+        </div>
 
         <!-- Complete State - Combined Editor View -->
         <TranscriptEditor
@@ -86,8 +96,9 @@ export default {
       modalMessage: "Regjistrimi është i nevojshëm për të vazhduar me ngarkimin e videos.",
 
       // API
-      apiUrl: 'http://localhost:3000',
-      // 'https://albcaptions-api-488229739417.europe-west4.run.app',
+      apiUrl: 
+      //'http://localhost:3000',
+      'https://albcaptions-api-488229739417.europe-west4.run.app',
       // 'https://8064aa68daa5.ngrok-free.app',
 
       // Global processing state (drives overlay)

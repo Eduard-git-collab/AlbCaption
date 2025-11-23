@@ -467,8 +467,6 @@ async function saveAllSegments() {
       throw new Error('Failed to rebuild transcription JSON');
     }
 
-    console.log('Saving updated transcription:', updatedJson);
-
     // Save to API
     const response = await apiClient.post(
       `/update-transcription/${transaction.value.processing_id}`,
@@ -505,8 +503,6 @@ async function saveAllSegments() {
       transcriptSegments.value.forEach(segment => {
         segment.isEditing = false;
       });
-
-      console.log('Transaction and segments updated successfully');
     }
     
     showMessage('Transcription saved successfully');
@@ -522,6 +518,7 @@ async function saveAllSegments() {
 function saveSegment({ index, text }) {
   transcriptSegments.value[index].text = text;
   transcriptSegments.value[index].isEditing = false;
+  saveAllSegments();
 }
 
 function cancelEdit(index) {
@@ -780,14 +777,6 @@ async function downloadWithSelectedStyle() {
         outputHeight = Math.round(videoEl.clientHeight);
       }
     }
-
-    console.log('Sending request with:', {
-      videoPath: transaction.value.video_url,
-      segments: segments.length,
-      style,
-      outputDimensions: { width: outputWidth, height: outputHeight }
-    });
-
     const response = await apiClient.post(
       `/render-captioned-video`,
       {

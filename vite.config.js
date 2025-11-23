@@ -8,8 +8,14 @@ export default defineConfig({
   plugins: [vue(), tailwindcss()],
   server: {
     allowedHosts: [
-      'bc25674011a4.ngrok-free.app', 
-    ]
+      'f65d1373b3cf.ngrok-free.app', 
+    ],
+    hmr: {
+      protocol: 'ws',
+      host: 'localhost',
+      port: 5173,
+      timeout: 60000
+    }
   },
   resolve: {
     alias: {

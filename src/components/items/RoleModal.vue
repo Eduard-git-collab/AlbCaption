@@ -297,11 +297,11 @@ async function handleSubmit() {
                 close()
             }, 1500)
         } else {
-            errorMessage.value = response.data.message || 'Ndodhi një gabim gjatë ruajtjes së rolit. Ju lutemi provoni përsëri.'
+            errorMessage.value = response.data.message || 'Ndodhi një gabim gjatë ruajtjes së rolit. Ju lutemi provo përsëri.'
         }
     } catch (error) {
         console.error('Error submitting form:', error)
-        errorMessage.value = 'Ndodhi një gabim gjatë ruajtjes së rolit. Ju lutemi provoni përsëri.'
+        errorMessage.value = 'Ndodhi një gabim gjatë ruajtjes së rolit. Ju lutemi provo përsëri.'
     } finally {
         isLoading.value = false
     }

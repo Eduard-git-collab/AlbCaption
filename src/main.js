@@ -13,6 +13,18 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 
+import AOS from 'aos'
+import 'aos/dist/aos.css'
+
+// Initialize AOS
+// once: true means animations happen only once (don't reset when scrolling up)
+AOS.init({
+  once: true,
+  offset: 100, // offset (in px) from the original trigger point
+  duration: 800, // values from 0 to 3000, with step 50ms
+  easing: 'ease-out-cubic', // default easing for AOS animations
+})
+
 const initApp = async () => {
   try {
     // Only initialize auth store for non-public routes
@@ -39,7 +51,6 @@ const initApp = async () => {
     
     app.mount('#app')
   } catch (error) {
-    console.error('Failed to initialize app:', error)
     app.mount('#app') // Mount anyway to show error state
   }
 }

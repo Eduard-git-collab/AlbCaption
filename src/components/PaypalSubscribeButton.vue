@@ -29,7 +29,6 @@ async function createPayPalSubscription() {
   isLoading.value = true
 
   try {
-    console.log(`Creating subscription for plan: ${props.planId}`)
     
     const response = await apiClient.post(
       '/api/paypal/create-subscription',
@@ -37,8 +36,6 @@ async function createPayPalSubscription() {
         planId: props.planId
       }
     )
-
-    console.log('Subscription creation response:', response.data)
 
     if (response.data.approvalUrl) {
       window.location.href = response.data.approvalUrl
