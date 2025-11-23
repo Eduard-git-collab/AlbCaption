@@ -65,8 +65,8 @@ const captionPresets = [
   },
   {
     id: 'classic',
-    name: 'Classic White',
-    description: 'Clean white text with outline.',
+    name: 'Klassike',
+    description: 'Shkrim i bardh.',
     previewCss: { color: '#FFFFFF', textShadow: '2px 2px 0 #000', background: 'transparent' },
     backendOpts: {
       karaoke: false,
@@ -81,8 +81,8 @@ const captionPresets = [
   },
   {
     id: 'boxed',
-    name: 'Boxed Background',
-    description: 'White text on semi-transparent box.',
+    name: 'Shkrim me sfrond',
+    description: 'Shkrim i bardhe me sfond.',
     previewCss: { color: '#FFFFFF', textShadow: 'none', background: 'rgba(0,0,0,0.6)' },
     backendOpts: {
       karaoke: false,
@@ -919,7 +919,7 @@ async function downloadWithSelectedStyle() {
               <div class="relative w-full aspect-[9/16] max-h-[60vh] bg-black shadow-2xl rounded-lg overflow-hidden border border-white/10">
                 <!-- Preview background image -->
                 <img 
-                  src="https://images.unsplash.com/photo-1616469829941-c7200edec809?q=80&w=2070&auto=format&fit=crop" 
+                  src="" 
                   class="w-full h-full object-cover opacity-50"
                   alt="Video Preview" 
                 />
