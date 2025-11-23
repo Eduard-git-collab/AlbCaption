@@ -11,7 +11,6 @@ import Usage from '../components/Usage.vue'
 import Test from '../components/Test.vue';
 import ResetPassword from '../components/views/reset-password.vue'; 
 import Upload from '../components/Upload.vue';
-import Payment from '../components/Paypal.vue';
 import PaymentSuccess from '../components/views/PaymentSuccess.vue';
 
 // Import example routes
