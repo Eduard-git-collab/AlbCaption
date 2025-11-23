@@ -56,12 +56,11 @@
                   <span v-else>Riaktivizoni llogarinë</span>
                 </button>
                 
-                <span @click="$router.back(-1)"
-                  to="/signin"
+                <RouterLink to="/signin"
                   class="cursor-pointer w-full sm:w-auto inline-flex items-center justify-center rounded-full border border-secondary text-secondary px-8 py-3.5 font-poppins font-medium hover:bg-secondary hover:text-primary transition-colors"
                 >
                   Kthehu
-                </span>
+              </RouterLink>
                 
                 <a
                   href="mailto:hello@albcaptions.com"

@@ -155,6 +155,15 @@ const startLoading = () => {
   setTimeout(finish, 7000);
 };
 
+// Watch isLoading to lock/unlock scroll
+watch(isLoading, (newVal) => {
+  if (newVal) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
+});
+
 // Watch route to enable/disable loading screen logic
 watch(
   () => route.path,
@@ -244,6 +253,8 @@ onMounted(async () => {
 
 onUnmounted(() => {
   window.removeEventListener('scroll', throttledHandleScroll);
+  // Ensure scroll is unlocked if component unmounts unexpectedly while loading
+  document.body.style.overflow = '';
 });
 
 const handleSignOut = async () => {

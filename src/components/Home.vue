@@ -130,8 +130,8 @@
 
     <StackedCards class="my-20"/>
     <BentoGrid class="my-20"/>
-    <Upload />
-    <Payment />
+    <Upload class="my-20"/>
+    <Payment class="my-20"/>
 
     <!-- 
       FAQ + Footer Stacking Logic 
@@ -139,7 +139,7 @@
       - We place Footer AFTER it.
       - GSAP will pin FAQ, allowing Footer to slide over.
     -->
-    <div class="relative">
+    <div class="relative mt-20">
       <!-- Z-Index 0: Stays behind when pinned -->
       <div ref="faqContainer" class="relative z-0">
         <FAQ/>

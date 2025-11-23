@@ -41,73 +41,93 @@ const isSavingFilename = ref(false)
 const filenameError = ref(null)
 const filenameInput = ref(null)
 
-// Caption presets
+// Modal State
+const selectedPresetId = ref('karaoke')
+
+// --- PRESETS CONFIGURATION ---
+// Aligned with transcriptToAss backend logic
 const captionPresets = [
   {
+    id: 'karaoke',
+    name: 'Karaoke (Active)',
+    description: 'Green highlight on spoken words.',
+    previewCss: { color: '#9FE29E', textShadow: '2px 2px 0 #000', background: 'transparent' },
+    backendOpts: {
+      karaoke: true,
+      primaryColour: '&H009EE29F&',   // Active Word (Green)
+      secondaryColour: '&H00FFFFFF&', // Inactive Word (White)
+      outlineColour: '&H00000000&',   // Black Outline
+      backColour: '&H00000000&',
+      borderStyle: 1, // Outline
+      outline: 4,
+      fontSize: 72
+    }
+  },
+  {
     id: 'classic',
-    name: 'Klasik',
-    description: 'E bardha në të zezë, poshtë',
-    fontSize: 72,
-    textColor: '#FFFFFF',
-    outlineColor: '#000000',
-    outlineWidth: 4,
-    hasBackground: false,
-    backgroundColor: '#000000',
-    position: 'bottom'
+    name: 'Classic White',
+    description: 'Clean white text with outline.',
+    previewCss: { color: '#FFFFFF', textShadow: '2px 2px 0 #000', background: 'transparent' },
+    backendOpts: {
+      karaoke: false,
+      primaryColour: '&H00FFFFFF&',   // White
+      secondaryColour: '&H00FFFFFF&',
+      outlineColour: '&H00000000&',   // Black
+      backColour: '&H00000000&',
+      borderStyle: 1, // Outline
+      outline: 4,
+      fontSize: 72
+    }
   },
   {
-    id: 'modern',
-    name: 'Modernu',
-    description: 'Jeshil i ndritshëm, poshtë',
-    fontSize: 72,
-    textColor: '#12998E',
-    outlineColor: '#000000',
-    outlineWidth: 3,
-    hasBackground: true,
-    backgroundColor: '#000000',
-    position: 'bottom'
-  },
-  {
-    id: 'bold',
-    name: 'I guxueshëm',
-    description: 'E bardha me kontur i trashë, mesme',
-    fontSize: 80,
-    textColor: '#FFFFFF',
-    outlineColor: '#000000',
-    outlineWidth: 6,
-    hasBackground: false,
-    backgroundColor: '#000000',
-    position: 'middle'
-  },
-  {
-    id: 'soft',
-    name: 'I butë',
-    description: 'Gri i lehtë, lart',
-    fontSize: 64,
-    textColor: '#E0E0E0',
-    outlineColor: '#333333',
-    outlineWidth: 2,
-    hasBackground: true,
-    backgroundColor: '#1A1A1A',
-    position: 'top'
+    id: 'boxed',
+    name: 'Boxed Background',
+    description: 'White text on semi-transparent box.',
+    previewCss: { color: '#FFFFFF', textShadow: 'none', background: 'rgba(0,0,0,0.6)' },
+    backendOpts: {
+      karaoke: false,
+      primaryColour: '&H00FFFFFF&',   // White
+      secondaryColour: '&H00FFFFFF&',
+      outlineColour: '&H00000000&',
+      backColour: '&H80000000&',      // Semi-transparent Black
+      borderStyle: 3, // Opaque Box
+      outline: 0,
+      fontSize: 64
+    }
   }
 ]
-
-const selectedPresetId = ref('classic')
-
-const currentPreset = computed(() => {
-  return captionPresets.find(p => p.id === selectedPresetId.value) || captionPresets[0]
-})
 
 const hasUnsavedChanges = computed(() => {
   return transcriptSegments.value.some(s => s.originalText !== s.text || s.isEditing)
 })
 
+// Computed Preview Style
+const currentPreviewStyle = computed(() => {
+  const preset = captionPresets.find(p => p.id === selectedPresetId.value) || captionPresets[0];
+  return {
+    fontFamily: "'Poppins', sans-serif",
+    fontWeight: '900',
+    fontSize: '32px',
+    textAlign: 'center',
+    lineHeight: '1.4',
+    padding: preset.backendOpts.borderStyle === 3 ? '8px 16px' : '0',
+    borderRadius: preset.backendOpts.borderStyle === 3 ? '6px' : '0',
+    color: preset.previewCss.color,
+    textShadow: preset.previewCss.textShadow,
+    backgroundColor: preset.previewCss.background,
+    position: 'absolute',
+    bottom: '30px', 
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: '90%',
+    whiteSpace: 'normal'
+  };
+});
+
 watch(() => props.originalTranscriptionJson, (newJson) => {
   if (newJson) {
     hasOriginalTranscription.value = true
     createTranscriptSegments()
-    debugTranscriptionJson()
   }
 }, { immediate: true, deep: true })
 
@@ -305,11 +325,6 @@ function createTranscriptSegments() {
   transcriptSegments.value = segments
 }
 
-function debugTranscriptionJson() {
-  const json = props.originalTranscriptionJson
-  if (!json) return
-}
-
 function reprocessSegments() {
   if (!hasOriginalTranscription.value) return
   if (hasUnsavedChanges.value) {
@@ -418,23 +433,17 @@ function extractTimeInSeconds(timeObject) {
 function rebuildTranscriptionJson() {
   if (!props.originalTranscriptionJson) return null
 
-  // Start with the original JSON structure
   const updatedJson = {
     text: transcriptSegments.value.map(s => s.text).join(' '),
     results: []
   }
 
-  // Rebuild results from segments
   transcriptSegments.value.forEach(segment => {
-    // Split the segment text into words
     const segmentWords = segment.text.split(/\s+/).filter(w => w.trim())
-    
-    // Try to match with original words for timing
     const words = []
     let originalWordIndex = 0
     
     segmentWords.forEach((editedWord) => {
-      // Find the corresponding original word (best effort matching)
       const originalWord = segment.words[originalWordIndex] || segment.words[segment.words.length - 1]
       
       if (originalWord) {
@@ -551,83 +560,11 @@ function copyTranscript() {
 
 function downloadEmbeddedCaptionsModalCall() {
   downloadModal.value = true
-  selectedPresetId.value = 'classic'
+  selectedPresetId.value = 'karaoke'
 }
 
 function closeDownloadModal() {
   downloadModal.value = false
-}
-
-function selectPreset(preset) {
-  selectedPresetId.value = preset.id
-}
-
-function getPreviewStyle() {
-  const preset = currentPreset.value
-  const w = preset.outlineWidth
-  const color = preset.outlineColor
-  
-  let textShadow = 'none'
-  if (w > 0) {
-    const shadows = []
-    for (let x = -w; x <= w; x++) {
-      for (let y = -w; y <= w; y++) {
-        if (x !== 0 || y !== 0) {
-          shadows.push(`${x}px ${y}px 0 ${color}`)
-        }
-      }
-    }
-    textShadow = shadows.join(', ')
-  }
-
-  let positionStyle = 'position: absolute; bottom: 20px;'
-  if (preset.position === 'top') {
-    positionStyle = 'position: absolute; top: 20px;'
-  } else if (preset.position === 'middle') {
-    positionStyle = 'position: absolute; top: 50%; transform: translateY(-50%);'
-  }
-
-  return {
-    fontSize: preset.fontSize + 'px',
-    color: preset.textColor,
-    textShadow,
-    padding: preset.hasBackground ? '12px 16px' : '0',
-    backgroundColor: preset.hasBackground ? preset.backgroundColor + '80' : 'transparent',
-    borderRadius: preset.hasBackground ? '4px' : '0',
-    ...Object.fromEntries(positionStyle.split(';').filter(Boolean).map(s => {
-      const [key, value] = s.split(':').map(x => x.trim())
-      return [key, value]
-    }))
-  }
-}
-
-function hexToRGB(hex) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : { r: 255, g: 255, b: 255 }
-}
-
-function hexToASSColor(hex) {
-  const rgb = hexToRGB(hex)
-  return `&H${rgb.b.toString(16).padStart(2, '0')}${rgb.g.toString(16).padStart(2, '0')}${rgb.r.toString(16).padStart(2, '0')}&`
-}
-
-function buildTranscriptForRender() {
-  return {
-    segments: transcriptSegments.value.map(s => ({
-      startTime: s.startTime,
-      endTime: s.endTime,
-      text: s.text,
-      words: (s.words || []).map(w => ({
-        text: w.text,
-        startTime: w.startTime,
-        endTime: w.endTime
-      }))
-    }))
-  }
 }
 
 async function downloadWithSelectedStyle() {
@@ -646,37 +583,23 @@ async function downloadWithSelectedStyle() {
   saveStatus.value = { type: 'text-blue-600', message: 'Duke përpunuar videon...' }
   
   try {
-    const preset = currentPreset.value
-    
-    const positionMap = {
-      top: 8,
-      middle: 5,
-      bottom: 2
-    }
+    const preset = captionPresets.find(p => p.id === selectedPresetId.value) || captionPresets[0];
 
-    const style = {
-      fontName: 'Poppins',
-      fontSize: preset.fontSize,
-      outline: preset.outlineWidth,
-      borderStyle: 1,
-      alignment: positionMap[preset.position],
-      karaoke: true,
-      primaryColour: hexToASSColor(preset.textColor),
-      secondaryColour: hexToASSColor(preset.textColor),
-      outlineColour: hexToASSColor(preset.outlineColor),
-      backColour: preset.hasBackground ? hexToASSColor(preset.backgroundColor) : '&H80000000&'
-    }
-
-    // Build transcript segments array directly
+    // Build transcript segments array directly (include words for karaoke)
     const segments = transcriptSegments.value.map(s => ({
       startTime: s.startTime,
       endTime: s.endTime,
-      text: s.text
+      text: s.text,
+      words: (s.words || []).map(w => ({
+        text: w.text,
+        startTime: w.startTime,
+        endTime: w.endTime
+      }))
     }))
 
-    // Determine source video dimensions and pass them to the render API.
-    let outputWidth = 1280
-    let outputHeight = 720
+    // Determine source video dimensions
+    let outputWidth = 1080 // Default vertical assumption if missing
+    let outputHeight = 1920
     const videoEl = videoPlayer.value
     if (videoEl) {
       if (videoEl.videoWidth && videoEl.videoHeight) {
@@ -695,7 +618,11 @@ async function downloadWithSelectedStyle() {
         transcript: {
           segments: segments
         },
-        style,
+        style: {
+            ...preset.backendOpts,
+            videoWidth: outputWidth,
+            videoHeight: outputHeight
+        },
         output: {
           width: outputWidth,
           height: outputHeight
@@ -733,8 +660,8 @@ async function downloadWithSelectedStyle() {
   <div class="max-w-6xl mx-auto font-poppins">
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
       <!-- Transcript Panel -->
-      <div class="lg:col-span-3 bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="bg-[#FBFCFB] border-b border-gray-200 px-4 py-3 flex justify-between items-center">
+      <div class="lg:col-span-3 bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-[calc(100vh-100px)]">
+        <div class="bg-[#FBFCFB] border-b border-gray-200 px-4 py-3 flex justify-between items-center shrink-0">
           <h2 class="text-lg text-kollektif-bold text-primary">Segmentet e transkriptuara</h2>
           <div class="flex space-x-2">
             <button 
@@ -761,7 +688,6 @@ async function downloadWithSelectedStyle() {
                 {{ isDownloadingSRT ? 'Downloading...' : 'Shkarko Titra' }}
               </button>
               
-              <!-- Dropdown Menu -->
               <div 
                 v-if="showSubtitleDropdown"
                 class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-50"
@@ -781,7 +707,6 @@ async function downloadWithSelectedStyle() {
               </div>
             </div>
 
-            <!--Download embedded captions (burned-in) -->
             <button
               @click="downloadEmbeddedCaptionsModalCall"
               class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center"
@@ -805,9 +730,7 @@ async function downloadWithSelectedStyle() {
           </div>
         </div>
 
-        <!-- Transcript Segments -->
-        <div class="p-4">
-          <div class="h-[calc(100vh-250px)] overflow-y-auto">
+        <div class="p-4 flex-1 overflow-y-auto">
             <SegmentRow
               v-for="(segment, index) in transcriptSegments"
               :key="index"
@@ -823,69 +746,48 @@ async function downloadWithSelectedStyle() {
             <p v-if="saveStatus" class="text-sm mt-2" :class="saveStatus.type">
               {{ saveStatus.message }}
             </p>
-          </div>
         </div>
       </div>
 
       <!-- Video Panel -->
-      <div class="lg:col-span-2 bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="lg:col-span-2 bg-white rounded-lg shadow-md overflow-hidden flex flex-col gap-4">
         <div class="bg-[#FBFCFB] border-b border-gray-200 px-4 py-3">
-          <!-- Display mode -->
           <div v-if="!isEditingFilename" class="flex items-center justify-between">
-            <h2 class="text-lg text-kollektif-bold text-primary">{{ originalFilenameLocal }}</h2>
+            <h2 class="text-lg text-kollektif-bold text-primary truncate pr-2">{{ originalFilenameLocal }}</h2>
             <button 
               @click="startEditingFilename"
-              class="ml-2 px-3 py-1 text-sm bg-primary text-white rounded hover:bg-[#033027] transition-colors"
+              class="ml-2 shrink-0 px-3 py-1 text-sm bg-primary text-white rounded hover:bg-[#033027] transition-colors"
             >
-              <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-              </svg>
               Edito
             </button>
           </div>
-          <!-- Edit mode -->
-          <div v-else class="space-y-2">
-            <div class="flex items-center space-x-2">
-              <input
-                ref="filenameInput"
-                v-model="editedFilename"
-                @keydown="handleFilenameKeydown"
-                type="text"
-                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-gray-800 font-poppins"
-                placeholder="Enter filename"
-              />
-              <button
-                @click="saveFilename"
-                :disabled="isSavingFilename"
-                class="px-3 py-2 bg-secondary text-primary rounded hover:bg-[#7ED089] disabled:opacity-50 transition-colors text-sm"
-              >
-                <svg v-if="isSavingFilename" class="w-4 h-4 inline mr-1 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <svg v-else class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                {{ isSavingFilename ? 'Duke u ruajtur...' : 'Ruaj' }}
-              </button>
-              <button
-                @click="cancelEditingFilename"
-                :disabled="isSavingFilename"
-                class="px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-50 transition-colors text-sm"
-              >
-                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-                Anulo
-              </button>
-            </div>
-            <p v-if="filenameError" class="text-red-600 text-sm flex items-center font-poppins">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-              </svg>
-              {{ filenameError }}
-            </p>
+          <div v-else class="flex items-center gap-2">
+            <input
+              ref="filenameInput"
+              v-model="editedFilename"
+              @keydown="handleFilenameKeydown"
+              type="text"
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-gray-800 font-poppins"
+              placeholder="Enter filename"
+            />
+            <button
+              @click="saveFilename"
+              :disabled="isSavingFilename"
+              class="px-2 py-1 bg-secondary text-primary rounded hover:bg-[#7ED089] text-xs"
+            >
+              Ruaj
+            </button>
+            <button
+              @click="cancelEditingFilename"
+              :disabled="isSavingFilename"
+              class="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 text-xs"
+            >
+              Anulo
+            </button>
           </div>
+          <p v-if="filenameError" class="text-red-600 text-xs mt-1 font-poppins">
+            {{ filenameError }}
+          </p>
         </div>
 
         <div class="p-4">
@@ -921,10 +823,7 @@ async function downloadWithSelectedStyle() {
                 @click="skipBackward(5)"
                 class="flex items-center text-xs font-medium text-primary px-2 py-1 hover:bg-[#F4F9F7] rounded"
               >
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z"></path>
-                </svg>
-                5s
+                -5s
               </button>
             </div>
             
@@ -936,81 +835,27 @@ async function downloadWithSelectedStyle() {
               @click="skipForward(5)"
               class="flex items-center text-xs font-medium text-primary px-2 py-1 hover:bg-[#F4F9F7] rounded"
             >
-              5s
-              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-              </svg>
+              +5s
             </button>
           </div>
           
-          <!-- Segment Controls -->
-          <div class="mt-4 flex justify-between">
+          <div class="mt-2 flex justify-between">
             <button 
               @click="playPreviousSegment"
-              class="flex items-center text-sm font-medium text-primary px-3 py-1.5 bg-[#FBFCFB] hover:bg-[#F4F9F7] rounded transition-colors"
+              class="flex items-center text-sm font-medium text-primary px-3 py-1.5 bg-[#FBFCFB] border border-gray-100 hover:bg-[#F4F9F7] rounded transition-colors"
               :disabled="currentSegmentIndex <= 0"
               :class="{ 'opacity-50 cursor-not-allowed': currentSegmentIndex <= 0 }"
             >
-              <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-              </svg>
               Para
             </button>
             <button 
               @click="playNextSegment"
-              class="flex items-center text-sm font-medium text-primary px-3 py-1.5 bg-[#FBFCFB] hover:bg-[#F4F9F7] rounded transition-colors"
+              class="flex items-center text-sm font-medium text-primary px-3 py-1.5 bg-[#FBFCFB] border border-gray-100 hover:bg-[#F4F9F7] rounded transition-colors"
               :disabled="currentSegmentIndex >= transcriptSegments.length - 1"
               :class="{ 'opacity-50 cursor-not-allowed': currentSegmentIndex >= transcriptSegments.length - 1 }"
             >
               Pas
-              <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
             </button>
-          </div>
-        </div>
-
-        <!-- Segment settings -->
-        <div class="mt-4 px-4 pb-4">
-          <div class="border border-gray-200 rounded-md p-3">
-            <h3 class="text-sm text-kollektif-bold text-primary mb-2">Segmentation Settings</h3>
-            <div class="space-y-3">
-              <div>
-                <label class="block text-xs text-gray-600 mb-1 font-poppins">Max words per segment</label>
-                <div class="flex items-center">
-                  <input 
-                    type="range" 
-                    v-model.number="maxWordsPerSegment"
-                    min="5" 
-                    max="30" 
-                    step="1"
-                    class="w-full h-2 bg-[#FBFCFB] rounded-lg appearance-none cursor-pointer"
-                  />
-                  <span class="ml-2 text-sm font-medium w-8 text-gray-700 font-poppins">{{ maxWordsPerSegment }}</span>
-                </div>
-              </div>
-              <div>
-                <label class="block text-xs text-gray-600 mb-1 font-poppins">Pause threshold (seconds)</label>
-                <div class="flex items-center">
-                  <input 
-                    type="range" 
-                    v-model.number="segmentOverlapThreshold"
-                    min="0.5" 
-                    max="3" 
-                    step="0.1"
-                    class="w-full h-2 bg-[#FBFCFB] rounded-lg appearance-none cursor-pointer"
-                  />
-                  <span class="ml-2 text-sm font-medium w-8 text-gray-700 font-poppins">{{ segmentOverlapThreshold.toFixed(1) }}</span>
-                </div>
-              </div>
-              <button 
-                @click="reprocessSegments"
-                class="w-full px-3 py-1.5 text-sm bg-primary text-white rounded hover:bg-[#033027] transition-colors mt-2"
-                :disabled="!hasOriginalTranscription"
-              >
-                Reprocess Segments
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -1022,13 +867,16 @@ async function downloadWithSelectedStyle() {
     <transition name="fade">
       <div 
         v-if="downloadModal" 
-        class="fixed inset-0 z-[1000] bg-black/50 flex items-center justify-center p-4"
+        class="fixed inset-0 z-[1000] bg-black/50 flex items-center justify-center p-4 font-poppins"
       >
         <!-- Modal -->
-        <div class="w-full max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden">
+        <div class="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
           <!-- Header -->
-          <div class="bg-primary px-6 py-4 flex items-center justify-between">
-            <h2 class="text-xl font-bold text-white">Shkarko videon me titra</h2>
+          <div class="bg-primary px-6 py-4 flex items-center justify-between shrink-0">
+            <div>
+              <h2 class="text-xl font-bold text-white">Shkarko videon me titra</h2>
+              <p class="text-white/60 text-xs mt-0.5">Zgjidhni një stil për titrat tuaja</p>
+            </div>
             <button
               @click="closeDownloadModal"
               class="text-white hover:text-gray-200"
@@ -1040,46 +888,56 @@ async function downloadWithSelectedStyle() {
           </div>
 
           <!-- Content -->
-          <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Left: Presets -->
-            <div class="space-y-3">
-              <label class="block text-sm font-medium text-primary mb-3">Zgjedhni stilin</label>
-              <div class="space-y-2">
-                <button
-                  v-for="preset in captionPresets"
-                  :key="preset.id"
-                  @click="selectPreset(preset)"
-                  class="w-full text-left px-4 py-3 border-2 rounded transition-all"
-                  :class="selectedPresetId === preset.id 
-                    ? 'border-secondary bg-secondary/10' 
-                    : 'border-gray-200 hover:border-gray-300'"
-                >
-                  <p class="font-medium text-primary text-sm">{{ preset.name }}</p>
-                  <p class="text-xs text-gray-600 mt-1">{{ preset.description }}</p>
-                </button>
+          <div class="flex-1 overflow-hidden flex flex-col lg:flex-row">
+            
+            <!-- Left: Presets List -->
+            <div class="w-full lg:w-5/12 bg-gray-50 border-r border-gray-200 overflow-y-auto p-4 space-y-3">
+              <div 
+                v-for="preset in captionPresets"
+                :key="preset.id"
+                @click="selectedPresetId = preset.id"
+                class="group cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md bg-white"
+                :class="selectedPresetId === preset.id 
+                  ? 'border-secondary ring-1 ring-secondary/30' 
+                  : 'border-transparent hover:border-gray-200'"
+              >
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-bold text-primary">{{ preset.name }}</span>
+                  <div 
+                    class="w-4 h-4 rounded-full border flex items-center justify-center"
+                    :class="selectedPresetId === preset.id ? 'border-secondary bg-secondary' : 'border-gray-300'"
+                  >
+                    <div v-if="selectedPresetId === preset.id" class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500">{{ preset.description }}</p>
               </div>
             </div>
 
             <!-- Right: Preview -->
-            <div class="flex flex-col gap-3">
-              <p class="text-sm text-gray-600">Paraqitje paraprakisht</p>
-              <div class="flex-1 bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center relative min-h-64">
-                <!-- Preview background -->
-                <div class="absolute inset-0 bg-gradient-to-b from-gray-800 to-black opacity-60"></div>
+            <div class="w-full lg:w-7/12 bg-[#1a1a1a] relative flex items-center justify-center p-8 overflow-hidden">
+              <div class="relative w-full aspect-[9/16] max-h-[60vh] bg-black shadow-2xl rounded-lg overflow-hidden border border-white/10">
+                <!-- Preview background image -->
+                <img 
+                  src="https://images.unsplash.com/photo-1616469829941-c7200edec809?q=80&w=2070&auto=format&fit=crop" 
+                  class="w-full h-full object-cover opacity-50"
+                  alt="Video Preview" 
+                />
                 
-                <!-- Caption preview based on position -->
-                <div 
-                  class="relative px-4 font-bold text-center w-full"
-                  :style="getPreviewStyle()"
-                >
-                  Këtu shfaqen titrat
+                <!-- Computed Style Preview -->
+                <div :style="currentPreviewStyle">
+                  Këtu shfaqen titrat<br>për videon tuaj
+                </div>
+                
+                <div class="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm font-bold">
+                  PREVIEW
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Footer -->
-          <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-3">
+          <div class="px-6 py-4 border-t border-gray-200 bg-white flex items-center justify-end gap-3 shrink-0">
             <button
               @click="closeDownloadModal"
               class="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
@@ -1089,9 +947,13 @@ async function downloadWithSelectedStyle() {
             </button>
             <button
               @click="downloadWithSelectedStyle"
-              class="px-4 py-2 text-sm bg-secondary text-primary rounded hover:bg-[#7dd87b] disabled:opacity-50 font-medium"
+              class="px-4 py-2 text-sm bg-secondary text-primary rounded hover:bg-[#7dd87b] disabled:opacity-50 font-medium flex items-center gap-2"
               :disabled="isDownloadingVideo"
             >
+              <svg v-if="isDownloadingVideo" class="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
               {{ isDownloadingVideo ? 'Duke shkarkuar...' : 'Shkarko videon' }}
             </button>
           </div>
