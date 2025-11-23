@@ -158,7 +158,6 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Logo_lines from './logos/Logo_lines.vue';
-import Curved_line from './items/Curved_line.vue';
 import Upload from './Upload.vue';
 import FooterComponent from './FooterComponent.vue';
 import Payment from './Payment.vue';
