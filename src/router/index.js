@@ -13,9 +13,6 @@ import ResetPassword from '../components/views/reset-password.vue';
 import Upload from '../components/Upload.vue';
 import PaymentSuccess from '../components/views/PaymentSuccess.vue';
 
-// Import example routes
-import exampleRoutes, { setupExampleRouteGuard } from '../examples/auth-learning/exampleRouter'
-
 const routes = [
   {
     path: '/',
@@ -108,10 +105,6 @@ const routes = [
     name: 'Activate Account',
     component: AccountActivation,
   },
-  
-  // Add example routes here
-  ...exampleRoutes,
-  
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
