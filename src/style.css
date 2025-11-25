@@ -39,19 +39,19 @@
 /* Font Faces */
 @font-face {
   font-family: 'kollektif';
-  src: url('/fonts/kollektif.ttf') format('truetype');
+  src: url('@assets/fonts/kollektif.ttf') format('truetype');
 }
 @font-face {
   font-family: 'kollektif-Italic';
-  src: url('/fonts/kollektif-Italic.ttf') format('truetype');
+  src: url('@assets/fonts/kollektif-Italic.ttf') format('truetype');
 }
 @font-face {
   font-family: 'kollektif-Bold';
-  src: url('/fonts/kollektif-Bold.ttf') format('truetype');
+  src: url('@assets/fonts/kollektif-Bold.ttf') format('truetype');
 }
 @font-face {
   font-family: 'kollektif-BoldItalic';
-  src: url('/fonts/kollektif-BoldItalic.ttf') format('truetype');
+  src: url('@assets/fonts/kollektif-BoldItalic.ttf') format('truetype');
 }
 
 .text-kollektif {

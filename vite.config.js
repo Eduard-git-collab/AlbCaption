@@ -13,9 +13,6 @@ export default defineConfig({
       '@assets': path.resolve(__dirname, './src/assets'),
     },
   },
-  // You generally don't need explicit HMR/server settings for production builds.
-  // Vercel/Netlify handle this for you.
-  // If you are running 'vite preview' locally, this is fine.
   server: {
     allowedHosts: [
       'albcaptions.com',
