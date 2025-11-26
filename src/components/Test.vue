@@ -690,6 +690,25 @@
       </a>
     </div>
 
+    <ConfirmModal
+    v-if="showDeleteModal"
+    :title="'Fshirje Transkripti'"
+    :message="`Jeni të sigurt që doni të fshini '${transactionToDelete?.original_filename}'? Ky veprim nuk mund të zhbëhet.`"
+    icon="warning"
+    confirm-text="Fshi"
+    confirm-variant="danger"
+    cancel-text="Anulo"
+    :show-footer="true"
+    @confirm="confirmDelete"
+    @cancel="cancelDelete"
+    @close="cancelDelete"
+>
+    <template #body>
+    <p v-if="deleteError" class="text-red-600 mb-2">{{ deleteError }}</p>
+    <p v-if="deleteLoading" class="text-gray-500">Deleting...</p>
+    </template>
+  </ConfirmModal>
+
     <!-- Profile Dropdown Menu -->
     <div
       v-if="showProfileDropdown"
@@ -1460,8 +1479,11 @@ const cancelDeactivate = () => {
 
 // Transaction deletion logic
 const promptDelete = (transaction) => {
+  console.log("Attempting transaction deletion")
   transactionToDelete.value = transaction;
   showDeleteModal.value = true;
+  console.log("Transaction set for deletion:", showDeleteModal.value)
+  console.log("Transaction to delete:", transactionToDelete.value)
   deleteError.value = null;
 };
 
