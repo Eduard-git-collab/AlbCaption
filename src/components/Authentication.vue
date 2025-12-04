@@ -1,9 +1,9 @@
 <template>
   <div class="min-h-screen w-screen bg-gray-100 overflow-x-hidden">
       <div class="p-2 sm:p-3 w-full h-full">
-          <div class="min-h-screen flex flex-col md:flex-row gap-2 md:gap-4">
+          <div class="h-screen flex flex-col md:flex-row gap-2 md:gap-4">
               <!-- Left Section -->
-              <div class="w-full md:w-2/5 h-auto md:h-screen bg-primary rounded-2xl md:rounded-4xl relative py-8 md:py-0 order-2 md:order-1">
+              <div class="w-full md:w-2/5 h-auto md:min-h-screen bg-primary rounded-2xl md:rounded-4xl relative py-8 md:py-0 order-2 md:order-1">
                   <div class="h-full z-10 relative w-full">
                       <div class="h-full w-full py-6 sm:py-8 md:py-10 px-4 sm:px-5 flex justify-between flex-col">
                           <div class="flex w-full flex-col gap-3 sm:gap-4">
@@ -40,7 +40,7 @@
               </div> 
 
               <!-- Right Section -->
-              <div class="w-full md:w-3/5 h-auto md:h-screen rounded-2xl md:rounded-3xl order-1 md:order-2">
+              <div class="w-full md:w-3/5 h-auto md:h-fit rounded-2xl md:rounded-3xl order-1 md:order-2">
                   <!-- Sign Up Form -->
                   <form v-if="!showLogin" @submit="handleSignUp" class="w-full h-full py-6 sm:py-8 md:py-10 px-3 sm:px-4 md:px-6 rounded-2xl md:rounded-3xl overflow-y-auto md:overflow-hidden">
                       <div class="w-full h-fit flex flex-col items-center gap-2 sm:gap-3">
@@ -53,7 +53,7 @@
                           <span class="text-primary text-xs sm:text-sm md:text-base font-poppins font-thin text-center">
                               Plotëso formularin më poshtë për të krijuar llogarinë
                           </span>
-                          <div v-if="error && !isInactiveAccount" class="bg-red-300 border border-red-400 text-xs sm:text-sm text-red-500 font-poppins font-normal p-2 sm:p-3 rounded-xl w-full max-w-md">
+                          <div v-if="error && !isInactiveAccount" class="bg-red-300 border border-red-400 text-xs text-red-500 font-poppins font-normal p-2 sm:p-3 rounded-xl w-full max-w-md">
                               {{ error }}
                           </div>
                           <div v-if="success" class="bg-green-500 bg-opacity-20 border border-green-500 text-white text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-3 rounded-full mt-3 sm:mt-5 w-full max-w-md">
@@ -166,11 +166,11 @@
                           </button>
                           <span class="text-primary text-xs font-poppins font-normal text-center px-2 leading-relaxed">
                               Duke vazhduar, ti pranon
-                              <a href="#" class="text-primary font-bold underline hover:text-secondary transition-all duration-300 ease-in-out">Kushtet e Shërbimit</a> 
+                              <a href="" @click.prevent="promptToSModal" class="text-primary font-bold underline hover:text-secondary transition-all duration-300 ease-in-out">Kushtet e Përdorimit</a> 
                               dhe 
-                              <a href="#" class="text-primary font-bold underline hover:text-secondary transition-all duration-300 ease-in-out">Politikën tonë të Privatësisë</a>
+                              <a href="" @click.prevent="promptPrivacyPolicy" class="text-primary font-bold underline hover:text-secondary transition-all duration-300 ease-in-out">Politikën tonë të Privatësisë</a>
                           </span>
-                          <div class="w-full flex items-center justify-center gap-2">
+                          <div class="w-full flex items-center justify-center">
                               <button 
                                   type="button" 
                                   @click="toggleForm" 
@@ -198,7 +198,7 @@
                               {{ error }}
                           </div>
                           <div v-if="isInactiveAccount" @click.prevent="handleInactiveAccountClick" class="bg-yellow-300 border border-yellow-400 text-xs text-yellow-700 font-poppins font-normal p-2 sm:p-3 rounded-xl cursor-pointer hover:bg-yellow-400 transition-colors duration-300 w-full max-w-md text-center">
-                            {{ error }} <span class="underline"> Klikoni këtu për riaktivizim. </span>
+                            {{ error }} <span class="underline"> Kliko këtu për riaktivizim. </span>
                           </div>
                           <div v-if="success" class="bg-green-300 border border-green-400 text-green-500 font-poppins font-normal p-2 sm:p-3 rounded-xl text-xs sm:text-sm w-full max-w-md">
                               {{ success }}
@@ -266,6 +266,12 @@
           </div>
       </div>
   </div>
+  <ToSModal
+    v-model:open="ShowToSModal"
+  />
+  <PrivacyPolicyModal
+    v-model:open="ShowPrivacyPolicy"
+  />
 </template>
 
 <script setup>
@@ -275,6 +281,17 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { supabase } from '@/lib/supabaseClient.js';
 import apiClient from '@/stores/apiClient.js';
+import PrivacyPolicyModal from './items/PrivacyPolicyModal.vue';
+import ToSModal from './items/ToSModal.vue';
+
+const ShowPrivacyPolicy = ref(false);
+const ShowToSModal = ref(false);
+const promptPrivacyPolicy = () => {
+  ShowPrivacyPolicy.value = true;
+};
+const promptToSModal = () => {
+  ShowToSModal.value = true;
+};
 
 const props = defineProps({
   isLogin: {

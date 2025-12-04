@@ -1,14 +1,15 @@
 <template>
   <span 
     ref="animationSpan"
-    class="absolute rounded-full bg-primary ease-out flex items-center justify-center z-100" 
-    :class="isClicked ? 'w-[170vmax] h-[200vmax] transition-all duration-[2s]' : 'w-0 h-0 transition-all duration-[0.5s]'"
+    class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary ease-out flex items-center justify-center" 
+    :class="isClicked ? 'w-[170vmax] h-[200vmax] transition-all duration-[2s] z-100' : 'w-0 h-0 transition-all duration-[0.5s] z-0'"
   >
     <div
       id="processing_container"
       class="w-screen h-screen flex items-center justify-center"
     >
-      <div class="flex items-center gap-2">
+      <!-- Desktop Version (MD+) - Keeps original whitespace-nowrap and max-width animation -->
+      <div class="items-center gap-2 md:flex hidden">
         <span
           class="text-4xl text-kollektif font-bold text-secondary whitespace-nowrap overflow-hidden wipe-transition"
           :class="showText ? 'wipe-open' : 'wipe-close'"
@@ -24,6 +25,25 @@
           <span class="dot dot-3">.</span>
         </span>
       </div>
+
+      <!-- Mobile Version (SM) - Allows text breaking, uses clip-path for stability -->
+      <div class="flex md:hidden flex-wrap items-center justify-center gap-1 max-w-[90vw] text-center">
+        <span
+          class="text-4xl text-kollektif font-bold text-secondary mobile-wipe-transition"
+          :class="showText ? 'mobile-wipe-open' : 'mobile-wipe-close'"
+        >
+          {{ processingStateMessage }}
+        </span>
+        <span
+          v-if="isClicked"
+          class="text-2xl text-kollektif font-bold text-secondary flex items-center"
+        >
+          <span class="dot dot-1">.</span>
+          <span class="dot dot-2">.</span>
+          <span class="dot dot-3">.</span>
+        </span>
+      </div>
+
     </div>
   </span>
 </template>
@@ -52,6 +72,8 @@ const processingStateMessage = computed(() => {
       return 'Procesimi perfundoi me sukses.'
     case 'error':
       return 'Një error është shfaqur gjatë procesimit.'
+    case 'embedding':
+      return 'Duke shkarkuar videon me titra'
     default:
       return 'Video duke u procesuar'
   }
@@ -67,45 +89,29 @@ function enableScroll() {
   document.documentElement.style.overflow = ''
 }
 
-function scrollToCenter() {
-  if (animationSpan.value) {
-    const spanRect = animationSpan.value.getBoundingClientRect()
-    const spanCenterY = spanRect.top + window.scrollY + (spanRect.height / 2)
-    const viewportCenterY = window.innerHeight / 2
-    const scrollToY = spanCenterY - viewportCenterY
-    window.scrollTo({
-      top: Math.max(0, scrollToY),
-      behavior: 'smooth'
-    })
-  }
-}
-
 function start() {
   if (isClicked.value) return
-  scrollToCenter()
-  setTimeout(() => {
-    isClicked.value = true
-    disableScroll()
-    setTimeout(() => { showText.value = true }, 400)
-    // auto re-enable scroll after main expansion
-    setTimeout(() => { enableScroll() }, 2000)
-  }, 500)
+  
+  isClicked.value = true
+  disableScroll()
+  
+  setTimeout(() => { showText.value = true }, 400)
 }
 
 function stop() {
   showText.value = false
-  disableScroll()
+  disableScroll() 
   setTimeout(() => {
     isClicked.value = false
     setTimeout(() => { enableScroll() }, 500)
   }, 1500)
 }
 
-// Auto-stop when state transitions to final states (safety net)
 watch(() => props.state, (newState) => {
   if (newState === 'complete' || newState === 'error') {
     setTimeout(() => { isClicked.value = false }, 2000)
     showText.value = false
+    setTimeout(() => { enableScroll() }, 2500)
   }
 })
 
@@ -127,6 +133,21 @@ defineExpose({ start, stop })
   opacity: 0.5;
 }
 
+/* Mobile Wipe - Clip Path Animation (Prevents reflow on wrapped text) */
+.mobile-wipe-transition {
+  transition: clip-path 1s cubic-bezier(.4,0,.2,1), opacity 0.4s;
+  display: inline-block;
+}
+.mobile-wipe-open {
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+}
+.mobile-wipe-close {
+  clip-path: inset(0 100% 0 0);
+  opacity: 0;
+}
+
+/* Dots Animation */
 .dot {
   animation: bounce 1.4s infinite ease-in-out;
   font-size: 3rem;

@@ -13,6 +13,8 @@ import ResetPassword from '../components/views/reset-password.vue';
 import Upload from '../components/Upload.vue';
 import PaymentSuccess from '../components/views/PaymentSuccess.vue';
 
+import Login from '../components/Login.vue';
+
 const routes = [
   {
     path: '/',
@@ -98,6 +100,11 @@ const routes = [
     path: '/account-activation',
     name: 'Activate Account',
     component: AccountActivation,
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login
   },
   {
     path: '/:pathMatch(.*)*',

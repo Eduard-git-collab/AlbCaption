@@ -97,8 +97,8 @@ export default {
 
       // API
       apiUrl: 
-      //'http://localhost:3000',
-      'https://albcaptions-api-488229739417.europe-west4.run.app',
+      'http://localhost:3000',
+      //'https://albcaptions-api-488229739417.europe-west4.run.app',
       // 'https://8064aa68daa5.ngrok-free.app',
 
       // Global processing state (drives overlay)

@@ -20,6 +20,7 @@ const downloadModal = ref(false)
 const isSavingTranscript = ref(false)
 const saveStatus = ref(null)
 const showSubtitleDropdown = ref(false)
+const isMenuOpen = ref(false);
 
 // Video playback properties
 const currentVideoTime = ref(0)
@@ -215,6 +216,11 @@ function onVideoTimeUpdate() {
 function onVideoSeeking() {
   updateCurrentSegment()
 }
+
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+};
+
 
 function togglePlayback() {
   const video = videoPlayer.value
@@ -663,7 +669,7 @@ async function downloadWithSelectedStyle() {
       <div class="lg:col-span-3 bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-[calc(100vh-100px)]">
         <div class="bg-[#FBFCFB] border-b border-gray-200 px-4 py-3 flex justify-between items-center shrink-0">
           <h2 class="text-lg text-kollektif-bold text-primary">Segmentet e transkriptuara</h2>
-          <div class="flex space-x-2">
+          <div class="md:flex hidden space-x-2">
             <button 
               @click="copyTranscript" 
               class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center"
@@ -728,6 +734,18 @@ async function downloadWithSelectedStyle() {
               Ruaj të gjitha
             </button>
           </div>
+          <div class="md:hidden block self-end" @click.outside="isMenuOpen = false">
+            <button @click="toggleMenu" class="p-2 rounded-md bg-secondary text-primary hover:bg-secondary/70 cursor-pointer duration-200 transition-all">
+              <svg class="w-6 h-6" fill="#000000" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+              </svg>
+            </button>
+            <div v-if="isMenuOpen" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+              <a @click="copyTranscript" class="cursor-pointer block px-4 py-2 text-sm text-primary hover:bg-gray-100">Kopjo</a>
+              <a href="#" class="cursor-pointer block px-4 py-2 text-sm text-primary hover:bg-gray-100">Shkarko Titrat</a>
+              <a @click="downloadEmbeddedCaptionsModalCall" class="cursor-pointer block px-4 py-2 text-sm text-primary hover:bg-gray-100">Shkarko me Titra</a>
+            </div>
+          </div> 
         </div>
 
         <div class="p-4 flex-1 overflow-y-auto">

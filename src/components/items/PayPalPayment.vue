@@ -184,32 +184,35 @@ const discount = computed(() => (!props.plan || !props.isYearly) ? null : props.
 const yearlyTotal = computed (() => (!props.plan || !props.isYearly) ? null : props.plan.yearlytotal.yearly)
 
 const formatDateSq = (date) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  try {
-    return new Intl.DateTimeFormat('sq-AL', options).format(date);
-  } catch (_) {}
-  const monthsSq = ['janar','shkurt','mars','prill','maj','qershor','korrik','gusht','shtator','tetor','nëntor','dhjetor'];
+  const monthsSq = [
+    'Janar', 'Shkurt', 'Mars', 'Prill', 'Maj', 'Qershor',
+    'Korrik', 'Gusht', 'Shtator', 'Tetor', 'Nëntor', 'Dhjetor'
+  ];
   return `${date.getDate()} ${monthsSq[date.getMonth()]} ${date.getFullYear()}`;
 };
 
 const nextBillingDate = computed(() => {
   const today = new Date();
   const nextDate = new Date(today);
+
   if (props.isYearly) {
     nextDate.setFullYear(today.getFullYear() + 1);
   } else {
     const currentDay = today.getDate();
     nextDate.setMonth(today.getMonth() + 1);
+
     if (currentDay === 31) {
-      const lastDayOfNextMonth = new Date(nextDate.getFullYear(), nextDate.getMonth() + 1, 0).getDate();
-      if (lastDayOfNextMonth < 31) {
+      const lastDay = new Date(nextDate.getFullYear(), nextDate.getMonth() + 1, 0).getDate();
+      if (lastDay < 31) {
         nextDate.setDate(1);
         nextDate.setMonth(nextDate.getMonth() + 1);
       }
     }
   }
+
   return formatDateSq(nextDate);
 });
+
 
 const billingCycle = computed(() => (props.isYearly ? 'Vjetore' : 'Mujore'))
 </script>
@@ -420,9 +423,9 @@ const billingCycle = computed(() => (props.isYearly ? 'Vjetore' : 'Mujore'))
                     </div>
                     <p class="text-xs text-center text-gray-400 mt-2 max-w-md leading-relaxed">
                         Duke vazhduar, ju pranoni 
-                        <a href="/terms" class="text-primary underline hover:text-secondary" target="_blank">Kushtet</a> 
+                        <a href="/terms" class="text-primary underline hover:text-secondary" target="_blank">Kushtet e Përdorimit</a> 
                         dhe 
-                        <a href="/privacy" class="text-primary underline hover:text-secondary" target="_blank">Privatësinë</a>.
+                        <a href="/privacy" class="text-primary underline hover:text-secondary" target="_blank">Politikat e Privatësisë</a>.
                     </p>
                 </div>
             </div>

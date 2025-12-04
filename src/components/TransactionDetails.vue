@@ -4,9 +4,11 @@ import { useRoute, useRouter } from 'vue-router';
 import { supabase } from '@/lib/supabaseClient';
 import SegmentRow from '@/components/subcomponents/SegmentRow.vue';
 import apiClient from '@/stores/apiClient'
+import ProcessingOverlay from '@/components/subcomponents/ProcessingOverlay.vue';
 
 const route = useRoute();
 const router = useRouter();
+const isMenuOpen = ref(false);
 const transaction = ref(null);
 const loading = ref(true);
 const unauthorized = ref(false);
@@ -49,8 +51,12 @@ const isSavingFilename = ref(false);
 const filenameError = ref(null);
 const filenameInput = ref(null);
 
+// Processing overlay (embedding download)
+const overlay = ref(null);
+const processingState = ref(null); // null | 'uploading' | 'processing' | 'complete' | 'error' | 'embedding'
+const processingStep = ref(null);  // null | 'audio-extraction' | 'transcribing' | ...
+
 // --- PRESETS CONFIGURATION ---
-// These maps directly to your backend's transcriptToAss options
 const captionPresets = [
   {
     id: 'karaoke',
@@ -143,6 +149,10 @@ const showMessage = (message, isError = false) => {
     saveStatusMessage.value = '';
     isSaveError.value = false;
   }, 2500);
+};
+
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
 };
 
 // Watch for transaction changes
@@ -287,13 +297,15 @@ async function downloadSubtitles(format) {
     const downloadUrl = `${apiUrl.value}/download-${format.toLowerCase()}/${transaction.value.processing_id}?t=${Date.now()}`;
     const link = document.createElement('a'); link.href = downloadUrl; link.download = `${originalFilenameLocal.value ? originalFilenameLocal.value.replace(/\.[^/.]+$/, '') : 'transcript'}.${format.toUpperCase()}`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
   } catch (e) { console.error('Download error:', e); showMessage(`Failed to download: ${e.message || 'Unknown error'}`, true); } finally { isDownloadingSRT.value = false; }
+  isMenuOpen.value = false;
 }
 
-function copyTranscript() { const fullText = transcriptSegments.value.map(s => s.text).join(' '); navigator.clipboard.writeText(fullText).then(() => showMessage('Transkripti u kopjua')).catch(err => showMessage('Kopjimi dështoi', true)); }
+function copyTranscript() { const fullText = transcriptSegments.value.map(s => s.text).join(' '); navigator.clipboard.writeText(fullText).then(() => showMessage('Transkripti u kopjua')).catch(err => showMessage('Kopjimi dështoi', true)); isMenuOpen.value = false; }
 
 function downloadEmbeddedCaptionsModalCall() {
   downloadModal.value = true;
   selectedPresetId.value = 'karaoke';
+  isMenuOpen.value = false;
 }
 
 function closeDownloadModal() {
@@ -306,12 +318,16 @@ async function downloadWithSelectedStyle() {
   
   isDownloadingVideo.value = true;
   showMessage('Duke përpunuar videon...');
+
+  // Start processing overlay in "embedding" state
+  processingState.value = 'embedding';
+  processingStep.value = null;
+  await nextTick();
+  overlay.value?.start();
   
   try {
     const preset = captionPresets.find(p => p.id === selectedPresetId.value) || captionPresets[0];
     
-    // IMPORTANT: Ensure we pass the words if the style is Karaoke, otherwise just text is fine
-    // The backend expects 'segments' array where each segment has 'words' if karaoke=true.
     const segments = transcriptSegments.value.map(s => ({
       startTime: s.startTime,
       endTime: s.endTime,
@@ -338,7 +354,7 @@ async function downloadWithSelectedStyle() {
         transcript: { segments: segments }, // Pass full structure including words
         style: { 
             ...preset.backendOpts,
-            videoWidth: outputWidth, // Ensure fonts scale somewhat correctly relative to video size
+            videoWidth: outputWidth,
             videoHeight: outputHeight
         }, 
         output: { width: outputWidth, height: outputHeight } 
@@ -349,10 +365,19 @@ async function downloadWithSelectedStyle() {
     link.href = url; link.download = `${baseName}-captioned.mp4`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
 
     closeDownloadModal();
-    showMessage('Video shkarkuar me sukses!');
+    setTimeout(() => {
+      showMessage('Video shkarkuar me sukses!');
+    }, 2500);
+    // Mark overlay as complete and stop
+    processingState.value = 'complete';
+    processingStep.value = null;
+    overlay.value?.stop();
   } catch (error) {
     console.error('Error downloading video:', error);
     showMessage(`Gabim: ${error.message}`, true);
+    processingState.value = 'error';
+    processingStep.value = null;
+    overlay.value?.stop();
   } finally {
     isDownloadingVideo.value = false;
   }
@@ -360,6 +385,13 @@ async function downloadWithSelectedStyle() {
 </script>
 
 <template>
+  <!-- Processing Overlay -->
+  <ProcessingOverlay
+    ref="overlay"
+    :state="processingState"
+    :step="processingStep"
+  />
+
   <!-- Toast Notification -->
   <div
     v-if="showSaveStatus"
@@ -402,9 +434,9 @@ async function downloadWithSelectedStyle() {
           <div class="lg:col-span-3 bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-[calc(100vh-140px)]">
             <div class="bg-[#FBFCFB] border-b border-gray-200 px-4 py-3 flex justify-between items-center shrink-0">
               <h2 class="text-lg text-kollektif-bold text-primary">Segmentet e transkriptuara</h2>
-              <div class="flex space-x-2">
+              <div class="hidden space-x-2 md:flex">
                 <button @click="copyTranscript" class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center">
-                  <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Kopjo
+                  <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2 2h-8a2 2 0 00-2 2z" /></svg> Kopjo
                 </button>
 
                 <div class="relative">
@@ -425,6 +457,19 @@ async function downloadWithSelectedStyle() {
                   <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg> Ruaj
                 </button>
               </div>
+              <div class="md:hidden block self-end">
+                <button @click="toggleMenu" class="p-2 rounded-md bg-secondary text-primary hover:bg-secondary/70 cursor-pointer duration-200 transition-all">
+                  <svg class="w-6 h-6" fill="#000000" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                  </svg>
+                </button>
+                <div v-if="isMenuOpen" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                  <a @click="copyTranscript" class="cursor-pointer block px-4 py-2 text-sm text-primary hover:bg-gray-100">Kopjo</a>
+                  <a @click="downloadSubtitles('srt')" class="cursor-pointer block px-4 py-2 text-sm text-primary hover:bg-gray-100">Shkarko SRT</a>
+                  <a @click="downloadSubtitles('vtt')" class="cursor-pointer block px-4 py-2 text-sm text-primary hover:bg-gray-100">Shkarko VTT</a>
+                  <a @click="downloadEmbeddedCaptionsModalCall" class="cursor-pointer block px-4 py-2 text-sm text-primary hover:bg-gray-100">Shkarko me Titra</a>
+                </div>
+              </div>  
             </div>
 
             <div class="p-4 flex-1 overflow-y-auto">
@@ -489,7 +534,7 @@ async function downloadWithSelectedStyle() {
   <!-- Simplified Download Modal -->
   <teleport to="body">
     <transition name="fade">
-      <div v-if="downloadModal" class="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-poppins">
+      <div v-if="downloadModal" class="fixed inset-0 z-[50] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-poppins">
         <div class="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
           
           <!-- Header -->

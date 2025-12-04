@@ -14,7 +14,7 @@
       <div class="relative z-10 w-full max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
   
         <!-- Cards Stack Container -->
-        <div class="relative h-[600px] lg:h-[700px] w-full">
+        <div class="relative h-[600px] xl:h-[650px] 2xl:h-[700px] w-full">
           
           <!-- Card 1: Introduction -->
           <div
@@ -22,7 +22,7 @@
             class="absolute top-0 left-0 w-full rounded-3xl shadow-2xl overflow-hidden border border-cream bg-white"
             style="will-change: transform; z-index: 10;"
           >
-            <div class="flex flex-col lg:flex-row h-[600px] lg:h-[700px]">
+            <div class="flex flex-col lg:flex-row h-[600px]">
               <!-- Left Content -->
               <div class="w-full lg:w-3/5 p-8 lg:p-16 flex flex-col justify-center relative overflow-hidden order-2 lg:order-1">
                 <div class="absolute inset-0 opacity-[0.03]">
@@ -32,10 +32,10 @@
                 <div class="relative z-10 space-y-6 lg:space-y-10">
                   <div>
                     <!-- Larger text sizes for desktop -->
-                    <h3 class="text-3xl sm:text-4xl lg:text-6xl xl:text-7xl font-kollektif font-bold text-primary mb-6 lg:mb-8 leading-tight">
+                    <h3 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-kollektif font-bold text-primary mb-6 lg:mb-8 leading-tight">
                       Bizneset Moderne Kerkojne Zgjidhje Praktike
                     </h3>
-                    <p class="text-base sm:text-lg lg:text-xl xl:text-2xl text-primary/80 font-poppins leading-relaxed">
+                    <p class="text-base sm:text-lg lg:text-xl 2xl:text-2xl text-primary/80 font-poppins leading-relaxed">
                       Nëse po përpiqesh të ndërtosh një audiencë në TikTok, Instagram apo YouTube për të shitur produkte ose për të rritur ndikimin tënd, titrimi manual i videove mund të të kushtojë orë të tëra. Orë që mund t’i shpenzosh për të krijuar videon e radhës.
                     </p>
                   </div>
@@ -52,7 +52,7 @@
                   </svg>
                 </div>
   
-                <RouterLink to="/signup" class="relative z-10 hidden lg:block">
+                <RouterLink to="/signup" class="relative z-10 block">
                   <button class="text-kollektif text-xl xl:text-2xl hover:text-secondary hover:bg-primary text-primary py-3 px-6 rounded-xl transition-all duration-200 cursor-pointer bg-secondary border-2 border-secondary">
                     Provo Falas AlbCaptions
                   </button>
@@ -71,7 +71,7 @@
             class="absolute top-0 left-0 w-full rounded-3xl shadow-2xl overflow-hidden border border-cream bg-white"
             style="will-change: transform; z-index: 20;"
           >
-            <div class="flex flex-col lg:flex-row h-[600px] lg:h-[700px]">
+            <div class="flex flex-col lg:flex-row h-[600px]">
               <!-- Left Illustration (Reversed Layout on Desktop) -->
               <div class="w-full lg:w-2/5 relative overflow-hidden bg-primary/5 border-b lg:border-b-0 lg:border-r border-gray-100 h-64 lg:h-auto order-1">
                 <div class="absolute inset-0 text-primary pointer-events-none">
@@ -96,10 +96,10 @@
   
                 <div class="relative z-10 space-y-6 lg:space-y-10">
                   <div>
-                    <h3 class="text-3xl sm:text-4xl lg:text-6xl xl:text-7xl font-kollektif font-bold text-primary mb-6 lg:mb-8 leading-tight">
+                    <h3 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-kollektif font-bold text-primary mb-6 lg:mb-8 leading-tight">
                       Nuk ka rëndesi thelbi i videos nëse askush nuk po e shikon
                     </h3>
-                    <p class="text-base sm:text-lg lg:text-xl xl:text-2xl text-primary/80 font-poppins leading-relaxed">
+                    <p class="text-base sm:text-lg lg:text-xl 2xl:text-2xl text-primary/80 font-poppins leading-relaxed">
                       Audiencat nuk ndërtohen për një ditë. Suksesi në rrjetet sociale kërkon strategji dhe mjete specifike për të tërhequr vëmendjen dhe për të mbajtur audiencën të angazhuar.
                     </p>
                   </div>
@@ -114,7 +114,7 @@
             class="absolute top-0 left-0 w-full rounded-3xl shadow-2xl overflow-hidden border border-cream bg-white"
             style="will-change: transform; z-index: 30;"
           >
-            <div class="flex flex-col lg:flex-row h-[600px] lg:h-[700px]">
+            <div class="flex flex-col lg:flex-row h-[600px]">
               <!-- Left Content -->
               <div class="w-full lg:w-3/5 p-8 lg:p-16 flex flex-col justify-center relative overflow-hidden order-2 lg:order-1">
                 <div class="absolute inset-0 opacity-[0.03]">
@@ -123,10 +123,10 @@
   
                 <div class="relative z-10 space-y-6 lg:space-y-10">
                   <div>
-                    <h3 class="text-3xl sm:text-4xl lg:text-6xl xl:text-7xl font-kollektif font-bold text-primary mb-6 lg:mb-8 leading-tight">
+                    <h3 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-kollektif font-bold text-primary mb-6 lg:mb-8 leading-tight">
                       98% saktësi në çdo dialekt nga AlbCaptions
                     </h3>
-                    <div class="text-base sm:text-lg lg:text-xl xl:text-2xl text-primary/80 font-poppins leading-relaxed space-y-4">
+                    <div class="text-base sm:text-lg lg:text-xl 2xl:text-2xl text-primary/80 font-poppins leading-relaxed">
                       <p>
                         AlbCaptions përdor një proces të automatizuar që konverton zërin në titra dhe i sinkronizon ato me videon përkatëse (98% saktësi).
                       </p>

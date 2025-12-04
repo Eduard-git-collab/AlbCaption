@@ -66,8 +66,8 @@
                     <RouterLink to="/upload" class="text-lg sm:text-xl text-secondary font-poppins hover:text-white transition-colors">Ngarko</RouterLink>
                     <RouterLink to="/faq" class="text-lg sm:text-xl text-secondary font-poppins hover:text-white transition-colors">FAQ</RouterLink>
                     <RouterLink to="/contact" class="text-lg sm:text-xl text-secondary font-poppins hover:text-white transition-colors">Na Kontakto</RouterLink>
-                    <RouterLink to="/tos" class="text-lg sm:text-xl text-secondary font-poppins hover:text-white transition-colors">Kushtet e Përdorimit</RouterLink>
-                    <RouterLink to="/pp" class="text-lg sm:text-xl text-secondary font-poppins hover:text-white transition-colors">Politikat e Privatësisë</RouterLink>
+                    <a href="" @click.prevent="promptToSModal" class="text-lg sm:text-xl text-secondary font-poppins hover:text-white transition-colors">Kushtet e Përdorimit</a>
+                    <a href="" @click.prevent="promptPrivacyPolicy" class="text-lg sm:text-xl text-secondary font-poppins hover:text-white transition-colors">Politikat e Privatësisë</a>
                 </div>
                 
                 <!-- Divider -->
@@ -89,6 +89,12 @@
             </div>
         </div>
     </div>
+    <ToSModal
+        v-model:open="ShowToSModal"
+    />
+    <PrivacyPolicyModal
+        v-model:open="ShowPrivacyPolicy"
+    />
 </template>
   
 <script setup>
@@ -98,6 +104,18 @@ import gmail_logo from './logos/gmail.vue';
 import facebook_logo from './logos/facebook.vue';
 import instagram_logo from './logos/instagram.vue';
 import linkedin_logo from './logos/linkedin.vue';
+import PrivacyPolicyModal from './items/PrivacyPolicyModal.vue';
+import ToSModal from './items/ToSModal.vue';
+import { ref } from 'vue';
+
+const ShowPrivacyPolicy = ref(false);
+const ShowToSModal = ref(false);
+const promptPrivacyPolicy = () => {
+  ShowPrivacyPolicy.value = true;
+};
+const promptToSModal = () => {
+  ShowToSModal.value = true;
+};
 </script>
 
 <style scoped>
