@@ -128,25 +128,17 @@
       </div>
     </div>
 
-    <StackedCards class="my-20"/>
+    <StackedCards class="mb-20"/>
     <BentoGrid class="my-20"/>
     <Upload class="my-20"/>
     <Payment class="my-20"/>
 
-    <!-- 
-      FAQ + Footer Stacking Logic 
-      - We wrap FAQ in a generic container.
-      - We place Footer AFTER it.
-      - GSAP will pin FAQ, allowing Footer to slide over.
-    -->
     <div class="relative mt-20">
-      <!-- Z-Index 0: Stays behind when pinned -->
-      <div ref="faqContainer" class="relative z-0">
+      <!-- Sticky FAQ container -->
+      <div class="sticky top-0 z-0">
         <FAQ/>
       </div>
-
-      <!-- Z-Index 50: Slides OVER the pinned FAQ -->
-      <div class="relative z-50 shadow-2xl">
+      <div class="relative z-50 shadow-2xl bg-white">
         <FooterComponent />
       </div>
     </div>
@@ -154,9 +146,6 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Logo_lines from './logos/Logo_lines.vue';
 import Upload from './Upload.vue';
 import FooterComponent from './FooterComponent.vue';
@@ -165,26 +154,4 @@ import FAQ from './FAQ.vue';
 import BentoGrid from './subcomponents/BentoGrid.vue';
 import StackedCards from './subcomponents/StackedCards.vue';
 
-gsap.registerPlugin(ScrollTrigger);
-
-const faqContainer = ref(null);
-let ctx;
-
-onMounted(() => {
-  ctx = gsap.context(() => {
-    // Logic: Pin the FAQ section so the Footer slides over it
-    ScrollTrigger.create({
-      trigger: faqContainer.value,
-      start: "top top",     // When top of FAQ hits top of viewport
-      end: "bottom top",    // Pin until the bottom of FAQ hits top (effectively 100vh duration if h-screen)
-      pin: true,            // Pin the FAQ
-      pinSpacing: false,    // Important: allows the Footer to overlap instead of being pushed down
-      scrub: true
-    });
-  });
-});
-
-onUnmounted(() => {
-  if (ctx) ctx.revert();
-});
 </script>

@@ -969,8 +969,6 @@ const passwordForm = ref({
   confirm: ''
 });
 const passwordError = ref(null);
-const passwordLoading = ref(false);
-const passwordSuccess = ref(null);
 
 const recentTranscripts = ref([])
 
@@ -1384,6 +1382,42 @@ async function getAllUsers() {
     allUsersLoading.value = false;
   }
 }
+
+const confirmDelete = async () => {
+  if (!transactionToDelete.value) return;
+  const transactionId = transactionToDelete.value.id;
+  const videoUrl = transactionToDelete.value.video_url;
+  
+  try{
+
+    await apiClient.post(`/delete/transcription/${transactionId}`, {
+      video_url: videoUrl
+    });
+    showDeleteModal.value = false;
+    setTimeout(() => {
+      showDeletionError.value = true;
+      isError.value = false;
+      showDeletionErrorMessage.value = 'Transkripti u fshi me sukses.';
+      getTranscripts();
+      getRecentTranscripts();
+      setTimeout(() => {
+        showDeletionError.value = false;
+        showDeletionErrorMessage.value = '';
+      }, 3000);
+    }, 500);
+  }
+  catch (error) {
+    console.error('[DASHBOARD] Error deleting transcript:', error);
+    deleteError.value = error.message || 'Failed to delete transcript.';
+    return;
+  }
+};
+
+const cancelDelete = () => {
+  showDeleteModal.value = false;
+  transactionToDelete.value = null;
+  deleteError.value = null;
+};
 
 // Helper function to check if user is admin
 const isAdmin = () => {

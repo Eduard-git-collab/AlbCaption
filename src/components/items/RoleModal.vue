@@ -147,17 +147,19 @@
                                     </label>
                                     <div class="flex items-center gap-2">
                                         <input
-                                            v-model.number="form.srt_exports_per_month"
-                                            type="number"
+                                            :value="form.srt_exports_per_month === 10000 ? 'Pafundësi' : form.srt_exports_per_month"
+                                            @input="form.srt_exports_per_month = $event.target.value === 'Pafundësi' ? 10000 : Number($event.target.value)"
+                                            type="text"
                                             min="0"
                                             placeholder="Pafundësi"
                                             class="flex-1 px-4 py-2 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
                                         />
+
                                         <label class="flex items-center gap-2 cursor-pointer whitespace-nowrap">
                                             <input
                                                 type="checkbox"
-                                                @change="form.srt_exports_per_month = $event.target.checked ? 10 : 0"
-                                                :checked="form.srt_exports_per_month === 10"
+                                                @change="form.srt_exports_per_month = $event.target.checked ? 10000 : 0"
+                                                :checked="form.srt_exports_per_month === 10000"
                                                 class="w-4 h-4"
                                             />
                                             <span class="text-sm text-primary/70 font-poppins">Pafundësi</span>

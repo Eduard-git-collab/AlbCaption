@@ -15,6 +15,8 @@ const unauthorized = ref(false);
 
 // Video player reference
 const videoPlayer = ref(null);
+const loopingSegment = ref(null);
+const isLoopingSeek = ref(false);
 
 // UI state properties
 const isDownloadingSRT = ref(false);
@@ -39,8 +41,6 @@ const isVideoPlaying = ref(false);
 // Transcript related
 const transcriptSegments = ref([]);
 const currentSegmentIndex = ref(-1);
-const maxWordsPerSegment = ref(15);
-const segmentOverlapThreshold = ref(1.5);
 const hasOriginalTranscription = ref(false);
 
 // Filename editing
@@ -53,89 +53,254 @@ const filenameInput = ref(null);
 
 // Processing overlay (embedding download)
 const overlay = ref(null);
-const processingState = ref(null); // null | 'uploading' | 'processing' | 'complete' | 'error' | 'embedding'
-const processingStep = ref(null);  // null | 'audio-extraction' | 'transcribing' | ...
+const processingState = ref(null);
+const processingStep = ref(null);
 
 // --- PRESETS CONFIGURATION ---
 const captionPresets = [
+  {
+    id: 'tiktok',
+    name: 'TikTok Style',
+    description: 'Big bold text, 2-3 words at a time.',
+    previewCss: { 
+      color:  '#FFFFFF', 
+      textShadow: '3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000', 
+      background: 'transparent' 
+    },
+    backendOpts:  {
+      karaoke: true,
+      primaryColour: '&H0000FFFF&',   // Active Word (Yellow) - BGR format
+      secondaryColour: '&H00FFFFFF&', // Inactive Word (White)
+      outlineColour: '&H00000000&',   // Black Outline
+      backColour: '&H00000000&',
+      borderStyle: 1,
+      outline: 6,
+      fontSize: 120,
+      alignment: 5,      // Center of screen (middle)
+      marginV: 0,
+      shadow: 2
+    },
+    maxWordsPerSegment: 3,
+    overlapThreshold: 0.5
+  },
   {
     id: 'karaoke',
     name: 'Karaoke (Active)',
     description: 'Green highlight on spoken words.',
     previewCss: { color: '#9FE29E', textShadow: '2px 2px 0 #000', background: 'transparent' },
-    backendOpts: {
+    backendOpts:  {
       karaoke: true,
       primaryColour: '&H009EE29F&',   // Active Word (Green) - BGR format
       secondaryColour: '&H00FFFFFF&', // Inactive Word (White)
-      outlineColour: '&H00000000&',   // Black Outline
+      outlineColour:  '&H00000000&',   // Black Outline
       backColour: '&H00000000&',
-      borderStyle: 1, // Outline
+      borderStyle:  1,
       outline: 4,
-      fontSize: 72
-    }
+      fontSize: 72,
+      alignment: 2,
+      marginV: 120
+    },
+    maxWordsPerSegment: 15,
+    overlapThreshold:  1.5
   },
   {
     id: 'classic',
     name: 'Classic White',
     description: 'Clean white text with outline.',
     previewCss: { color: '#FFFFFF', textShadow: '2px 2px 0 #000', background: 'transparent' },
-    backendOpts: {
+    backendOpts:  {
       karaoke: false,
-      primaryColour: '&H00FFFFFF&',   // White
+      primaryColour: '&H00FFFFFF&',
       secondaryColour: '&H00FFFFFF&',
-      outlineColour: '&H00000000&',   // Black
-      backColour: '&H00000000&',
-      borderStyle: 1, // Outline
+      outlineColour: '&H00000000&',
+      backColour:  '&H00000000&',
+      borderStyle: 1,
       outline: 4,
-      fontSize: 72
-    }
+      fontSize: 72,
+      alignment: 2,
+      marginV: 120
+    },
+    maxWordsPerSegment:  15,
+    overlapThreshold: 1.5
   },
   {
-    id: 'boxed',
+    id:  'boxed',
     name: 'Boxed Background',
     description: 'White text on semi-transparent box.',
     previewCss: { color: '#FFFFFF', textShadow: 'none', background: 'rgba(0,0,0,0.6)' },
     backendOpts: {
       karaoke: false,
-      primaryColour: '&H00FFFFFF&',   // White
-      secondaryColour: '&H00FFFFFF&',
+      primaryColour: '&H00FFFFFF&',
+      secondaryColour:  '&H00FFFFFF&',
       outlineColour: '&H00000000&',
-      backColour: '&H80000000&',      // Semi-transparent Black Background
-      borderStyle: 3, // Opaque Box
+      backColour: '&H80000000&',
+      borderStyle: 3,
       outline: 0,
-      fontSize: 64
-    }
+      fontSize: 64,
+      alignment: 2,
+      marginV: 120
+    },
+    maxWordsPerSegment: 15,
+    overlapThreshold: 1.5
   }
-]
+];
 
 // API URL
 const apiUrl = ref(import.meta.env.VITE_API_URL || 'http://localhost:8000');
+
+// Computed: current preset
+const currentPreset = computed(() => {
+  return captionPresets.find(p => p.id === selectedPresetId.value) || captionPresets[0];
+});
+
+// Computed: max words per segment based on preset
+const maxWordsPerSegment = computed(() => {
+  return currentPreset.value?.maxWordsPerSegment ??  15;
+});
+
+// Computed: overlap threshold based on preset
+const segmentOverlapThreshold = computed(() => {
+  return currentPreset.value?.overlapThreshold ??  1.5;
+});
 
 const hasUnsavedChanges = computed(() => {
   return transcriptSegments.value.some(s => s.originalText !== s.text || s.isEditing);
 });
 
-// Computed Preview Style for the Modal
-const currentPreviewStyle = computed(() => {
-  const preset = captionPresets.find(p => p.id === selectedPresetId.value) || captionPresets[0];
+// Constants for scaling
+const REFERENCE_HEIGHT = 1920;
+const BASE_PREVIEW_FONT_PX = 32;
+const ASS_FONT_FACTOR = 0.0375;
+
+// Compute the video dimensions used for scaling
+function getVideoDimensions() {
+  const videoEl = videoPlayer.value;
+  if (videoEl) {
+    if (videoEl.videoWidth && videoEl.videoHeight) {
+      return { width: videoEl.videoWidth, height: videoEl.videoHeight };
+    }
+    if (videoEl.clientWidth && videoEl.clientHeight) {
+      return { width: Math.round(videoEl.clientWidth), height: Math.round(videoEl.clientHeight) };
+    }
+  }
+  return { width: 1080, height: 1920 };
+}
+
+// Computes scaled style values for a preset given video dimensions
+function computeScaledStyle(preset, videoWidth, videoHeight) {
+  const backend = preset?.backendOpts || {};
+  const borderStyle = backend.borderStyle ??  1;
+  const baseOutline = backend.outline ?? 4;
+  const baseMarginV = backend.marginV ??  120;
+  const baseShadow = backend.shadow ??  0;
+  const baseFontSizeAss = backend.fontSize ?? Math.round(videoHeight * ASS_FONT_FACTOR);
+
+  const isTiktok = preset?.id === 'tiktok';
+
+  // Preview font (CSS px) scaled from baseline preview size
+  const previewFontPxRaw = Math.round(BASE_PREVIEW_FONT_PX * (videoHeight / REFERENCE_HEIGHT));
+  const previewFontPx = Math.min(Math.max(previewFontPxRaw, 12), 128);
+
+  // ASS font size - larger for TikTok style
+  const fontSizeAss = isTiktok 
+    ? Math.max(10, Math.round(videoHeight * ASS_FONT_FACTOR * 1.8))
+    : Math.max(10, Math.round(videoHeight * ASS_FONT_FACTOR));
+
+  // Outline scaled proportionally
+  const outline = Math.min(Math.max(Math.round(baseOutline * (videoHeight / REFERENCE_HEIGHT)), 0), 64);
+
+  // marginV scaled (vertical margin)
+  const marginV = Math.max(0, Math.round(baseMarginV * (videoHeight / REFERENCE_HEIGHT)));
+
+  // shadow scaled
+  const shadow = Math.max(0, Math.round(baseShadow * (videoHeight / REFERENCE_HEIGHT)));
+
   return {
-    fontFamily: "'Poppins', sans-serif",
+    previewFontPx,
+    fontSizeAss,
+    outline,
+    marginV,
+    shadow,
+    borderStyle,
+    alignment: Number(backend.alignment ??  2),
+    previewCss: preset?.previewCss ??  {}
+  };
+}
+
+// Computed Preview Wrapper Style
+const currentPreviewWrapperStyle = computed(() => {
+  const preset = currentPreset.value;
+  const { width: vw, height:  vh } = getVideoDimensions();
+  const scaled = computeScaledStyle(preset, vw, vh);
+
+  const horizMap = {
+    1: 'flex-start', 2: 'center', 3: 'flex-end',
+    4: 'flex-start', 5: 'center', 6: 'flex-end',
+    7: 'flex-start', 8: 'center', 9: 'flex-end'
+  };
+  const vertMap = {
+    1: 'flex-end', 2: 'flex-end', 3: 'flex-end',
+    4: 'center', 5: 'center', 6: 'center',
+    7: 'flex-start', 8: 'flex-start', 9: 'flex-start'
+  };
+
+  const alignment = scaled.alignment || 2;
+  const paddingBottom = [1,2,3].includes(alignment) ? `${scaled.marginV}px` : undefined;
+  const paddingTop = [7,8,9].includes(alignment) ? `${scaled.marginV}px` : undefined;
+  const middlePad = [4,5,6].includes(alignment) ? `${Math.round(scaled.marginV / 2)}px` : undefined;
+
+  return {
+    display: 'flex',
+    justifyContent: horizMap[alignment] || 'center',
+    alignItems: vertMap[alignment] || 'flex-end',
+    width: '100%',
+    height: '100%',
+    boxSizing: 'border-box',
+    paddingLeft: '4%',
+    paddingRight: '4%',
+    paddingBottom:  paddingBottom ??  middlePad,
+    paddingTop: paddingTop ?? middlePad
+  };
+});
+
+// Computed Caption Style
+const currentPreviewCaptionStyle = computed(() => {
+  const preset = currentPreset.value;
+  const { width: vw, height:  vh } = getVideoDimensions();
+  const scaled = computeScaledStyle(preset, vw, vh);
+
+  const alignment = scaled.alignment || 2;
+  const textAlignMap = {
+    1: 'left', 2: 'center', 3: 'right',
+    4: 'left', 5: 'center', 6: 'right',
+    7: 'left', 8: 'center', 9: 'right'
+  };
+
+  const isBox = scaled.borderStyle === 3;
+  const isTiktok = preset.id === 'tiktok';
+
+  return {
+    fontFamily: `'Poppins', sans-serif`,
     fontWeight: '900',
-    fontSize: '32px',
-    textAlign: 'center',
-    lineHeight: '1.4',
-    padding: preset.backendOpts.borderStyle === 3 ? '8px 16px' : '0',
-    borderRadius: preset.backendOpts.borderStyle === 3 ? '6px' : '0',
+    fontSize: isTiktok 
+      ? `${Math.min(scaled.previewFontPx * 1.8, 64)}px`
+      : `${scaled.previewFontPx}px`,
+    textAlign: textAlignMap[alignment] || 'center',
+    lineHeight: isTiktok ?  '1.2' : '1.4',
+    textTransform: isTiktok ? 'uppercase' : 'none',
+    letterSpacing: isTiktok ?  '2px' : 'normal',
+    padding: isBox ? '8px 16px' : '0',
+    borderRadius: isBox ? '6px' : '0',
     color: preset.previewCss.color,
-    textShadow: preset.previewCss.textShadow,
-    backgroundColor: preset.previewCss.background,
-    // Position relative to preview container
-    position: 'absolute',
-    bottom: '30px', 
-    left: '50%',
-    transform: 'translateX(-50%)',
-    width: '90%',
-    whiteSpace: 'normal'
+    textShadow: preset.previewCss.textShadow || undefined,
+    backgroundColor: preset.previewCss.background || 'transparent',
+    maxWidth: isTiktok ? '80%' : '92%',
+    whiteSpace: 'normal',
+    wordBreak: isTiktok ? 'break-word' : 'normal',
+    WebkitTextStroke: scaled.outline 
+      ? `${Math.max(1, Math.round(scaled.outline * (isTiktok ? 0.8 : 0.6)))}px rgba(0,0,0,0.85)` 
+      : 'none',
+    boxSizing: 'border-box'
   };
 });
 
@@ -154,6 +319,19 @@ const showMessage = (message, isError = false) => {
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
+
+// Watch for preset changes to re-segment
+watch(selectedPresetId, (newId, oldId) => {
+  const oldPreset = captionPresets.find(p => p.id === oldId);
+  const newPreset = captionPresets.find(p => p.id === newId);
+  
+  const oldMax = oldPreset?.maxWordsPerSegment ??  15;
+  const newMax = newPreset?.maxWordsPerSegment ?? 15;
+  
+  if (oldMax !== newMax && hasOriginalTranscription.value) {
+    createTranscriptSegments();
+  }
+});
 
 // Watch for transaction changes
 watch(transaction, (newTransaction) => {
@@ -174,7 +352,6 @@ onMounted(async () => {
     loading.value = false;
     return;
   }
-  const userId = session.user.id;
 
   const { data, error } = await supabase
     .from('transactions')
@@ -183,9 +360,6 @@ onMounted(async () => {
     .single();
 
   if (error || !data) {
-    transaction.value = null;
-    unauthorized.value = true;
-  } else if (data.user_id !== userId) {
     unauthorized.value = true;
     transaction.value = null;
   } else {
@@ -194,6 +368,7 @@ onMounted(async () => {
       video_url: data.videos?.video_url || null,
     };
   }
+
   loading.value = false;
 
   nextTick(() => {
@@ -203,108 +378,471 @@ onMounted(async () => {
   });
 });
 
-function startEditingFilename() { isEditingFilename.value = true; editedFilename.value = originalFilenameLocal.value || ''; filenameError.value = null; nextTick(() => filenameInput.value?.focus()); }
-function cancelEditingFilename() { isEditingFilename.value = false; editedFilename.value = ''; filenameError.value = null; }
-async function saveFilename() {
-  if (!editedFilename.value.trim()) { filenameError.value = 'Filename cannot be empty'; return; }
-  if (!transaction.value?.processing_id) { filenameError.value = 'Processing ID not found'; return; }
-  isSavingFilename.value = true; filenameError.value = null;
-  try {
-    const response = await fetch(`${apiUrl.value}/update-filename/${transaction.value.processing_id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ original_filename: editedFilename.value.trim() }) });
-    if (!response.ok) throw new Error((await response.json()).message || 'Failed to update filename');
-    const { error } = await supabase.from('transactions').update({ original_filename: editedFilename.value.trim(), updated_at: new Date().toISOString() }).eq('id', transaction.value.id);
-    if (error) throw error;
-    originalFilenameLocal.value = editedFilename.value.trim(); transaction.value.original_filename = editedFilename.value.trim();
-    isEditingFilename.value = false; editedFilename.value = ''; showMessage('Filename updated successfully');
-  } catch (e) { filenameError.value = e.message; } finally { isSavingFilename.value = false; }
+function startEditingFilename() {
+  isEditingFilename.value = true;
+  editedFilename.value = originalFilenameLocal.value || '';
+  filenameError.value = null;
+  nextTick(() => filenameInput.value?.focus());
 }
-function handleFilenameKeydown(event) { if (event.key === 'Enter') saveFilename(); else if (event.key === 'Escape') cancelEditingFilename(); }
 
-function setupVideoEvents() { const video = videoPlayer.value; if (!video) return; video.addEventListener('loadedmetadata', () => { videoDuration.value = video.duration; }); video.addEventListener('durationchange', () => { videoDuration.value = video.duration; }); }
-function onVideoTimeUpdate() { const video = videoPlayer.value; if (video) { currentVideoTime.value = video.currentTime; updateCurrentSegment(); } }
-function onVideoSeeking() { updateCurrentSegment(); }
-function togglePlayback() { const video = videoPlayer.value; if (!video) return; if (video.paused) video.play(); else video.pause(); }
-function formatVideoTime(seconds) { if (isNaN(seconds)) return '00:00'; const mins = Math.floor(seconds / 60); const secs = Math.floor(seconds % 60); return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; }
-function skipBackward(seconds) { const video = videoPlayer.value; if (!video) return; video.currentTime = Math.max(0, video.currentTime - seconds); }
-function skipForward(seconds) { const video = videoPlayer.value; if (!video) return; video.currentTime = Math.min(video.duration, video.currentTime + seconds); }
+function cancelEditingFilename() {
+  isEditingFilename.value = false;
+  editedFilename.value = '';
+  filenameError.value = null;
+}
+
+async function saveFilename() {
+  if (!editedFilename.value.trim()) {
+    filenameError.value = 'Filename cannot be empty';
+    return;
+  }
+  if (! transaction.value?.processing_id) {
+    filenameError.value = 'Processing ID not found';
+    return;
+  }
+
+  isSavingFilename.value = true;
+  filenameError.value = null;
+
+  try {
+    const response = await apiClient.post(
+      `/update-filename/${transaction.value.processing_id}`,
+      { original_filename: editedFilename.value.trim() }
+    );
+
+    const { error } = await supabase
+      .from('transactions')
+      .update({ 
+        original_filename: editedFilename.value.trim(), 
+        updated_at: new Date().toISOString() 
+      })
+      .eq('id', transaction.value.id);
+
+    if (error) throw error;
+
+    originalFilenameLocal.value = editedFilename.value.trim();
+    transaction.value.original_filename = editedFilename.value.trim();
+    isEditingFilename.value = false;
+    editedFilename.value = '';
+    showMessage('Filename updated successfully');
+  } catch (e) {
+    filenameError.value = e.response?.data?.message || e.message;
+  } finally {
+    isSavingFilename.value = false;
+  }
+}
+
+function handleFilenameKeydown(event) {
+  if (event.key === 'Enter') saveFilename();
+  else if (event.key === 'Escape') cancelEditingFilename();
+}
+
+function setupVideoEvents() {
+  const video = videoPlayer.value;
+  if (!video) return;
+
+  video.addEventListener('loadedmetadata', () => {
+    videoDuration.value = video.duration;
+  });
+
+  video.addEventListener('durationchange', () => {
+    videoDuration.value = video.duration;
+  });
+}
+
+function onVideoTimeUpdate() {
+  const video = videoPlayer.value;
+  if (video) {
+    currentVideoTime.value = video.currentTime;
+    
+    // Loop Logic
+    if (loopingSegment.value && !video.paused) {
+      if (currentVideoTime.value >= loopingSegment.value.endTime) {
+        isLoopingSeek.value = true;
+        video.currentTime = loopingSegment.value.startTime;
+        video.play();
+      }
+    }
+
+    updateCurrentSegment();
+  }
+}
+
+function onVideoSeeking() {
+  if (isLoopingSeek.value) {
+    // If seeking was triggered by our loop logic, just reset flag
+    isLoopingSeek.value = false;
+  } else {
+    // If seeking was manual, clear the loop
+    loopingSegment.value = null;
+  }
+  updateCurrentSegment();
+}
+
+function togglePlayback() {
+  const video = videoPlayer.value;
+  if (! video) return;
+  if (video.paused) {
+    video.play();
+  } else {
+    video.pause();
+    loopingSegment.value = null; // Clear loop on pause
+  }
+}
+
+function formatVideoTime(seconds) {
+  if (isNaN(seconds)) return '00:00';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+function skipBackward(seconds) {
+  loopingSegment.value = null; // Clear loop
+  const video = videoPlayer.value;
+  if (!video) return;
+  video.currentTime = Math.max(0, video.currentTime - seconds);
+}
+
+function skipForward(seconds) {
+  loopingSegment.value = null; // Clear loop
+  const video = videoPlayer.value;
+  if (!video) return;
+  video.currentTime = Math.min(video.duration, video.currentTime + seconds);
+}
 
 function createTranscriptSegments(transcriptionJson = null) {
   const json = transcriptionJson || transaction.value?.transcription_json;
   if (!json || !json.results) return;
+
+  // Get current max words and overlap threshold (reactive based on preset)
+  const currentMaxWords = maxWordsPerSegment.value;
+  const currentOverlapThreshold = segmentOverlapThreshold.value;
+
   let allWords = [];
-  json.results.forEach(result => { if (result.words && Array.isArray(result.words)) { allWords.push(...result.words.map(word => ({ text: word.word, startTime: extractTimeInSeconds(word.startOffset), endTime: extractTimeInSeconds(word.endOffset) }))); } });
-  if (allWords.length === 0 && json.results[0]?.alternatives?.[0]?.words) { allWords.push(...json.results[0].alternatives[0].words.map(word => ({ text: word.word, startTime: extractTimeInSeconds(word.startTime), endTime: extractTimeInSeconds(word.endTime) }))); }
-  allWords.sort((a, b) => a.startTime - b.startTime);
-  const segments = [];
-  let currentSegment = { words: [], startTime: 0, endTime: 0, text: '', originalText: '', editText: '', isEditing: false };
-  for (const word of allWords) {
-    if (currentSegment.words.length === 0) { currentSegment.startTime = word.startTime; currentSegment.words.push(word); }
-    else if (currentSegment.words.length >= maxWordsPerSegment.value || word.startTime - currentSegment.words[currentSegment.words.length - 1].endTime > segmentOverlapThreshold.value) {
-      currentSegment.endTime = currentSegment.words[currentSegment.words.length - 1].endTime; currentSegment.text = currentSegment.words.map(w => w.text).join(' '); currentSegment.originalText = currentSegment.text; currentSegment.editText = currentSegment.text; segments.push(currentSegment);
-      currentSegment = { words: [word], startTime: word.startTime, endTime: 0, text: '', originalText: '', editText: '', isEditing: false };
-    } else { currentSegment.words.push(word); }
+  json.results.forEach(result => {
+    if (result.words && Array.isArray(result.words)) {
+      allWords.push(
+        ...result.words.map(word => ({
+          text: word.word,
+          startTime: extractTimeInSeconds(word.startOffset),
+          endTime: extractTimeInSeconds(word.endOffset),
+        }))
+      );
+    }
+  });
+
+  if (allWords.length === 0 && json.results[0]?.alternatives?.[0]?.words) {
+    allWords.push(
+      ...json.results[0].alternatives[0].words.map(word => ({
+        text:  word.word,
+        startTime: extractTimeInSeconds(word.startTime),
+        endTime: extractTimeInSeconds(word.endTime),
+      }))
+    );
   }
-  if (currentSegment.words.length > 0) { currentSegment.endTime = currentSegment.words[currentSegment.words.length - 1].endTime; currentSegment.text = currentSegment.words.map(w => w.text).join(' '); currentSegment.originalText = currentSegment.text; currentSegment.editText = currentSegment.text; segments.push(currentSegment); }
+
+  allWords.sort((a, b) => a.startTime - b.startTime);
+
+  const segments = [];
+  let currentSegment = {
+    words: [],
+    startTime: 0,
+    endTime: 0,
+    text: '',
+    originalText: '',
+    editText: '',
+    isEditing:  false,
+  };
+
+  for (const word of allWords) {
+    if (currentSegment.words.length === 0) {
+      currentSegment.startTime = word.startTime;
+      currentSegment.words.push(word);
+    } else if (
+      currentSegment.words.length >= currentMaxWords ||
+      word.startTime - currentSegment.words[currentSegment.words.length - 1].endTime > currentOverlapThreshold
+    ) {
+      currentSegment.endTime = currentSegment.words[currentSegment.words.length - 1].endTime;
+      currentSegment.text = currentSegment.words.map(w => w.text).join(' ');
+      currentSegment.originalText = currentSegment.text;
+      currentSegment.editText = currentSegment.text;
+      segments.push(currentSegment);
+
+      currentSegment = {
+        words: [word],
+        startTime: word.startTime,
+        endTime: 0,
+        text: '',
+        originalText: '',
+        editText: '',
+        isEditing: false,
+      };
+    } else {
+      currentSegment.words.push(word);
+    }
+  }
+
+  if (currentSegment.words.length > 0) {
+    currentSegment.endTime = currentSegment.words[currentSegment.words.length - 1].endTime;
+    currentSegment.text = currentSegment.words.map(w => w.text).join(' ');
+    currentSegment.originalText = currentSegment.text;
+    currentSegment.editText = currentSegment.text;
+    segments.push(currentSegment);
+  }
+
   transcriptSegments.value = segments;
 }
 
-function reprocessSegments() { if (!hasOriginalTranscription.value) return; if (hasUnsavedChanges.value && !confirm('Unsaved changes will be lost. Continue?')) return; createTranscriptSegments(); showMessage('Segments reprocessed'); }
-function beginEdit(index) { transcriptSegments.value.forEach((s, idx) => { if (idx !== index && s.isEditing) { s.isEditing = false; s.editText = s.text; } }); transcriptSegments.value[index].isEditing = true; transcriptSegments.value[index].editText = transcriptSegments.value[index].text; }
+function reprocessSegments() {
+  if (!hasOriginalTranscription.value) return;
+  if (hasUnsavedChanges.value && !confirm('Unsaved changes will be lost.Continue? ')) return;
+  createTranscriptSegments();
+  showMessage('Segments reprocessed');
+}
+
+function beginEdit(index) {
+  transcriptSegments.value.forEach((s, idx) => {
+    if (idx !== index && s.isEditing) {
+      s.isEditing = false;
+      s.editText = s.text;
+    }
+  });
+  transcriptSegments.value[index].isEditing = true;
+  transcriptSegments.value[index].editText = transcriptSegments.value[index].text;
+}
 
 function rebuildTranscriptionJson() {
   if (!transaction.value?.transcription_json) return null;
-  const updatedJson = { text: transcriptSegments.value.map(s => s.text).join(' '), results: [] };
+
+  const updatedJson = {
+    text: transcriptSegments.value.map(s => s.text).join(' '),
+    results: [],
+  };
+
   transcriptSegments.value.forEach(segment => {
     const segmentWords = segment.text.split(/\s+/).filter(w => w.trim());
-    const words = []; let originalWordIndex = 0;
+    const words = [];
+    let originalWordIndex = 0;
+
     segmentWords.forEach((editedWord) => {
       const originalWord = segment.words[originalWordIndex] || segment.words[segment.words.length - 1];
-      if (originalWord) { words.push({ word: editedWord, startOffset: originalWord.startOffset || { seconds: Math.floor(originalWord.startTime || 0), nanos: Math.floor(((originalWord.startTime || 0) % 1) * 1e9) }, endOffset: originalWord.endOffset || { seconds: Math.floor(originalWord.endTime || 0), nanos: Math.floor(((originalWord.endTime || 0) % 1) * 1e9) }, confidence: originalWord.confidence || 0.9, speakerLabel: originalWord.speakerLabel || "" }); originalWordIndex++; }
+      if (originalWord) {
+        words.push({
+          word: editedWord,
+          startOffset: originalWord.startOffset || {
+            seconds: Math.floor(originalWord.startTime || 0),
+            nanos: Math.floor(((originalWord.startTime || 0) % 1) * 1e9),
+          },
+          endOffset: originalWord.endOffset || {
+            seconds: Math.floor(originalWord.endTime || 0),
+            nanos: Math.floor(((originalWord.endTime || 0) % 1) * 1e9),
+          },
+          confidence: originalWord.confidence || 0.9,
+          speakerLabel: originalWord.speakerLabel || '',
+        });
+        originalWordIndex++;
+      }
     });
-    if (words.length > 0) { updatedJson.results.push({ words: words, confidence: segment.words[0]?.confidence || 0.9, transcript: segment.text }); }
+
+    if (words.length > 0) {
+      updatedJson.results.push({
+        words: words,
+        confidence: segment.words[0]?.confidence || 0.9,
+        transcript: segment.text,
+      });
+    }
   });
+
   return updatedJson;
 }
 
 async function saveAllSegments() {
-  if (!transaction.value?.processing_id) { showMessage('Processing ID not found', true); return; }
+  if (!transaction.value?.processing_id) {
+    showMessage('Processing ID not found', true);
+    return;
+  }
+
   isSavingTranscript.value = true;
+
   try {
     const updatedJson = rebuildTranscriptionJson();
     if (!updatedJson) throw new Error('Failed to rebuild transcription JSON');
+
     await apiClient.post(`/update-transcription/${transaction.value.processing_id}`, { transcription_json: updatedJson });
-    const { data: updatedTransaction, error: fetchError } = await supabase.from('transactions').select('*').eq('processing_id', transaction.value.processing_id).single();
+
+    const { data: updatedTransaction, error: fetchError } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('processing_id', transaction.value.processing_id)
+      .single();
+
     if (fetchError) throw new Error(`Failed to fetch updated data: ${fetchError.message}`);
-    if (updatedTransaction) { transaction.value = { ...updatedTransaction, video_url: transaction.value.video_url }; if (updatedTransaction.transcription_json) { createTranscriptSegments(updatedTransaction.transcription_json); } transcriptSegments.value.forEach(segment => { segment.isEditing = false; }); }
+
+    if (updatedTransaction) {
+      transaction.value = { ...updatedTransaction, video_url: transaction.value.video_url };
+      if (updatedTransaction.transcription_json) {
+        createTranscriptSegments(updatedTransaction.transcription_json);
+      }
+      transcriptSegments.value.forEach(segment => {
+        segment.isEditing = false;
+      });
+    }
+
     showMessage('Transcription saved successfully');
-  } catch (error) { console.error('Error:', error); showMessage(`Error: ${error.message}`, true); } finally { isSavingTranscript.value = false; }
+  } catch (error) {
+    console.error('Error:', error);
+    showMessage(`Error:  ${error.message}`, true);
+  } finally {
+    isSavingTranscript.value = false;
+  }
 }
 
-function saveSegment({ index, text }) { transcriptSegments.value[index].text = text; transcriptSegments.value[index].isEditing = false; saveAllSegments(); }
-function cancelEdit(index) { transcriptSegments.value[index].isEditing = false; transcriptSegments.value[index].editText = transcriptSegments.value[index].text; }
-function playSegment(segment) { const video = videoPlayer.value; if (!video) return; video.currentTime = segment.startTime; video.play(); }
-function playPreviousSegment() { if (currentSegmentIndex.value > 0) playSegment(transcriptSegments.value[currentSegmentIndex.value - 1]); }
-function playNextSegment() { if (currentSegmentIndex.value < transcriptSegments.value.length - 1) playSegment(transcriptSegments.value[currentSegmentIndex.value + 1]); }
-function updateCurrentSegment() { const currentTime = currentVideoTime.value; let newIndex = -1; for (let i = 0; i < transcriptSegments.value.length; i++) { const s = transcriptSegments.value[i]; if (currentTime >= s.startTime && currentTime <= s.endTime) { newIndex = i; break; } } if (newIndex === -1) { for (let i = 0; i < transcriptSegments.value.length; i++) { if (currentTime < transcriptSegments.value[i].startTime) { break; } newIndex = i; } } currentSegmentIndex.value = newIndex; scrollToCurrentSegment(); }
-function scrollToCurrentSegment() { nextTick(() => { if (currentSegmentIndex.value >= 0) { const segments = document.querySelectorAll('.mb-4.border.border-gray-200.rounded-md'); if (segments && segments[currentSegmentIndex.value]) { segments[currentSegmentIndex.value].scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } } }); }
-function extractTimeInSeconds(timeObject) { if (!timeObject) return 0; if (typeof timeObject === 'object') { const seconds = typeof timeObject.seconds === 'string' ? parseInt(timeObject.seconds) : timeObject.seconds || 0; const nanos = timeObject.nanos || 0; return seconds + (nanos / 1_000_000_000); } else if (typeof timeObject === 'string') { if (timeObject.includes('s')) return parseFloat(timeObject.replace('s', '')); if (timeObject.includes(':')) { const parts = timeObject.split(':'); let seconds = 0; if (parts.length === 3) { seconds = (parseInt(parts[0]) * 3600) + (parseInt(parts[1]) * 60) + parseFloat(parts[2]); } else if (parts.length === 2) { seconds = (parseInt(parts[0]) * 60) + parseFloat(parts[1]); } return seconds; } return parseFloat(timeObject); } return Number(timeObject) || 0; }
+function saveSegment({ index, text }) {
+  transcriptSegments.value[index].text = text;
+  transcriptSegments.value[index].isEditing = false;
+  saveAllSegments();
+}
+
+function cancelEdit(index) {
+  transcriptSegments.value[index].isEditing = false;
+  transcriptSegments.value[index].editText = transcriptSegments.value[index].text;
+}
+
+function playSegment(segment) {
+  // Regular play: clear any loop
+  loopingSegment.value = null;
+  
+  const video = videoPlayer.value;
+  if (!video) return;
+  video.currentTime = segment.startTime;
+  video.play();
+}
+
+function loopSegment(segment) {
+  // Loop play: set the loop
+  loopingSegment.value = segment;
+  isLoopingSeek.value = true; // Mark seek as programmatic
+
+  const video = videoPlayer.value;
+  if (!video) return;
+  video.currentTime = segment.startTime;
+  video.play();
+}
+
+function playPreviousSegment() {
+  loopingSegment.value = null;
+  if (currentSegmentIndex.value > 0) playSegment(transcriptSegments.value[currentSegmentIndex.value - 1]);
+}
+
+function playNextSegment() {
+  loopingSegment.value = null;
+  if (currentSegmentIndex.value < transcriptSegments.value.length - 1) playSegment(transcriptSegments.value[currentSegmentIndex.value + 1]);
+}
+
+function updateCurrentSegment() {
+  const currentTime = currentVideoTime.value;
+  let newIndex = -1;
+
+  for (let i = 0; i < transcriptSegments.value.length; i++) {
+    const s = transcriptSegments.value[i];
+    if (currentTime >= s.startTime && currentTime <= s.endTime) {
+      newIndex = i;
+      break;
+    }
+  }
+
+  if (newIndex === -1) {
+    for (let i = 0; i < transcriptSegments.value.length; i++) {
+      if (currentTime < transcriptSegments.value[i].startTime) {
+        break;
+      }
+      newIndex = i;
+    }
+  }
+
+  currentSegmentIndex.value = newIndex;
+  scrollToCurrentSegment();
+}
+
+function scrollToCurrentSegment() {
+  nextTick(() => {
+    if (currentSegmentIndex.value >= 0) {
+      const segments = document.querySelectorAll('.mb-4.border.border-gray-200.rounded-md');
+      if (segments && segments[currentSegmentIndex.value]) {
+        segments[currentSegmentIndex.value].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  });
+}
+
+function extractTimeInSeconds(timeObject) {
+  if (!timeObject) return 0;
+
+  if (typeof timeObject === 'object') {
+    const seconds = typeof timeObject.seconds === 'string' ? parseInt(timeObject.seconds) : timeObject.seconds || 0;
+    const nanos = timeObject.nanos || 0;
+    return seconds + (nanos / 1_000_000_000);
+  } else if (typeof timeObject === 'string') {
+    if (timeObject.includes('s')) return parseFloat(timeObject.replace('s', ''));
+
+    if (timeObject.includes(': ')) {
+      const parts = timeObject.split(':');
+      let seconds = 0;
+      if (parts.length === 3) {
+        seconds = (parseInt(parts[0]) * 3600) + (parseInt(parts[1]) * 60) + parseFloat(parts[2]);
+      } else if (parts.length === 2) {
+        seconds = (parseInt(parts[0]) * 60) + parseFloat(parts[1]);
+      }
+      return seconds;
+    }
+
+    return parseFloat(timeObject);
+  }
+
+  return Number(timeObject) || 0;
+}
 
 async function downloadSubtitles(format) {
   if (!transaction.value?.processing_id) return;
-  if (hasUnsavedChanges.value) { showMessage('Please save all transcript edits before downloading.', true); return; }
-  isDownloadingSRT.value = true; showSubtitleDropdown.value = false;
+
+  if (hasUnsavedChanges.value) {
+    showMessage('Please save all transcript edits before downloading.', true);
+    return;
+  }
+
+  isDownloadingSRT.value = true;
+  showSubtitleDropdown.value = false;
+
   try {
-    const downloadUrl = `${apiUrl.value}/download-${format.toLowerCase()}/${transaction.value.processing_id}?t=${Date.now()}`;
-    const link = document.createElement('a'); link.href = downloadUrl; link.download = `${originalFilenameLocal.value ? originalFilenameLocal.value.replace(/\.[^/.]+$/, '') : 'transcript'}.${format.toUpperCase()}`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-  } catch (e) { console.error('Download error:', e); showMessage(`Failed to download: ${e.message || 'Unknown error'}`, true); } finally { isDownloadingSRT.value = false; }
+    const downloadUrl = `${apiUrl.value}/download-${format.toLowerCase()}/${transaction.value.processing_id}? t=${Date.now()}`;
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `${originalFilenameLocal.value ?  originalFilenameLocal.value.replace(/\.[^/.]+$/, '') : 'transcript'}.${format.toUpperCase()}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (e) {
+    console.error('Download error:', e);
+    showMessage(`Failed to download:  ${e.message || 'Unknown error'}`, true);
+  } finally {
+    isDownloadingSRT.value = false;
+  }
+
   isMenuOpen.value = false;
 }
 
-function copyTranscript() { const fullText = transcriptSegments.value.map(s => s.text).join(' '); navigator.clipboard.writeText(fullText).then(() => showMessage('Transkripti u kopjua')).catch(err => showMessage('Kopjimi dështoi', true)); isMenuOpen.value = false; }
+function copyTranscript() {
+  const fullText = transcriptSegments.value.map(s => s.text).join(' ');
+  navigator.clipboard.writeText(fullText)
+    .then(() => showMessage('Transkripti u kopjua'))
+    .catch(err => showMessage('Kopjimi dështoi', true));
+  isMenuOpen.value = false;
+}
 
 function downloadEmbeddedCaptionsModalCall() {
   downloadModal.value = true;
-  selectedPresetId.value = 'karaoke';
+  selectedPresetId.value = 'tiktok'; // Default to TikTok style
   isMenuOpen.value = false;
 }
 
@@ -313,20 +851,25 @@ function closeDownloadModal() {
 }
 
 async function downloadWithSelectedStyle() {
-  if (hasUnsavedChanges.value) { showMessage('Please save all transcript edits before downloading the video.', true); return; }
-  if (!transaction.value?.video_url) { showMessage('Video URL is missing.', true); return; }
+  if (hasUnsavedChanges.value) { 
+    showMessage('Please save all transcript edits before downloading the video.', true); 
+    return; 
+  }
+  if (!transaction.value?.video_url) { 
+    showMessage('Video URL is missing.', true); 
+    return; 
+  }
   
   isDownloadingVideo.value = true;
   showMessage('Duke përpunuar videon...');
 
-  // Start processing overlay in "embedding" state
   processingState.value = 'embedding';
   processingStep.value = null;
   await nextTick();
   overlay.value?.start();
   
   try {
-    const preset = captionPresets.find(p => p.id === selectedPresetId.value) || captionPresets[0];
+    const preset = currentPreset.value;
     
     const segments = transcriptSegments.value.map(s => ({
       startTime: s.startTime,
@@ -339,36 +882,43 @@ async function downloadWithSelectedStyle() {
       }))
     }));
 
-    // Determine video dimensions
-    let outputWidth = 1080; // Default vertical
-    let outputHeight = 1920;
-    
-    const videoEl = videoPlayer.value;
-    if (videoEl) {
-      if (videoEl.videoWidth && videoEl.videoHeight) { outputWidth = videoEl.videoWidth; outputHeight = videoEl.videoHeight; }
-      else if (videoEl.clientWidth && videoEl.clientHeight) { outputWidth = Math.round(videoEl.clientWidth); outputHeight = Math.round(videoEl.clientHeight); }
-    }
-    
+    const { width:  outputWidth, height: outputHeight } = getVideoDimensions();
+    const scaled = computeScaledStyle(preset, outputWidth, outputHeight);
+
+    const stylePayload = {
+      ...preset.backendOpts,
+      fontSize: scaled.fontSizeAss,
+      outline: scaled.outline,
+      marginV: scaled.marginV,
+      shadow: scaled.shadow,
+      alignment: scaled.alignment,
+      videoWidth: outputWidth,
+      videoHeight: outputHeight
+    };
+
     const response = await apiClient.post(`/render-captioned-video`, { 
-        videoPath: transaction.value.video_url, 
-        transcript: { segments: segments }, // Pass full structure including words
-        style: { 
-            ...preset.backendOpts,
-            videoWidth: outputWidth,
-            videoHeight: outputHeight
-        }, 
-        output: { width: outputWidth, height: outputHeight } 
+      videoPath: transaction.value.video_url, 
+      transcript: { segments:  segments },
+      style: stylePayload, 
+      output: { width: outputWidth, height: outputHeight } 
     }, { responseType: 'blob' });
 
-    const blob = response.data; const url = URL.createObjectURL(blob); const link = document.createElement('a');
+    const blob = response.data;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
     const baseName = (transaction.value.original_filename || 'video').replace(/\.[^/.]+$/, '');
-    link.href = url; link.download = `${baseName}-captioned.mp4`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+    link.href = url;
+    link.download = `${baseName}-captioned.mp4`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 
     closeDownloadModal();
     setTimeout(() => {
-      showMessage('Video shkarkuar me sukses!');
+      showMessage('Video shkarkuar me sukses! ');
     }, 2500);
-    // Mark overlay as complete and stop
+
     processingState.value = 'complete';
     processingStep.value = null;
     overlay.value?.stop();
@@ -434,27 +984,69 @@ async function downloadWithSelectedStyle() {
           <div class="lg:col-span-3 bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-[calc(100vh-140px)]">
             <div class="bg-[#FBFCFB] border-b border-gray-200 px-4 py-3 flex justify-between items-center shrink-0">
               <h2 class="text-lg text-kollektif-bold text-primary">Segmentet e transkriptuara</h2>
-              <div class="hidden space-x-2 md:flex">
-                <button @click="copyTranscript" class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center">
-                  <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2 2h-8a2 2 0 00-2 2z" /></svg> Kopjo
+              <div class="md:flex hidden space-x-2">
+                <button 
+                  @click="copyTranscript" 
+                  class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center"
+                >
+                  <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Kopjo
                 </button>
-
+    
+                <!-- Subtitle Download Dropdown -->
                 <div class="relative">
-                  <button @click="showSubtitleDropdown = !showSubtitleDropdown" class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center" :disabled="isDownloadingSRT || hasUnsavedChanges" :class="{ 'opacity-50 cursor-not-allowed': isDownloadingSRT || hasUnsavedChanges }">
-                    <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg> {{ isDownloadingSRT ? 'Downloading...' : 'Shkarko Titra' }}
+                  <button 
+                    @click="showSubtitleDropdown = !showSubtitleDropdown"
+                    class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center"
+                    :disabled="isDownloadingSRT || hasUnsavedChanges"
+                    :class="{ 'opacity-50 cursor-not-allowed': isDownloadingSRT || hasUnsavedChanges }"
+                  >
+                    <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    {{ isDownloadingSRT ? 'Downloading...' : 'Shkarko Titra' }}
                   </button>
-                  <div v-if="showSubtitleDropdown" class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-50 w-32">
-                    <button @click="downloadSubtitles('srt')" class="w-full text-left px-4 py-2 text-xs text-primary hover:bg-[#F4F9F7] transition-colors border-b border-gray-100">SRT</button>
-                    <button @click="downloadSubtitles('vtt')" class="w-full text-left px-4 py-2 text-xs text-primary hover:bg-[#F4F9F7] transition-colors">VTT</button>
+                  
+                  <div 
+                    v-if="showSubtitleDropdown"
+                    class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-50"
+                  >
+                    <button
+                      @click="downloadSubtitles('srt')"
+                      class="w-full text-left px-4 py-2 text-xs text-primary hover:bg-[#F4F9F7] transition-colors border-b border-gray-100 last:border-b-0"
+                    >
+                      SRT
+                    </button>
+                    <button
+                      @click="downloadSubtitles('vtt')"
+                      class="w-full text-left px-4 py-2 text-xs text-primary hover:bg-[#F4F9F7] transition-colors"
+                    >
+                      VTT
+                    </button>
                   </div>
                 </div>
-
-                <button @click="downloadEmbeddedCaptionsModalCall" class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center" :disabled="isDownloadingVideo || hasUnsavedChanges" :class="{ 'opacity-50 cursor-not-allowed': isDownloadingVideo || hasUnsavedChanges }">
+    
+                <button
+                  @click="downloadEmbeddedCaptionsModalCall"
+                  class="px-2 py-1 text-xs bg-secondary text-primary rounded hover:bg-[#7ED089] transition-colors flex items-center"
+                  :disabled="isDownloadingVideo || hasUnsavedChanges"
+                  :class="{ 'opacity-50 cursor-not-allowed': isDownloadingVideo || hasUnsavedChanges }"
+                >
                   {{ isDownloadingVideo ? 'Downloading...' : 'Shkarko me titra' }}
                 </button>
-
-                <button v-if="hasUnsavedChanges" @click="saveAllSegments" class="px-2 py-1 text-xs bg-primary text-white rounded hover:bg-[#033027] transition-colors flex items-center" :disabled="isSavingTranscript">
-                  <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg> Ruaj
+    
+                <button 
+                  v-if="hasUnsavedChanges"
+                  @click="saveAllSegments" 
+                  class="px-2 py-1 text-xs bg-primary text-white rounded hover:bg-[#033027] transition-colors flex items-center"
+                  :disabled="isSavingTranscript"
+                >
+                  <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
+                  Ruaj të gjitha
                 </button>
               </div>
               <div class="md:hidden block self-end">
@@ -469,7 +1061,7 @@ async function downloadWithSelectedStyle() {
                   <a @click="downloadSubtitles('vtt')" class="cursor-pointer block px-4 py-2 text-sm text-primary hover:bg-gray-100">Shkarko VTT</a>
                   <a @click="downloadEmbeddedCaptionsModalCall" class="cursor-pointer block px-4 py-2 text-sm text-primary hover:bg-gray-100">Shkarko me Titra</a>
                 </div>
-              </div>  
+              </div> 
             </div>
 
             <div class="p-4 flex-1 overflow-y-auto">
@@ -481,6 +1073,7 @@ async function downloadWithSelectedStyle() {
                 :current-video-time="currentVideoTime"
                 :is-current="currentSegmentIndex === index"
                 @play="playSegment"
+                @loop="loopSegment"
                 @begin-edit="beginEdit"
                 @save="saveSegment"
                 @cancel-edit="cancelEdit"
@@ -574,9 +1167,11 @@ async function downloadWithSelectedStyle() {
             <div class="w-full lg:w-7/12 bg-[#1a1a1a] relative flex items-center justify-center p-8 overflow-hidden">
               <div class="relative w-full aspect-[9/16] max-h-[60vh] bg-black shadow-2xl rounded-lg overflow-hidden border border-white/10">
                 
-                <!-- Dynamic Preview Text -->
-                <div :style="currentPreviewStyle">
-                  Këtu shfaqen titrat<br>për videon tuaj
+                <!-- Dynamic Preview Text: wrapper controls placement based on ASS alignment -->
+                <div :style="currentPreviewWrapperStyle">
+                  <div :style="currentPreviewCaptionStyle">
+                    Këtu shfaqen titrat<br>për videon tuaj
+                  </div>
                 </div>
                 
                 <div class="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm font-bold">PREVIEW</div>

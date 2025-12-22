@@ -56,7 +56,7 @@
                 data-aos-delay="300"
                 class="bg-tan rounded-xl overflow-hidden relative min-h-[250px] lg:col-span-3 lg:row-span-3 lg:col-start-4 lg:row-start-3 order-3"
               >
-                <div class="absolute h-full -top-2 -left-2 opacity-50">
+                <div class="absolute h-full -translate-y-1/3 -left-3 opacity-50">
                     <img 
                         src="https://htoujjoglfzjvyovryuc.supabase.co/storage/v1/object/public/assets/BentoCurves.webp" 
                         alt="Background Curves"
@@ -66,7 +66,7 @@
                     >
                 </div>
                 <div class="flex items-center justify-center h-full w-full relative z-10">
-                    <Albcaption_logo_nobg class="w-1/2 h-1/2 lg:w-full lg:h-full lg:scale-75"/>
+                    <Albcaption_logo_nobg class="md:w-1/2 md:h-1/2 w-3/4 h-3/4 translate-y-1/3 lg:w-full lg:h-full lg:scale-75"/>
                 </div>
               </div>
 

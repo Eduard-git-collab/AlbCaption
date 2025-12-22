@@ -15,7 +15,7 @@ export default defineConfig({
   },
   server: {
     allowedHosts: [
-      '6dfab1b1a879.ngrok-free.app',
+      'b7f97b4dc45b.ngrok-free.app',
       'albcaptions.com',
       'www.albcaptions.com',
       'localhost'

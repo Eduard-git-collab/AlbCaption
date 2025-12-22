@@ -37,7 +37,10 @@
 }
 
 /* Font Faces */
-@font-face {
+
+
+/* Production */
+/* @font-face {
   font-family: 'kollektif';
   src: url('/public/fonts/Kollektif.ttf') format('truetype');
 }
@@ -52,6 +55,24 @@
 @font-face {
   font-family: 'kollektif-BoldItalic';
   src: url('/public/fonts/Kollektif-BoldItalic.ttf') format('truetype');
+} */
+
+/* Local */
+@font-face {
+  font-family: 'kollektif';
+  src: url('./assets/fonts/Kollektif.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'kollektif-Italic';
+  src: url('./assets/fonts/Kollektif-Italic.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'kollektif-Bold';
+  src: url('./assets/fonts/Kollektif-Bold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'kollektif-BoldItalic';
+  src: url('./assets/fonts/Kollektif-BoldItalic.ttf') format('truetype');
 }
 
 .text-kollektif {

@@ -26,6 +26,8 @@ const isMenuOpen = ref(false);
 const currentVideoTime = ref(0)
 const videoDuration = ref(0)
 const isVideoPlaying = ref(false)
+const loopingSegment = ref(null);
+const isLoopingSeek = ref(false);
 
 // Transcript related
 const transcriptSegments = ref([])
@@ -206,28 +208,48 @@ function setupVideoEvents() {
 }
 
 function onVideoTimeUpdate() {
-  const video = videoPlayer.value
+  const video = videoPlayer.value;
   if (video) {
-    currentVideoTime.value = video.currentTime
-    updateCurrentSegment()
+    currentVideoTime.value = video.currentTime;
+    
+    // Loop Logic
+    if (loopingSegment.value && !video.paused) {
+      if (currentVideoTime.value >= loopingSegment.value.endTime) {
+        isLoopingSeek.value = true;
+        video.currentTime = loopingSegment.value.startTime;
+        video.play();
+      }
+    }
+
+    updateCurrentSegment();
   }
 }
 
 function onVideoSeeking() {
-  updateCurrentSegment()
+  if (isLoopingSeek.value) {
+    isLoopingSeek.value = false;
+  } else {
+    loopingSegment.value = null;
+  }
+  updateCurrentSegment();
 }
+
+function togglePlayback() {
+  const video = videoPlayer.value;
+  if (! video) return;
+  if (video.paused) {
+    video.play();
+  } else {
+    video.pause();
+    loopingSegment.value = null; // Clear loop on pause
+  }
+}
+
+
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
-
-
-function togglePlayback() {
-  const video = videoPlayer.value
-  if (!video) return
-  if (video.paused) video.play()
-  else video.pause()
-}
 
 function formatVideoTime(seconds) {
   if (isNaN(seconds)) return '00:00'
@@ -237,15 +259,17 @@ function formatVideoTime(seconds) {
 }
 
 function skipBackward(seconds) {
-  const video = videoPlayer.value
-  if (!video) return
-  video.currentTime = Math.max(0, video.currentTime - seconds)
+  loopingSegment.value = null; // Clear loop
+  const video = videoPlayer.value;
+  if (!video) return;
+  video.currentTime = Math.max(0, video.currentTime - seconds);
 }
 
 function skipForward(seconds) {
-  const video = videoPlayer.value
-  if (!video) return
-  video.currentTime = Math.min(video.duration, video.currentTime + seconds)
+  loopingSegment.value = null; // Clear loop
+  const video = videoPlayer.value;
+  if (!video) return;
+  video.currentTime = Math.min(video.duration, video.currentTime + seconds);
 }
 
 // Segments creation and controls
@@ -360,10 +384,24 @@ function cancelEdit(index) {
 }
 
 function playSegment(segment) {
-  const video = videoPlayer.value
-  if (!video) return
-  video.currentTime = segment.startTime
-  video.play()
+  // Regular play: clear any loop
+  loopingSegment.value = null;
+  
+  const video = videoPlayer.value;
+  if (!video) return;
+  video.currentTime = segment.startTime;
+  video.play();
+}
+
+function loopSegment(segment) {
+  // Loop play: set the loop
+  loopingSegment.value = segment;
+  isLoopingSeek.value = true; // Mark seek as programmatic
+
+  const video = videoPlayer.value;
+  if (!video) return;
+  video.currentTime = segment.startTime;
+  video.play();
 }
 
 function playPreviousSegment() {
@@ -734,7 +772,7 @@ async function downloadWithSelectedStyle() {
               Ruaj të gjitha
             </button>
           </div>
-          <div class="md:hidden block self-end" @click.outside="isMenuOpen = false">
+          <div class="md:hidden block self-end">
             <button @click="toggleMenu" class="p-2 rounded-md bg-secondary text-primary hover:bg-secondary/70 cursor-pointer duration-200 transition-all">
               <svg class="w-6 h-6" fill="#000000" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
@@ -742,7 +780,8 @@ async function downloadWithSelectedStyle() {
             </button>
             <div v-if="isMenuOpen" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
               <a @click="copyTranscript" class="cursor-pointer block px-4 py-2 text-sm text-primary hover:bg-gray-100">Kopjo</a>
-              <a href="#" class="cursor-pointer block px-4 py-2 text-sm text-primary hover:bg-gray-100">Shkarko Titrat</a>
+              <a @click="downloadSubtitles('srt')" class="cursor-pointer block px-4 py-2 text-sm text-primary hover:bg-gray-100">Shkarko SRT</a>
+              <a @click="downloadSubtitles('vtt')" class="cursor-pointer block px-4 py-2 text-sm text-primary hover:bg-gray-100">Shkarko VTT</a>
               <a @click="downloadEmbeddedCaptionsModalCall" class="cursor-pointer block px-4 py-2 text-sm text-primary hover:bg-gray-100">Shkarko me Titra</a>
             </div>
           </div> 
@@ -757,6 +796,7 @@ async function downloadWithSelectedStyle() {
               :current-video-time="currentVideoTime"
               :is-current="currentSegmentIndex === index"
               @play="playSegment"
+              @loop="loopSegment"
               @begin-edit="beginEdit"
               @save="saveSegment"
               @cancel-edit="cancelEdit"
