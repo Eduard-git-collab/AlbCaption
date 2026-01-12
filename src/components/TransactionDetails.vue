@@ -146,7 +146,7 @@ const captionPresets = [
 ];
 
 // API URL
-const apiUrl = ref(import.meta.env.VITE_API_URL || 'http://localhost:8000');
+const apiUrl = ref(import.meta.env.VITE_API_URL || 'http://localhost:3000');
 
 // Computed: current preset
 const currentPreset = computed(() => {
@@ -720,12 +720,31 @@ function playSegment(segment) {
 }
 
 function loopSegment(segment) {
-  // Loop play: set the loop
-  loopingSegment.value = segment;
-  isLoopingSeek.value = true; // Mark seek as programmatic
-
   const video = videoPlayer.value;
   if (!video) return;
+
+  loopingSegment.value = segment;
+  isLoopingSeek.value = true;
+
+  const END_BUFFER = 0.08; // smooth loop buffer (seconds)
+
+  // Remove previous listener to avoid stacking
+  video.ontimeupdate = null;
+
+  video.ontimeupdate = () => {
+    if (!loopingSegment.value) return;
+
+    const duration = video.duration;
+    const segmentEnd = Math.min(segment.endTime, duration);
+
+    // Jump back BEFORE the video naturally ends
+    if (video.currentTime >= segmentEnd - END_BUFFER) {
+      video.currentTime = segment.startTime;
+      video.play();
+    }
+  };
+
+  // Start loop
   video.currentTime = segment.startTime;
   video.play();
 }

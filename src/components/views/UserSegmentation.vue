@@ -127,7 +127,7 @@
                 <logo_lines class="w-full h-auto text-primary opacity-20 md:opacity-100" />
                 <div class="absolute inset-0 z-10 flex items-center justify-center p-3">
                   <img
-                    src="../assets/images/envelope.png"
+                    src="../../assets/images/envelope.png"
                     alt="Email Envelope"
                     class="max-w-[150px] md:max-w-full max-h-full object-contain"
                   />

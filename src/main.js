@@ -24,31 +24,12 @@ AOS.init({
 
 const initApp = async () => {
   try {
-    // Only initialize auth store for non-public routes
     const authStore = useAuthStore()
-    
-    // Check if current route is public
-    const currentPath = window.location.pathname
-    const isPublicRoute = currentPath.includes('/auth/reset-password') || 
-                         currentPath === '/' || 
-                         currentPath.includes('/login') ||
-                         currentPath.includes('/signin') ||
-                         currentPath.includes('/signup') ||
-                         currentPath.includes('/example-') // Add example routes as public for learning
-    
-    if (!isPublicRoute) {
-      await authStore.init()
-    }
+    await authStore.init()
 
-    // Initialize example auth store if on example routes (for learning)
-    if (currentPath.includes('/example-')) {
-      const exampleAuthStore = useAuthExampleStore()
-      await exampleAuthStore.init()
-    }
-    
     app.mount('#app')
   } catch (error) {
-    app.mount('#app') // Mount anyway to show error state
+    app.mount('#app')
   }
 }
 

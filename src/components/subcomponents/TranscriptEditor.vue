@@ -394,15 +394,35 @@ function playSegment(segment) {
 }
 
 function loopSegment(segment) {
-  // Loop play: set the loop
-  loopingSegment.value = segment;
-  isLoopingSeek.value = true; // Mark seek as programmatic
-
   const video = videoPlayer.value;
   if (!video) return;
+
+  loopingSegment.value = segment;
+  isLoopingSeek.value = true;
+
+  const END_BUFFER = 0.08; // smooth loop buffer (seconds)
+
+  // Remove previous listener to avoid stacking
+  video.ontimeupdate = null;
+
+  video.ontimeupdate = () => {
+    if (!loopingSegment.value) return;
+
+    const duration = video.duration;
+    const segmentEnd = Math.min(segment.endTime, duration);
+
+    // Jump back BEFORE the video naturally ends
+    if (video.currentTime >= segmentEnd - END_BUFFER) {
+      video.currentTime = segment.startTime;
+      video.play();
+    }
+  };
+
+  // Start loop
   video.currentTime = segment.startTime;
   video.play();
 }
+
 
 function playPreviousSegment() {
   if (currentSegmentIndex.value > 0) {
@@ -521,39 +541,41 @@ function rebuildTranscriptionJson() {
 }
 
 async function saveAllSegments() {
-  if (!props.processingId) return
-  isSavingTranscript.value = true
-  saveStatus.value = null
+  if (!props.processingId) return;
+  
+  isSavingTranscript.value = true;
+  saveStatus.value = null;
+
   try {
+    // 1. Sync local UI state
     transcriptSegments.value.forEach((s) => {
       if (s.isEditing) {
-        s.text = s.editText
-        s.isEditing = false
+        s.text = s.editText;
+        s.isEditing = false;
       }
-    })
-    const fullText = transcriptSegments.value.map(s => s.text).join(' ')
-    const updatedTranscriptionJson = rebuildTranscriptionJson()
+    });
 
-    const response = await fetch(`${props.apiUrl}/update-transcript/${props.processingId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        text: fullText,
-        transcription_json: updatedTranscriptionJson
-      })
-    })
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || 'Failed to save transcript')
-    }
-    transcriptSegments.value.forEach(s => { s.originalText = s.text })
-    saveStatus.value = { type: 'text-green-600', message: 'All segments saved successfully' }
-    setTimeout(() => { saveStatus.value = null }, 3000)
+    // 2. Prepare the data
+    const updatedTranscriptionJson = rebuildTranscriptionJson();
+
+    // 3. Call the API using your apiClient (to ensure verifyToken is included)
+    // Note the route name change: update-transcription
+    const response = await apiClient.post(`/update-transcription/${props.processingId}`, { 
+      transcription_json: updatedTranscriptionJson 
+    });
+
+    // 4. Handle UI success state
+    transcriptSegments.value.forEach(s => { s.originalText = s.text });
+    saveStatus.value = { type: 'text-green-600', message: 'All segments saved successfully' };
+    
+    setTimeout(() => { saveStatus.value = null }, 3000);
   } catch (e) {
-    console.error('Error saving transcript:', e)
-    saveStatus.value = { type: 'text-red-600', message: `Failed to save transcript: ${e.message}` }
+    console.error('Error saving transcript:', e);
+    // Extract error message from apiClient or standard error
+    const errorMessage = e.response?.data?.error || e.message || 'Failed to save transcript';
+    saveStatus.value = { type: 'text-red-600', message: `Error: ${errorMessage}` };
   } finally {
-    isSavingTranscript.value = false
+    isSavingTranscript.value = false;
   }
 }
 
