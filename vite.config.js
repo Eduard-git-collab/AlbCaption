@@ -5,7 +5,11 @@ import * as path from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), tailwindcss()],
+  plugins: [vue({
+    compilerOptions: {
+          isCustomElement: (tag) => tag === 'wistia-player'
+        }
+  }), tailwindcss()],
   assetsInclude: ['**/*.ttf', '**/*.woff', '**/*.woff2'],
   resolve: {
     alias: {
@@ -15,7 +19,7 @@ export default defineConfig({
   },
   server: {
     allowedHosts: [
-      'b7f97b4dc45b.ngrok-free.app',
+      'f588-95-107-209-153.ngrok-free.app',
       'albcaptions.com',
       'www.albcaptions.com',
       'localhost'

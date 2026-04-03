@@ -1,137 +1,49 @@
 <template>
   <!-- Hero Section -->
-    <div class="relative w-full min-h-screen bg-primary overflow-visible flex flex-col items-center justify-start">
-      
+  <div class="relative w-full min-h-screen bg-primary overflow-visible flex">
+    <div class="w-full h-full flex-col items-center justify-start flex">  
       <!-- Background Lines - No animation needed (static BG) -->
-      <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+      <div class="absolute inset-0 z-0 2xl:-bottom-1/4 overflow-hidden pointer-events-none">
         <div class="w-full h-full flex items-end justify-center">
-          <logo_lines class="w-full h-2/3  md:translate-y-1/3 object-cover text-secondary/20" />
+          <logo_lines class="w-full h-2/3  md:translate-y-1/3 object-fill text-secondary/20" />
         </div>
       </div>
 
-      <div class="relative z-10 w-full flex flex-col items-center pt-28 sm:pt-32 lg:pt-36 px-4">
-        
-        <div class="w-full flex flex-col items-center text-center max-w-[90rem]">
-          
-          <!-- Headline: Fade Up -->
-          <h1 
-            data-aos="fade-up"
-            class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-secondary leading-tight mb-6 max-w-5xl"
-          >
-            Shkurto post-produksionin deri në 88%, Transkripto Automatikisht Gjuhën Shqipe
-          </h1>
-
-          <!-- Subhead: Fade Up + 100ms Delay -->
-          <h2 
-            data-aos="fade-up"
-            data-aos-delay="100"
-            class="text-base sm:text-lg lg:text-xl text-secondary/90 font-poppins mb-8 max-w-3xl leading-relaxed"
-          >
-            Tërhiq vëmëndjen, rrit shikimet. Fuqizuar nga AI për skuadra dhe influencera.
-          </h2>
-
-          <!-- Button: Fade Up + 200ms Delay -->
-          <div 
-            data-aos="fade-up"
-            data-aos-delay="200"
-            class="flex justify-center mb-12 lg:mb-16"
-          >
-            <RouterLink 
-              to="/signup" 
-              class="group relative inline-flex items-center justify-center px-8 py-3 text-lg font-bold text-primary bg-secondary rounded-lg border-2 border-secondary overflow-hidden transition-all duration-300 hover:bg-transparent hover:text-secondary"
-            >
-              <span class="relative z-10">Provo falas</span>
-            </RouterLink>
+      <div class="w-full h-screen relative z-10 flex flex-col 2xl:gap-20 lg:gap-10 gap-5 items-center justify-center xl:mx-10 2xl:mx-15 lg:mx-5 md:mx-3 mx-2">
+        <div class="w-fit mx-auto h-fit flex flex-col">
+          <div class="w-fit h-fit items-center justify-center flex flex-row">
+            <h1 class="2xl:text-[172px] lg:text-6xl md:text-5xl text-4xl text-kollektif-bold text-secondary">Titro&nbsp;</h1>
+            <h1 class="2xl:text-[172px] lg:text-6xl md:text-5xl text-4xl text-kollektif-bold text-primary bg-secondary lg:rounded-2xl rounded-lg lg:py-3 2xl:px-24 lg:px-10 px-5 py-1">Dokumentarin</h1>
+          </div>
+          <h1 class="2xl:text-[172px] lg:text-6xl md:text-5xl text-4xl text-kollektif-bold text-secondary">pa shkruar asnjë fjalë</h1>
+        </div>
+        <h3 class="2xl:text-[60px] lg:text-xl md:text-xl text-md text-secondary font-poppins lg:font-light mx-3 text-center ">Kthe videon në tekst me saktësi maksimale, për rrjete sociale, montazh dhe biznese. Fuqizuar nga IA.</h3>
+        <div class="w-fit h-fit flex 2xl:gap-10 gap-3 flex-col items-center justify-center">
+          <RouterLink to="/signup" class="2xl:text-[48px] text-primary bg-secondary 2xl:px-10 px-3 py-2 rounded-md text-kollektif-bold text-xl hover:ring-2 hover:ring-secondary hover:bg-primary hover:text-secondary duration-200">
+            Titro Falas Tani
+          </RouterLink>
+          <div class="w-fit h-fit flex flex-row items-center 2xl:gap-5 gap-2">
+            <card class="2xl:w-[40px] 2xl:h-[30px] w-5 h-5 text-secondary" />
+            <p class="2xl:text-[30px] text-secondary text-sm font-poppins">Pa Kartë Krediti</p>
           </div>
         </div>
-
-        <!-- Hero Image: Fade Up + 300ms Delay -->
-        <div 
-          data-aos="fade-up"
-          data-aos-delay="300"
-          class="w-[90%] sm:w-[85%] max-w-6xl z-20 transform translate-y-[15%] lg:translate-y-[20%]"
-        >
-          <img 
-            src="https://htoujjoglfzjvyovryuc.supabase.co/storage/v1/object/public/assets/Herobg.webp" 
-            loading="lazy"
-            alt="Dashboard Preview"
-            class="w-full h-auto rounded-xl shadow-2xl border-4 border-white/10 bg-white object-cover"
-          />
-        </div>
-
       </div>
     </div>
+    <!-- Overlapping Box -->
+    <div class="absolute left-1/2 -bottom-1/2 translate-y-1/3 -translate-x-1/2 z-20 max-w-[90vw] w-full p-3 rounded-xl shadow-[12px_16px_12px_8px_rgba(0,0,0,0.25)]">
+      <wistia-player media-id="oco4fzfyr8" aspect="1.7777777777777777"></wistia-player>
+    </div>
+  </div>
 
     <!-- Stats Section -->
-    <div class="w-full relative py-24 lg:py-48 overflow-hidden bg-white">
-      <div class="w-full max-w-[95rem] mx-auto px-6 lg:px-12 flex flex-col gap-8 lg:gap-10">
-        
-        <!-- Row 1 -->
-        <div class="flex flex-col lg:flex-row items-center lg:items-center justify-between gap-6">
-            <!-- Added delay="200" so it doesn't trigger instantly -->
-            <h1 
-                data-aos="fade-up"
-                data-aos-delay="200"
-                class="text-4xl sm:text-6xl lg:text-8xl text-kollektif-bold text-primary whitespace-nowrap text-center lg:text-left"
-            >
-                <strong class="text-secondary"> 69% </strong> e postimeve
-            </h1>
-            
-            <span 
-                data-aos="fade-up"
-                data-aos-delay="300"
-                class="text-sm sm:text-base font-poppins font-light text-primary/80 w-full lg:w-[30%] max-w-lg leading-relaxed text-center lg:text-left"
-            >
-                Gjasat janë që, nëse po publikon një video të pa titruar, audienca jote nuk ka për ta parë. 69% e shikuesëve ne ambjente publike ose zyra përdorin rrjete sociale me zërin e fikur.
-            </span>
-        </div>
-
-        <!-- Row 2 -->
-        <div class="flex flex-col lg:flex-row items-center lg:items-center gap-6 lg:gap-12">
-            <img 
-              data-aos="zoom-in"
-              data-aos-delay="200"
-              src="https://htoujjoglfzjvyovryuc.supabase.co/storage/v1/object/public/assets/pexels-amina-filkins-5427978.webp" 
-              alt="Person using social media on phone"
-              loading="lazy"
-              class="h-24 sm:h-32 w-full lg:w-96 object-cover object-bottom rounded-full shadow-md"
-            >
-            <h1 
-                data-aos="fade-up"
-                data-aos-delay="300"
-                class="text-4xl sm:text-6xl lg:text-8xl text-kollektif-bold text-primary whitespace-nowrap text-center lg:text-left"
-            >
-                në rrjete sociale
-            </h1>
-        </div>
-
-        <!-- Row 3 -->
-        <div class="flex flex-row items-center justify-center lg:justify-start mt-2 lg:mt-4">
-            <!-- Added fade-up and delay to the final text block -->
-            <h1 
-                data-aos="fade-up"
-                data-aos-delay="400"
-                class="text-4xl sm:text-6xl lg:text-8xl w-full text-kollektif-bold text-primary relative leading-tight text-center lg:text-left"
-            >
-                shikohen 
-                <span class="relative inline-block">
-                    me zërin e fikur
-                    <Curved_line 
-                      data-aos="fade-in" 
-                      data-aos-delay="600" 
-                      class="overflow-visible absolute left-0 w-full top-full mt-1"
-                    />
-                </span>
-            </h1>
-        </div>
-
-      </div>
+    <!-- <div class="w-full relative overflow-hidden bg-white">
+      <Statistic />
     </div>
 
     <StackedCards class="mb-20"/>
     <BentoGrid class="my-20"/>
     <Upload class="my-20"/>
-    <Payment class="my-20"/>
+    <Payment class="my-20"/> -->
 
     <div class="relative mt-20">
       <!-- Sticky FAQ container -->
@@ -153,5 +65,22 @@ import Payment from './Payment.vue';
 import FAQ from './FAQ.vue';
 import BentoGrid from './subcomponents/BentoGrid.vue';
 import StackedCards from './subcomponents/StackedCards.vue';
+import Statistic from './subcomponents/Statistic.vue';
+import card from './logos/card.vue';
+import { onMounted } from 'vue'
 
+onMounted(() => {
+  // Load the embed script for this specific video
+  const embedScript = document.createElement('script')
+  embedScript.src = 'https://fast.wistia.com/embed/oco4fzfyr8.js'
+  embedScript.async = true
+  embedScript.type = 'module'
+  document.head.appendChild(embedScript)
+
+  // Load the Wistia player script (if not already in index.html)
+  const playerScript = document.createElement('script')
+  playerScript.src = 'https://fast.wistia.com/player.js'
+  playerScript.async = true
+  document.head.appendChild(playerScript)
+})
 </script>

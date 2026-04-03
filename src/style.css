@@ -93,7 +93,7 @@
 }
 
 body {
-  overscroll-behavior-y: none;
+  overscroll-behavior: none;
   scroll-behavior: smooth;
   overflow-x: hidden;
 }
@@ -173,3 +173,16 @@ body {
 .fill-charcoal-1 { fill: var(--color-charcoal-1); }
 .fill-charcoal { fill: var(--color-charcoal); }
 .fill-charcoal1 { fill: var(--color-charcoal1); }
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-150%);
+  }
+  100% {
+    transform: translateX(150%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}

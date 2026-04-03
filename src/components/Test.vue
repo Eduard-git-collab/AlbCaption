@@ -1,16 +1,5 @@
 <template>
   
-  <!-- <div
-    class="fixed top-0 flex justify-center h-fit w-full z-100 p-3 duration-300 transition-all"
-    :class="showSuccessAlert ?'translate-y-[30px]':'-translate-y-[100px]'"
-  >
-    <div 
-    class="w-fit h-fit p-3 rounded-xl flex items-center border justify-center text-sm font-poppins"
-    :class="issuccess ? 'bg-secondary/25 border-secondary text-[#12998e]' : 'bg-[#ffffff]/75 border-secondary text-[#12998e]'"
-    >
-    {{ successAlertMessage }} 
-    </div>
-  </div> -->
   <div
     v-if="showDeletionError"
     class="fixed top-0 flex justify-center h-fit w-full z-100 p-3 duration-300 transition-all"
@@ -25,9 +14,9 @@
   </div>
   
 
-  <div class="w-screen h-screen bg-white">
-    <div class="p-3 w-full h-full">
-      <div class="relative bg-primary w-full rounded-3xl overflow-hidden">
+  <div class="w-screen h-screen bg-white overflow-y-auto">
+    <div class="p-2 sm:p-3 w-full h-full">
+      <div class="relative bg-primary w-full rounded-2xl sm:rounded-3xl overflow-hidden">
         <div
           class="angled-grid pointer-events-none absolute inset-0"
           style="--angle: 40deg; --grid-size: 22px; --line-opacity: 0.14;"
@@ -36,24 +25,24 @@
         <!-- Header -->
         <div class="relative z-10 grid grid-cols-[1fr_auto_1fr] items-start px-3 font-poppins">
           <div></div>
-          <div class="absolute top-6 left-6">
+          <div class="absolute top-4 left-4 sm:top-6 sm:left-6">
             <RouterLink to="/">
-              <svg class="w-6 h-6 text-secondary hover:text-white transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 xl:w-7 xl:h-7 text-secondary hover:text-white transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
               </svg>
             </RouterLink>
           </div>
 
-          <div class="rounded-tab h-fit p-2 flex items-center gap-2 px-4 md:px-6">
-            <RouterLink to="/upload" class="text-xs md:text-sm text-primary font-poppins cursor-pointer hover:text-secondary transition-all duration-300 ease-in-out">Krijo</RouterLink>
+          <div class="rounded-tab h-fit p-2 flex items-center gap-2 px-4 md:px-6 xl:px-8">
+            <RouterLink to="/upload" class="text-xs md:text-sm xl:text-base 2xl:text-lg text-primary font-poppins cursor-pointer hover:text-secondary transition-all duration-300 ease-in-out">Krijo</RouterLink>
             
-              <RouterLink to="/upload" class="w-9 h-9 bg-primary rounded-full hover:w-32 transition-all duration-300 cursor-pointer flex items-center justify-center gap-0 group overflow-hidden">
-                <albcaptions_logo_nobg_inv class="w-4 h-4" />
+            <RouterLink to="/upload" class="w-9 h-9 xl:w-11 xl:h-11 2xl:w-12 2xl:h-12 bg-primary rounded-full hover:w-32 xl:hover:w-36 2xl:hover:w-40 transition-all duration-300 cursor-pointer flex items-center justify-center gap-0 group overflow-hidden">
+              <albcaptions_logo_nobg_inv class="w-4 h-4 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6" />
               <div
                 class="overflow-hidden max-w-0 group-hover:max-w-[7ch] transition-[max-width] duration-300 ease-out"
               >
                 <span
-                  class="text-xs md:text-sm text-secondary font-poppins font-medium whitespace-nowrap inline-block wipe-text ml-0 group-hover:ml-1 transition-[margin] duration-300"
+                  class="text-xs md:text-sm xl:text-base 2xl:text-lg text-secondary font-poppins font-medium whitespace-nowrap inline-block wipe-text ml-0 group-hover:ml-1 transition-[margin] duration-300"
                 >
                   Ngarko
                 </span>
@@ -65,12 +54,20 @@
               @mouseleave="handleEditMouseLeave"
               ref="editTrigger"
             >
-              <p class="text-xs md:text-sm text-primary font-poppins cursor-pointer select-none">Edito</p>
+              <p class="text-xs md:text-sm xl:text-base 2xl:text-lg text-primary font-poppins cursor-pointer select-none">Edito</p>
             </div>
           </div>
 
           <!-- Top-right icons -->
-          <div class="flex items-center justify-self-end w-fit gap-2 p-3 md:p-4 text-secondary">
+          <div class="flex items-center justify-self-end w-fit gap-2 p-3 md:p-4 xl:p-5 text-secondary">
+            <!-- Upgrade button (hidden on mobile/tablet, shown on lg+) -->
+            <button
+              class="hidden lg:inline-flex items-center px-3 py-1.5 xl:px-4 xl:py-2 2xl:px-5 2xl:py-2.5 text-[11px] xl:text-xs 2xl:text-sm font-medium text-primary bg-secondary rounded-md ring-1 ring-primary/10 cursor-pointer transition-colors hover:bg-[#7dd87b] hover:ring-primary/20"
+              @click.prevent="promptConfigProfile"
+            >
+              Përditëso planin
+            </button>
+
             <!-- Help -->
             <div
               class="relative"
@@ -79,7 +76,7 @@
               ref="helpTrigger"
             >
               <svg
-                class="w-5 h-5 cursor-pointer text-secondary hover:text-[#7dd87b] transition-colors duration-200"
+                class="w-5 h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 cursor-pointer text-secondary hover:text-[#7dd87b] transition-colors duration-200"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -98,11 +95,11 @@
             >
 
               <div class="flex justify-center items-center" v-if="userData?.avatar_url">
-                <img :src="userData.avatar_url" alt="User Avatar" class="object-cover rounded-full w-7 h-7" />
+                <img :src="userData.avatar_url" alt="User Avatar" class="object-cover rounded-full w-7 h-7 xl:w-8 xl:h-8 2xl:w-9 2xl:h-9" />
               </div>
 
               <svg v-else
-                class="w-7 h-7 cursor-pointer text-secondary hover:text-[#7dd87b] transition-colors duration-200"
+                class="w-7 h-7 xl:w-8 xl:h-8 2xl:w-9 2xl:h-9 cursor-pointer text-secondary hover:text-[#7dd87b] transition-colors duration-200"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -117,22 +114,19 @@
 
         <!-- Content -->
         <div class="w-full p-3 z-10 relative">
-          <div class="w-full flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-            <h1 class="w-fit mx-auto text-[28px] md:text-4xl text-white text-kollektif-bold leading-tight">
-              Mirësevini, {{ userData?.name }} {{userData?.surname}}
+          <div class="w-full flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 xl:gap-4 2xl:gap-6">
+            <h1 class="w-fit mx-auto text-[28px] text-center md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl text-white text-kollektif-bold leading-tight">
+              Mirësevini,<br> {{ userData?.name }} {{userData?.surname}}
             </h1>
 
             <!-- Micro bento grid (super-compact chips) -->
-            <div class="grid grid-cols-12 gap-2 md:gap-3 w-full lg:w-1/2 items-stretch font-poppins">
+            <div class="grid grid-cols-12 gap-2 md:gap-3 xl:gap-4 2xl:gap-5 w-full lg:w-1/2 items-stretch font-poppins">
               <!-- Videos -->
-              <div
-                class="col-span-12 sm:col-span-6 lg:col-span-4 rounded-xl ring-1 ring-secondary/20 bg-secondary/5 h-full"
-              >
-                <div class="px-3 py-2 h-full">
+              <div class="col-span-12 sm:col-span-6 lg:col-span-6 rounded-xl ring-1 ring-secondary/20 bg-secondary/5 h-full">
+                <!-- Mobile/Tablet: Horizontal bar layout -->
+                <div class="px-3 py-2 h-full lg:hidden">
                   <div class="flex items-center gap-2">
-                    <div
-                      class="inline-flex items-center justify-center rounded-md text-secondary ring-1 ring-secondary/25 bg-secondary/10 w-7 h-7"
-                    >
+                    <div class="inline-flex items-center justify-center rounded-md text-secondary ring-1 ring-secondary/25 bg-secondary/10 w-7 h-7">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M3.5 7.5A2.5 2.5 0 016 5h7a2.5 2.5 0 012.5 2.5v3.2l3.2-1.8A1 1 0 0120 11v2a1 1 0 01-.3.7l-3.2-1.8v3.6A2.5 2.5 0 0113 18H6a2.5 2.5 0 01-2.5-2.5v-8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
                         <path d="M8.25 9.75h3.5M8.25 13h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
@@ -154,17 +148,57 @@
                     </div>
                   </div>
                 </div>
+
+                <!-- Desktop: Vertical circular ring (lg+) -->
+                <div class="px-4 py-4 xl:px-6 xl:py-6 2xl:px-8 2xl:py-8 h-full hidden lg:flex flex-col items-center justify-center gap-2 xl:gap-3">
+                  <div class="relative w-16 h-16 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24">
+                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 64 64">
+                      <circle
+                        cx="32"
+                        cy="32"
+                        r="28"
+                        stroke="currentColor"
+                        stroke-width="4"
+                        fill="none"
+                        class="text-secondary/20"
+                      />
+                      <circle
+                        cx="32"
+                        cy="32"
+                        r="28"
+                        stroke="currentColor"
+                        stroke-width="4"
+                        fill="none"
+                        class="text-secondary transition-all duration-500"
+                        :stroke-dasharray="`${(videoPct / 100) * 176} 176`"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                      <div class="w-fit h-fit p-1.5 xl:p-2 2xl:p-2.5 rounded-full flex items-center justify-center bg-secondary/10">
+                        <svg class="w-5 h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 text-secondary" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                          <path d="M3.5 7.5A2.5 2.5 0 016 5h7a2.5 2.5 0 012.5 2.5v3.2l3.2-1.8A1 1 0 0120 11v2a1 1 0 01-.3.7l-3.2-1.8v3.6A2.5 2.5 0 0113 18H6a2.5 2.5 0 01-2.5-2.5v-8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                          <path d="M8.25 9.75h3.5M8.25 13h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <h2 class="text-white text-center font-poppins font-thin text-[11px] xl:text-xs 2xl:text-sm">
+                    Video të mbetura
+                  </h2>
+                  <span class="text-white text-center font-poppins font-semibold text-lg xl:text-xl 2xl:text-2xl">
+                    {{userRoleDetails?.videos_remaining}} <span class="text-xs xl:text-sm 2xl:text-base font-normal text-white/70">nga {{userRoleDetails?.videos_quota}}</span>
+                  </span>
+                </div>
               </div>
 
               <!-- Minutes -->
-              <div
-                class="col-span-12 sm:col-span-6 lg:col-span-5 rounded-xl ring-1 ring-emerald-300/20 bg-emerald-400/5 h-full"
-              >
-                <div class="px-3 py-2 h-full">
+              <div class="col-span-12 sm:col-span-6 lg:col-span-6 rounded-xl ring-1 ring-emerald-300/20 bg-emerald-400/5 h-full">
+                <!-- Mobile/Tablet: Horizontal bar layout -->
+                <div class="px-3 py-2 h-full lg:hidden">
                   <div class="flex items-center gap-2">
-                    <div
-                      class="inline-flex items-center justify-center rounded-md text-secondary ring-1 ring-secondary/25 bg-secondary/10 w-7 h-7"
-                    >
+                    <div class="inline-flex items-center justify-center rounded-md text-secondary ring-1 ring-secondary/25 bg-secondary/10 w-7 h-7">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.4" />
                         <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -186,12 +220,53 @@
                     </div>
                   </div>
                 </div>
+
+                <!-- Desktop: Vertical circular ring (lg+) -->
+                <div class="px-4 py-4 xl:px-6 xl:py-6 2xl:px-8 2xl:py-8 h-full hidden lg:flex flex-col items-center justify-center gap-2 xl:gap-3">
+                  <div class="relative w-16 h-16 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24">
+                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 64 64">
+                      <circle
+                        cx="32"
+                        cy="32"
+                        r="28"
+                        stroke="currentColor"
+                        stroke-width="4"
+                        fill="none"
+                        class="text-secondary/20"
+                      />
+                      <circle
+                        cx="32"
+                        cy="32"
+                        r="28"
+                        stroke="currentColor"
+                        stroke-width="4"
+                        fill="none"
+                        class="text-secondary transition-all duration-500"
+                        :stroke-dasharray="`${(minutesPct / 100) * 176} 176`"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                      <div class="w-fit h-fit p-1.5 xl:p-2 2xl:p-2.5 rounded-full flex items-center justify-center bg-secondary/10">
+                        <svg class="w-5 h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 text-secondary" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                          <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.4" />
+                          <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <h2 class="text-white text-center font-poppins font-thin text-[11px] xl:text-xs 2xl:text-sm">
+                    Minuta të mbetura
+                  </h2>
+                  <span class="text-white text-center font-poppins font-semibold text-lg xl:text-xl 2xl:text-2xl">
+                    {{userRoleDetails?.second_to_minutes_remaining}} <span class="text-xs xl:text-sm 2xl:text-base font-normal text-white/70">nga {{userRoleDetails?.minutes_quota}}</span>
+                  </span>
+                </div>
               </div>
 
-              <!-- Plan (CTA centered) -->
-              <div
-                class="col-span-12 lg:col-span-3 rounded-xl h-full grid place-items-center p-2"
-              >
+              <!-- Plan (CTA centered) - Only shown on mobile/tablet, hidden on lg+ -->
+              <div class="col-span-12 lg:hidden rounded-xl h-full grid place-items-center p-2">
                 <button
                   class="inline-flex items-center px-3 py-1.5 text-[11px] font-medium text-primary bg-secondary rounded-md ring-1 ring-primary/10 cursor-pointer transition-colors hover:bg-[#7dd87b] hover:ring-primary/20"
                   @click.prevent="promptConfigProfile"
@@ -204,15 +279,16 @@
           </div>
         </div>
       </div>
+      
       <section v-if="!isAdmin()" class="w-full p-3 z-10 relative">
         <div class="flex items-center justify-between">
           <div class="w-fit h-fit flex gap-3 items-center">
-            <h2 class="text-primary text-kollektif-bold text-lg">Transkriptet e fundit</h2>
+            <h2 class="text-primary text-kollektif-bold text-base sm:text-lg xl:text-xl 2xl:text-2xl">Transkriptet e fundit</h2>
           </div>
         </div>
       
         <!-- Loading state -->
-        <div v-if="transcriptsLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 font-poppins">
+        <div v-if="transcriptsLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 font-poppins">
           <div
             v-for="n in 5"
             :key="n"
@@ -225,7 +301,7 @@
         </div>
       
         <!-- Recent Transcriptions -->
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 my-5 font-poppins">
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 my-5 font-poppins">
           <button
             v-for="t in recentTranscripts"
             :key="t.id"
@@ -253,50 +329,50 @@
       
             <!-- Meta -->
             <div class="mt-2">
-              <p class="font-poppins text-[12px] text-primary truncate">
+              <p class="font-poppins text-[12px] xl:text-[13px] 2xl:text-sm text-primary truncate">
                 {{ baseName(t.original_filename) }}
               </p>
               <div class="mt-0.5 flex items-center justify-between">
-                <span class="text-[11px] font-poppins text-primary/70">
+                <span class="text-[11px] xl:text-xs 2xl:text-[13px] font-poppins text-primary/70">
                   {{ formatDateShort(t.last_updated_at || t.created_at) }}
                 </span>
                 <span
-                  class="text-[11px] font-poppins text-primary bg-secondary/60 rounded px-1.5 py-0.5"
+                  class="text-[11px] xl:text-xs 2xl:text-[13px] font-poppins text-primary bg-secondary/60 rounded px-1.5 py-0.5"
                 >{{ formatDuration(t.duration) }}</span>
               </div>
             </div>
           </button>
           <!-- Empty state for recent if none -->
         <div v-if="!transcriptsLoading && recentTranscripts.length === 0" class="mt-2 text-center">
-          <p class="text-primary/70 font-poppins text-sm">Asnjë video e fundit.</p>
+          <p class="text-primary/70 font-poppins text-sm xl:text-base">Asnjë video e fundit.</p>
         </div>
         </div>
 
         <!-- All transcriptions (Table view) -->
-        <div class="flex items-center justify-between mt-2">
-          <div class="w-fit h-fit flex gap-3 items-center">
-            <h2 class="text-primary text-kollektif-bold text-lg">Transkriptet e mia</h2>
-            <div class="flex items-center border border-primary/20 rounded px-2 py-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-primary mr-2" fill="currentcolor" viewBox="0 0 24 24">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mt-2">
+          <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-2 sm:gap-3 items-start sm:items-center">
+            <h2 class="text-primary text-kollektif-bold text-base sm:text-lg xl:text-xl 2xl:text-2xl">Transkriptet e mia</h2>
+            <div class="flex items-center border border-primary/20 rounded px-2 py-1 w-full sm:w-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 xl:w-5 xl:h-5 text-primary mr-2" fill="currentcolor" viewBox="0 0 24 24">
                 <path d="M10.5 2a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm0 15a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13zM15.5 15.5l4.5 4.5-1.5 1.5-4.5-4.5z"/>
               </svg>
               <input
                 type="text"
                 v-model="searchFilename"
                 placeholder="Kërko..."
-                class="flex-1 text-xs font-poppins py-1 ring-0"
+                class="flex-1 text-xs xl:text-sm 2xl:text-base font-poppins py-1 ring-0 min-w-0"
               />
             </div>
             
-              <button @click="setFilters()" class="cursor-pointer rounded-lg border-primary text-primary border p-1 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentcolor" viewBox="0 0 640 640">
-                  <path d="M96 128C83.1 128 71.4 135.8 66.4 147.8C61.4 159.8 64.2 173.5 73.4 182.6L256 365.3L256 480C256 488.5 259.4 496.6 265.4 502.6L329.4 566.6C338.6 575.8 352.3 578.5 364.3 573.5C376.3 568.5 384 556.9 384 544L384 365.3L566.6 182.7C575.8 173.5 578.5 159.8 573.5 147.8C568.5 135.8 556.9 128 544 128L96 128z"/>
-                </svg>
-              </button>
+            <button @click="setFilters()" class="cursor-pointer rounded-lg border-primary text-primary border p-1 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 xl:w-6 xl:h-6" fill="currentcolor" viewBox="0 0 640 640">
+                <path d="M96 128C83.1 128 71.4 135.8 66.4 147.8C61.4 159.8 64.2 173.5 73.4 182.6L256 365.3L256 480C256 488.5 259.4 496.6 265.4 502.6L329.4 566.6C338.6 575.8 352.3 578.5 364.3 573.5C376.3 568.5 384 556.9 384 544L384 365.3L566.6 182.7C575.8 173.5 578.5 159.8 573.5 147.8C568.5 135.8 556.9 128 544 128L96 128z"/>
+              </svg>
+            </button>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
             <!-- Items per page -->
-            <select v-model="itemsPerPage" class="text-xs font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1">
+            <select v-model="itemsPerPage" class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1">
               <option value="20">20</option>
               <option value="60">60</option>
               <option value="100">100</option>
@@ -308,17 +384,17 @@
               <button
                 :disabled="currentPage === 1"
                 @click="goToPage(currentPage - 1)"
-                class="px-2 py-1 text-xs font-poppins text-primary bg-white border border-primary/20 rounded disabled:opacity-50"
+                class="px-2 py-1 text-xs xl:text-sm 2xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded disabled:opacity-50"
               >
                 &lt; 
               </button>
-              <span class="text-xs font-poppins text-primary">
-                Faqja {{ currentPage }} nga {{ totalPages }}
+              <span class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary whitespace-nowrap">
+                <span class="hidden sm:inline">Faqja </span>{{ currentPage }}<span class="hidden sm:inline"> nga {{ totalPages }}</span>
               </span>
               <button
                 :disabled="currentPage === totalPages"
                 @click="goToPage(currentPage + 1)"
-                class="px-2 py-1 text-xs font-poppins text-primary bg-white border border-primary/20 rounded disabled:opacity-50"
+                class="px-2 py-1 text-xs xl:text-sm 2xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded disabled:opacity-50"
               >
                &gt;
               </button>
@@ -336,40 +412,40 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <!-- Date From -->
               <div class="flex flex-col">
-                <label class="text-xs font-poppins text-primary/80 mb-1">Nga data</label>
+                <label class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary/80 mb-1">Nga data</label>
                 <input
                   type="date"
                   v-model="dateFrom"
-                  class="text-xs font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1"
+                  class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1"
                 />
               </div>
 
               <!-- Date To -->
               <div class="flex flex-col">
-                <label class="text-xs font-poppins text-primary/80 mb-1">Deri në datë</label>
+                <label class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary/80 mb-1">Deri në datë</label>
                 <input
                   type="date"
                   v-model="dateTo"
-                  class="text-xs font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1"
+                  class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1"
                 />
               </div>
 
               <!-- Sort By -->
               <div class="flex flex-col">
-                <label class="text-xs font-poppins text-primary/80 mb-1">Rendit sipas</label>
+                <label class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary/80 mb-1">Rendit sipas</label>
                 <select
                   v-model="sortBy"
-                  class="text-xs font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1">
+                  class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1">
                   <option value="created_at">Data e krijimit</option>
                   <option value="original_filename">Emri</option>
                   <option value="duration">Kohëzgjatja</option>
                 </select>
               </div>
               <div class="flex flex-col">
-                <label class="text-xs font-poppins text-primary/80 mb-1">Rendi</label>
+                <label class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary/80 mb-1">Rendi</label>
                 <select
                   v-model="sortOrder"
-                  class="text-xs font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1">
+                  class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1">
                   <option value="desc">Zbritës</option>
                   <option value="asc">Ngjitës</option>
                 </select>
@@ -382,10 +458,10 @@
             <table class="min-w-full divide-y divide-primary/10">
               <thead class="bg-secondary/10">
                 <tr>
-                  <th scope="col" class="px-3 md:px-4 py-2 text-left text-xs font-semibold text-primary/80 tracking-wide">Emri</th>
-                  <th scope="col" class="px-3 md:px-4 py-2 text-left text-xs font-semibold text-primary/80 tracking-wide">Krijuar</th>
-                  <th scope="col" class="px-3 md:px-4 py-2 text-left text-xs font-semibold text-primary/80 tracking-wide">Përditësuar</th>
-                  <th scope="col" class="px-3 md:px-4 py-2 text-right text-xs font-semibold text-primary/80 tracking-wide">Veprime</th>
+                  <th scope="col" class="px-3 md:px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80 tracking-wide">Emri</th>
+                  <th scope="col" class="px-3 md:px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80 tracking-wide hidden sm:table-cell">Krijuar</th>
+                  <th scope="col" class="px-3 md:px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80 tracking-wide hidden md:table-cell">Përditësuar</th>
+                  <th scope="col" class="px-3 md:px-4 xl:px-5 py-2 text-right text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80 tracking-wide">Veprime</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-primary/10">
@@ -395,28 +471,28 @@
                   class="hover:bg-secondary/5"
                 >
                   <!-- File with media icon and truncated name -->
-                  <td class="px-3 md:px-4 py-2">
+                  <td class="px-3 md:px-4 xl:px-5 py-2">
                     <div class="flex items-center gap-2">
-                      <span class="inline-flex items-center justify-center w-7 h-7 rounded-md ring-1 ring-primary/10 bg-primary/5 text-primary">
+                      <span class="inline-flex items-center justify-center w-7 h-7 xl:w-8 xl:h-8 2xl:w-9 2xl:h-9 rounded-md ring-1 ring-primary/10 bg-primary/5 text-primary">
                         <!-- Video icon -->
-                        <svg v-if="getMediaType(t.original_filename) === 'video'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <svg v-if="getMediaType(t.original_filename) === 'video'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 xl:w-5 xl:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                           <rect x="3" y="5" width="18" height="14" rx="2" ry="2" stroke-width="1.6"/>
                           <path d="M10 9l5 3-5 3V9z" fill="currentColor"/>
                         </svg>
                         <!-- Audio icon -->
-                        <svg v-else-if="getMediaType(t.original_filename) === 'audio'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <svg v-else-if="getMediaType(t.original_filename) === 'audio'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 xl:w-5 xl:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                           <path d="M9 18a3 3 0 100-6 3 3 0 000 6z" stroke-width="1.6"/>
                           <path d="M12 6l7-2v9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         <!-- Fallback file icon -->
-                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 xl:w-5 xl:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                           <path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12V7z" stroke-width="1.6"/>
                           <path d="M14 3v4a2 2 0 002 2h4" stroke-width="1.6"/>
                         </svg>
                       </span>
                       <button
                         type="button"
-                        class="text-sm md:text-[13px] text-primary font-medium truncate max-w-[14ch] md:max-w-[24ch] hover:underline text-left"
+                        class="text-sm md:text-[13px] xl:text-sm 2xl:text-base text-primary font-medium truncate max-w-[14ch] md:max-w-[24ch] xl:max-w-[30ch] hover:underline text-left"
                         :title="baseName(t.original_filename) || 'Video'"
                         @click="goToDetails(t.id)"
                       >
@@ -426,20 +502,20 @@
                   </td>
 
                   <!-- Created date -->
-                  <td class="px-3 md:px-4 py-2 text-[12px] text-primary/80">
+                  <td class="px-3 md:px-4 xl:px-5 py-2 text-[12px] xl:text-[13px] 2xl:text-sm text-primary/80 hidden sm:table-cell">
                     {{ formatDateShort(t.created_at) }}
                   </td>
 
                   <!-- Last updated date -->
-                  <td class="px-3 md:px-4 py-2 text-[12px] text-primary/80">
+                  <td class="px-3 md:px-4 xl:px-5 py-2 text-[12px] xl:text-[13px] 2xl:text-sm text-primary/80 hidden md:table-cell">
                     {{ t.last_updated_at ? formatDateShort(t.last_updated_at) : '—' }}
                   </td>
 
                   <!-- Actions -->
-                  <td class="px-3 md:px-4 py-2">
+                  <td class="px-3 md:px-4 xl:px-5 py-2">
                     <div class="flex justify-end gap-2">
-                      <edit @click.prevent="goToDetails(t.id)" class="w-5 h-5"/>
-                      <trash @click.prevent="promptDelete(t)" class="w-5 h-5"/>
+                      <edit @click.prevent="goToDetails(t.id)" class="w-5 h-5 xl:w-6 xl:h-6"/>
+                      <trash @click.prevent="promptDelete(t)" class="w-5 h-5 xl:w-6 xl:h-6"/>
                     </div>
                   </td>
                 </tr>
@@ -451,15 +527,16 @@
             v-else
             class="flex flex-col items-center justify-center h-48 text-primary/60 bg-white rounded-xl ring-1 ring-primary/10"
           >
-            <p class="text-sm md:text-base font-medium">Nuk u gjëndën transkripte</p>
-            <p class="text-xs md:text-sm mt-1">Provo ndryshoimin e filtrave ose <RouterLink to="/upload" class="text-secondary font-bold">krijo</RouterLink> një transkript të ri.</p>
+            <p class="text-sm md:text-base xl:text-lg font-medium">Nuk u gjëndën transkripte</p>
+            <p class="text-xs md:text-sm xl:text-base mt-1">Provo ndryshoimin e filtrave ose <RouterLink to="/upload" class="text-secondary font-bold">krijo</RouterLink> një transkript të ri.</p>
           </div>
         </div>
       </section>
+      
       <!-- Admin Panel Section -->
       <section v-if="isAdmin()" class="w-full p-3 z-10 relative mt-6">
         <div class="bg-white rounded-xl ring-1 ring-primary/10 p-6">
-          <h2 class="text-primary text-kollektif-bold text-lg mb-6">Admin Panel</h2>
+          <h2 class="text-primary text-kollektif-bold text-lg xl:text-xl 2xl:text-2xl mb-6">Admin Panel</h2>
           
           <!-- Tabs -->
           <div class="flex gap-2 mb-6 border-b border-primary/10 justify-between">
@@ -467,14 +544,14 @@
               <button
               @click="adminTab = 'users'"
               :class="adminTab === 'users' ? 'border-b-2 border-secondary text-secondary' : 'text-primary/60'"
-              class="pb-2 px-4 font-poppins text-sm transition-colors"
+              class="pb-2 px-4 font-poppins text-sm xl:text-base 2xl:text-lg transition-colors"
             >
               Users ({{ allUsers.length }})
             </button>
             <button
               @click="adminTab = 'roles'"
               :class="adminTab === 'roles' ? 'border-b-2 border-secondary text-secondary' : 'text-primary/60'"
-              class="pb-2 px-4 font-poppins text-sm transition-colors"
+              class="pb-2 px-4 font-poppins text-sm xl:text-base 2xl:text-lg transition-colors"
             >
               Roles ({{ roles.length }})
             </button>
@@ -483,7 +560,7 @@
               <a
               @click.prevent="promptRoleModal"
               :class="adminTab === 'roles' ? 'bg-primary text-secondary rounded-md px-4 py-2 hover:text-primary hover:bg-secondary cursor-pointer' : 'hidden'"
-              class="font-poppins text-sm transition-colors"
+              class="font-poppins text-sm xl:text-base 2xl:text-lg transition-colors"
               >
                 Krijo Rol
               </a>
@@ -499,21 +576,21 @@
             <table v-else-if="allUsers.length > 0" class="min-w-full divide-y divide-primary/10">
               <thead class="bg-secondary/10">
                 <tr>
-                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Username</th>
-                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Name</th>
-                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Email</th>
-                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Role</th>
-                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Created</th>
-                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Veprime</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Username</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Name</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Email</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Role</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Created</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Veprime</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-primary/10">
                 <tr v-for="user in allUsers" :key="user.id" class="hover:bg-secondary/5">
-                  <td class="px-4 py-3 text-sm text-primary/80">{{ user.username }}</td>
-                  <td class="px-4 py-3 text-sm text-primary">{{ user.name }} {{ user.surname }}</td>
-                  <td class="px-4 py-3 text-sm text-primary/80">{{ user.email }}</td>
-                  <td class="px-4 py-3 text-sm">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80">{{ user.username }}</td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary">{{ user.name }} {{ user.surname }}</td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80">{{ user.email }}</td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs xl:text-sm font-medium"
                       :class="{
                         'bg-purple-100 text-purple-800': user.role_name === 'admin',
                         'bg-blue-100 text-blue-800': user.role_name === 'pro',
@@ -525,16 +602,16 @@
                       {{ user.role_name || 'N/A' }}
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-sm text-primary/80">{{ formatDateShort(user.created_at) }}</td>
-                  <td class="px-4 py-3 flex items-center justify-center gap-3"> 
-                    <edit @click.prevent="assignRole(user)" class="w-5 h-5"/>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80">{{ formatDateShort(user.created_at) }}</td>
+                  <td class="px-4 xl:px-5 py-3 flex items-center justify-center gap-3"> 
+                    <edit @click.prevent="assignRole(user)" class="w-5 h-5 xl:w-6 xl:h-6"/>
                   </td>
                 </tr>
               </tbody>
             </table>
 
             <div v-else class="text-center py-8 text-primary/60">
-              <p class="text-sm">No users found</p>
+              <p class="text-sm xl:text-base">No users found</p>
             </div>
           </div>
 
@@ -547,33 +624,33 @@
             <table v-else-if="roles.length > 0" class="min-w-full divide-y divide-primary/10">
               <thead class="bg-secondary/10">
                 <tr>
-                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Roli</th>
-                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Çmimi</th>
-                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Video/muaj</th>
-                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Minuta/muaj</th>
-                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Kohëzgjatja max.</th>
-                  <th scope="col" class="px-4 py-2 text-left text-xs font-semibold text-primary/80">Përmasa(MB)</th>
-                  <th scope="col" class="px-4 py-2 text-center text-xs font-semibold text-primary/80">Veprime</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Roli</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Çmimi</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Video/muaj</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Minuta/muaj</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Kohëzgjatja max.</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Përmasa(MB)</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-center text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Veprime</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-primary/10">
                 <tr v-for="role in roles" :key="role.id" class="hover:bg-secondary/5">
-                  <td class="px-4 py-3 text-sm font-medium text-primary text-left">{{ role.name }}</td>
-                  <td class="px-4 py-3 text-sm text-primary/80 text-left">€ {{ role.price }}<span class="text-[9px] text-primary/30"> .00</span></td>
-                  <td class="px-4 py-3 text-sm text-primary/80 text-center">{{ role.videos_per_month }}</td>
-                  <td class="px-4 py-3 text-sm text-primary/80 text-center">{{ role.total_minutes_per_month }}<span class="text-[9px] text-primary/30 subscript"> /min</span></td>
-                  <td class="px-4 py-3 text-sm text-primary/80 text-center">{{ role.max_video_duration }}<span class="text-[9px] text-primary/30 subscript"> /min</span></td>
-                  <td class="px-4 py-3 text-sm text-primary/80 text-center">{{ role.max_file_size_mb }}<span class="text-[9px] text-primary/30 subscript"> /mb</span></td>
-                  <td class="px-4 py-3 flex items-center justify-center gap-3"> 
-                    <edit @click.prevent="editRole(role)" class="w-5 h-5"/>
-                    <trash @click.prevent="deleteRole(role)" class="w-5 h-5"/>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg font-medium text-primary text-left">{{ role.name }}</td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80 text-left">€ {{ role.price }}<span class="text-[9px] xl:text-[10px] text-primary/30"> .00</span></td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80 text-center">{{ role.videos_per_month }}</td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80 text-center">{{ role.total_minutes_per_month }}<span class="text-[9px] xl:text-[10px] text-primary/30 subscript"> /min</span></td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80 text-center">{{ role.max_video_duration }}<span class="text-[9px] xl:text-[10px] text-primary/30 subscript"> /min</span></td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80 text-center">{{ role.max_file_size_mb }}<span class="text-[9px] xl:text-[10px] text-primary/30 subscript"> /mb</span></td>
+                  <td class="px-4 xl:px-5 py-3 flex items-center justify-center gap-3"> 
+                    <edit @click.prevent="editRole(role)" class="w-5 h-5 xl:w-6 xl:h-6"/>
+                    <trash @click.prevent="deleteRole(role)" class="w-5 h-5 xl:w-6 xl:h-6"/>
                   </td>
                 </tr>
               </tbody>
             </table>
 
             <div v-else class="text-center py-8 text-primary/60">
-              <p class="text-sm">No roles found</p>
+              <p class="text-sm xl:text-base">No roles found</p>
             </div>
           </div>
         </div>
@@ -827,7 +904,7 @@
 
 <script setup>
 import albcaptions_logo_nobg_inv from './logos/Albcaption_logo_nobg.vue'
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '@/lib/supabaseClient';
 import ConfigsModal from './items/ConfigsModal.vue';
@@ -841,6 +918,9 @@ import UserEditModal from './items/UserEditModal.vue';
 import ReportBugModal from './items/ReportBugModal.vue';
 import apiClient from '@/stores/apiClient';
 
+// ============================================================
+// HELPER FUNCTIONS
+// ============================================================
 const baseName = (name) => (name ? name.replace(/\.[^/.]+$/, '') : 'Video')
 const formatDateShort = (d) => {
   if (!d) return '—'
@@ -850,12 +930,10 @@ const formatDateShort = (d) => {
     return '—'
   }
 }
-// Truncate helper (defaults to 10 characters)
 const truncateName = (str, max = 10) => {
   if (!str) return ''
   return str.length > max ? str.substring(0, max) + '...' : str
 }
-// Determine media type from filename
 const getMediaType = (filename = '') => {
   const ext = (filename.split('.').pop() || '').toLowerCase()
   const videoExt = ['mp4', 'mov', 'mkv', 'webm', 'avi', 'm4v']
@@ -864,23 +942,60 @@ const getMediaType = (filename = '') => {
   if (audioExt.includes(ext)) return 'audio'
   return 'unknown'
 }
+const formatDuration = (seconds) => {
+  if (!seconds) return 'N/A';
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+const formatFileSize = (bytes) => {
+  if (!bytes) return 'N/A';
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+};
 
+// ============================================================
+// ROUTER & STATE
+// ============================================================
 const router = useRouter();
+
+// Loading states
 const loading = ref(true);
 const transcriptsLoading = ref(true); 
 const allUsersLoading = ref(false); 
+const rolesLoading = ref(false);
+const userRoleDetailsLoading = ref(false);
+const deleteLoading = ref(false);
+const deleteUserLoading = ref(false);
+const deactivateLoading = ref(false);
+const editProfileLoading = ref(false);
+
+// User data
 const userData = ref(null);
 const userRoleDetails = ref(null);
-const userRoleDetailsLoading = ref(false);
 const userRoleDetailsError = ref(null);
 const authError = ref(null);
+
+// Transcripts
 const userTrans = ref([]);
+const recentTranscripts = ref([])
+
+// Admin data
 const allUsers = ref([]); 
-const showSuccessAlert = ref(false);
-const successAlertMessage = ref('');
+const roles = ref([]);
 const adminTab = ref('users')
 
-// Search and Filter State
+// Alerts & Messages
+const showSuccessAlert = ref(false);
+const successAlertMessage = ref('');
+const showDeletionError = ref(false);
+const isError = ref(false);
+const showDeletionErrorMessage = ref('');
+
+// ============================================================
+// SEARCH, FILTER & PAGINATION STATE
+// ============================================================
 const searchFilename = ref('');
 const dateFrom = ref('');
 const dateTo = ref('');
@@ -889,95 +1004,111 @@ const durationMax = ref('');
 const sortBy = ref('created_at');
 const sortOrder = ref('desc');
 const showFilters = ref(false);
-
-// Pagination State
 const currentPage = ref(1);
-const itemsPerPage = ref('20'); // Default to 20 items per page
+const itemsPerPage = ref('20');
 const jumpToPageInput = ref(null);
 
-// Modal state for transaction deletion
+// ============================================================
+// MODAL STATES
+// ============================================================
+// Transaction deletion
 const showDeleteModal = ref(false);
 const transactionToDelete = ref(null);
-const deleteLoading = ref(false);
 const deleteError = ref(null);
 
-// Modal state for user deletion
+// User deletion (unused but kept for reference)
 const showDeleteUserModal = ref(false);
 const userToDelete = ref(null);
-const deleteUserLoading = ref(false);
 const deleteUserError = ref(null);
-// Modal state for deactivating account
+
+// Account deactivation
 const showDeactivateModal = ref(false);
-const deactivateLoading = ref(false);
 const deactivateError = ref(null);
-// Modal state for subscription cancellation
+
+// Subscription (unused but kept)
 const showCancelSubscriptionModal = ref(false);
 const cancelSubscriptionLoading = ref(false);
 const cancelSubscriptionError = ref(null);
 const hasActiveSubscription = ref(false);
 
-//Roles states
-const roles = ref([]);
-const rolesLoading = ref(false);
-const DeletemodalVisible = ref(false);
-const DeletemodalMessage=ref('');
-const selectedRole = ref(null);
-const showDeletionError = ref(false);
-const isError = ref(false);
-const showDeletionErrorMessage = ref('');
-
-//User update states
+// Profile edit
 const showEditProfileModal = ref(false);
-const editProfileForm = ref({
-  username: '',
-  name: '',
-  surname: ''
-});
-const selectedUser = ref(null);
-const showUserEditModal = ref(false)
-const editProfileLoading = ref(false);
+const editProfileForm = ref({ username: '', name: '', surname: '' });
 const editProfileError = ref(null);
 const editProfileSuccess = ref(null);
+const showPasswordFields = ref(false);
+const passwordForm = ref({ current: '', new: '', confirm: '' });
+const passwordError = ref(null);
 
-const assignRole = (user) => {
-  selectedUser.value = user
-  showUserEditModal.value = true
-}
-
-const handleUserUpdated = async () => {
-  showUserEditModal.value = false
-  selectedUser.value = null
-  await getAllUsers() 
-  showSuccessAlert.value = true
-  successAlertMessage.value = 'Roli i përdoruesit u përditësua me sukses!'
-  setTimeout(() => {
-    showSuccessAlert.value = false
-    successAlertMessage.value = ''
-  }, 3000)
-}
-
-//Modal states
+// Other modals
 const showReportBugModal = ref(false);
 const showConfigsModal = ref(false);
 const showRoleModal = ref(false);
+const showUserEditModal = ref(false)
 
-// Password change form state
-const showPasswordFields = ref(false);
-const passwordForm = ref({
-  current: '',
-  new: '',
-  confirm: ''
-});
-const passwordError = ref(null);
+// Admin modal states
+const DeletemodalVisible = ref(false);
+const DeletemodalMessage = ref('');
+const selectedRole = ref(null);
+const selectedUser = ref(null);
 
-const recentTranscripts = ref([])
+// ============================================================
+// DROPDOWN STATES
+// ============================================================
+const showHelpDropdown = ref(false)
+const showProfileDropdown = ref(false)
+const showEditDropdown = ref(false)
+const helpTrigger = ref(null)
+const profileTrigger = ref(null)
+const editTrigger = ref(null)
+let helpTimeout = null
+let profileTimeout = null
+let editTimeout = null
+const editOffsetRightPx = 200
 
+// ============================================================
+// COMPUTED PROPERTIES
+// ============================================================
+// Progress percentages
+const videoPct = computed(() => {
+  const t = Number(userRoleDetails.value?.videos_quota) || 0
+  const v = Number(userRoleDetails.value?.videos_remaining) || 0
+  if (!t) return 0
+  return Math.max(0, Math.min(100, (v / t) * 100))
+})
+const minutesPct = computed(() => {
+  const t = Number(userRoleDetails.value?.seconds_quota) || 0
+  const v = Number(userRoleDetails.value?.seconds_remaining) || 0
+  if (!t) return 0
+  return Math.max(0, Math.min(100, (v / t) * 100))
+})
 
-// Computed property for filtered and sorted transactions
+// Dropdown positioning
+const helpDropdownStyle = computed(() => {
+  if (!helpTrigger.value) return {}
+  const rect = helpTrigger.value.getBoundingClientRect()
+  return { position: 'fixed', top: `${rect.bottom + 4}px`, right: `${window.innerWidth - rect.right}px`, zIndex: '9999' }
+})
+const profileDropdownStyle = computed(() => {
+  if (!profileTrigger.value) return {}
+  const rect = profileTrigger.value.getBoundingClientRect()
+  return { position: 'fixed', top: `${rect.bottom + 4}px`, right: `${window.innerWidth - rect.right}px`, zIndex: '9999' }
+})
+const editDropdownStyle = computed(() => {
+  if (!editTrigger.value) return {}
+  const rect = editTrigger.value.getBoundingClientRect()
+  return {
+    position: 'fixed',
+    top: `${rect.bottom + 4}px`,
+    right: `${Math.max(8, window.innerWidth - rect.right - editOffsetRightPx)}px`,
+    zIndex: '9999'
+  }
+})
+
+// Filtered & paginated transactions
 const filteredTransactions = computed(() => {
   let filtered = [...userTrans.value];
   
-  // Filter by filename
   if (searchFilename.value.trim()) {
     const searchTerm = searchFilename.value.toLowerCase().trim();
     filtered = filtered.filter(transaction => 
@@ -985,7 +1116,6 @@ const filteredTransactions = computed(() => {
     );
   }
   
-  // Filter by date range
   if (dateFrom.value) {
     const fromDate = new Date(dateFrom.value);
     filtered = filtered.filter(transaction => 
@@ -995,13 +1125,12 @@ const filteredTransactions = computed(() => {
   
   if (dateTo.value) {
     const toDate = new Date(dateTo.value);
-    toDate.setHours(23, 59, 59, 999); // Include the entire day
+    toDate.setHours(23, 59, 59, 999);
     filtered = filtered.filter(transaction => 
       new Date(transaction.created_at) <= toDate
     );
   }
   
-  // Filter by duration range
   if (durationMin.value !== '') {
     const minDuration = parseInt(durationMin.value);
     filtered = filtered.filter(transaction => 
@@ -1016,7 +1145,6 @@ const filteredTransactions = computed(() => {
     );
   }
   
-  // Sort transactions
   filtered.sort((a, b) => {
     let aValue, bValue;
     
@@ -1051,16 +1179,11 @@ const filteredTransactions = computed(() => {
   return filtered;
 });
 
-// Pagination computed properties
-const totalFilteredItems = computed(() => {
-  return filteredTransactions.value.length;
-});
-
+const totalFilteredItems = computed(() => filteredTransactions.value.length);
 const totalPages = computed(() => {
   if (itemsPerPage.value === 'all') return 1;
   return Math.ceil(totalFilteredItems.value / parseInt(itemsPerPage.value));
 });
-
 const paginatedTransactions = computed(() => {
   if (itemsPerPage.value === 'all') {
     return filteredTransactions.value;
@@ -1071,19 +1194,12 @@ const paginatedTransactions = computed(() => {
   return filteredTransactions.value.slice(start, end);
 });
 
-// Pagination display logic
 const startPage = computed(() => {
   const maxPagesToShow = 5;
   const halfRange = Math.floor(maxPagesToShow / 2);
   
-  if (totalPages.value <= maxPagesToShow) {
-    return 1;
-  }
-  
-  if (currentPage.value <= halfRange) {
-    return 1;
-  }
-  
+  if (totalPages.value <= maxPagesToShow) return 1;
+  if (currentPage.value <= halfRange) return 1;
   if (currentPage.value >= totalPages.value - halfRange) {
     return totalPages.value - maxPagesToShow + 1;
   }
@@ -1104,67 +1220,129 @@ const pageRange = computed(() => {
   return pages;
 });
 
-// Watch for filter changes to reset pagination
-watch([searchFilename, dateFrom, dateTo, durationMin, durationMax, sortBy, sortOrder], () => {
-  resetToFirstPage();
-});
+// ============================================================
+// DATA LOADING FUNCTIONS
+// ============================================================
+const loadUserData = async () => {
+  loading.value = true;
+  authError.value = null;
 
-// Pagination methods
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-    jumpToPageInput.value = null;
-    
-    // Scroll to top of video grid on next tick
-    setTimeout(() => {
-      const videoGrid = document.querySelector('.grid');
-      if (videoGrid) {
-        videoGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
+  try {
+    const response = await apiClient.get('/auth/user-profile')
+    userData.value = { ...response.data };
+  } catch (error) {
+    console.error('[DASHBOARD] Error loading profile:', error);
+    authError.value = error.message || 'Failed to load user profile';
+    userData.value = null;
+  } finally {
+    loading.value = false;
   }
 };
 
-const jumpToPage = () => {
-  if (jumpToPageInput.value && jumpToPageInput.value >= 1 && jumpToPageInput.value <= totalPages.value) {
-    goToPage(jumpToPageInput.value);
-  }
-};
-
-const resetToFirstPage = () => {
-  currentPage.value = 1;
-  jumpToPageInput.value = null;
-};
-
-
-// Open edit modal and fill form
-const promptEditProfile = () => {
-  showEditProfileModal.value = true;
-  editProfileForm.value = {
-    username: userData.value.username || '',
-    name: userData.value.name || '',
-    surname: userData.value.surname || ''
-  };
-  editProfileError.value = null;
-  editProfileSuccess.value = null;
-  showPasswordFields.value = false;
-  passwordForm.value = { current: '', new: '', confirm: '' };
-  passwordError.value = null;
+const getUserRoleDetails = async () => {
+  userRoleDetailsLoading.value = true;
+  userRoleDetailsError.value = null;
   
+  try {
+    if (!userData.value?.id) return;
+    const response = await apiClient.get('/auth/user-role-details')
+    userRoleDetails.value = response.data;
+  } catch (error) {
+    console.error('[DASHBOARD] Error loading role details:', error);
+    userRoleDetailsError.value = error.message || 'Failed to fetch role details';
+    userRoleDetails.value = null;
+  } finally {
+    userRoleDetailsLoading.value = false;
+  }
 };
 
-const promptReportBugModal = () => {
-  showReportBugModal.value = true;
+const getRecentTranscripts = async () => {
+  if (!userData.value?.id) return
+  const { data, error } = await supabase
+    .from('transactions')
+    .select(`*, videos (id, video_url)`)
+    .eq('user_id', userData.value.id)
+    .order('last_updated_at', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false })
+    .limit(5)
+
+  if (!error && data) {
+    recentTranscripts.value = data.map(t => ({
+      ...t,
+      video_url: t.videos?.video_url || null,
+    }))
+  }
+}
+
+async function getTranscripts() {
+  transcriptsLoading.value = true;
+  
+  try {
+    const response = await apiClient.get('/auth/user-transcripts')
+    userTrans.value = response.data.map(transaction => ({
+      ...transaction,
+      video_url: transaction.videos?.video_url || null,
+    }));
+  } catch (error) {
+    console.error('[DASHBOARD] Error loading transcripts:', error);
+  } finally {
+    transcriptsLoading.value = false;
+  }
+}
+
+// ============================================================
+// ADMIN FUNCTIONS
+// ============================================================
+const isAdmin = () => {
+  return userData.value?.role === 'd61d7768-a279-420b-a0ce-b65483794329';
 };
 
-const promptConfigProfile = () => {
-  showConfigsModal.value = true;
+const getAllRoles = async () => {
+  rolesLoading.value = true;
+  
+  try {
+    const response = await apiClient.get('/auth/admin/roles')
+    roles.value = response.data || [];
+  } catch (error) {
+    console.error('[DASHBOARD] Error loading roles:', error);
+    roles.value = [];
+  } finally {
+    rolesLoading.value = false;
+  }
 };
 
-const promptRoleModal = () => {
-  selectedRole.value = null
-  showRoleModal.value = true;
-};
+async function getAllUsers() {
+  if (!isAdmin()) return;
+  
+  allUsersLoading.value = true;
+  
+  try {
+    const response = await apiClient.get('/auth/admin/users')
+    allUsers.value = response.data || [];
+  } catch (error) {
+    console.error('[DASHBOARD] Error loading users:', error);
+    allUsers.value = [];
+  } finally {
+    allUsersLoading.value = false;
+  }
+}
+
+const assignRole = (user) => {
+  selectedUser.value = user
+  showUserEditModal.value = true
+}
+
+const handleUserUpdated = async () => {
+  showUserEditModal.value = false
+  selectedUser.value = null
+  await getAllUsers() 
+  showSuccessAlert.value = true
+  successAlertMessage.value = 'Roli i përdoruesit u përditësua me sukses!'
+  setTimeout(() => {
+    showSuccessAlert.value = false
+    successAlertMessage.value = ''
+  }, 3000)
+}
 
 async function editRole(role) {
   selectedRole.value = role;
@@ -1192,7 +1370,7 @@ async function handleRoleDelete() {
     .eq('role', roleId);
     
   if (roleModalError) {
-    ('Error checking users with role:', roleModalError);
+    console.error('Error checking users with role:', roleModalError);
     DeletemodalMessage.value = 'Gabim gjatë verifikimit të përdoruesve me këtë rol.';
     return;
   }
@@ -1224,175 +1402,29 @@ async function handleRoleDelete() {
   isError.value = false;
   showDeletionErrorMessage.value = 'Roli u fshi me sukses.';
   setTimeout(() => {
-      showDeletionError.value = false;
-      isError.value = false;
-      showDeletionErrorMessage.value = '';
-    }, 3000);
+    showDeletionError.value = false;
+    isError.value = false;
+    showDeletionErrorMessage.value = '';
+  }, 3000);
   await getAllRoles();
 }
 
-const goToDetails = (id) => {
-  router.push(`/transaction/${id}`);
+// ============================================================
+// TRANSCRIPT DELETION FUNCTIONS
+// ============================================================
+const promptDelete = (transaction) => {
+  transactionToDelete.value = transaction;
+  showDeleteModal.value = true;
+  deleteError.value = null;
 };
-
-// Helper function to format duration
-const formatDuration = (seconds) => {
-  if (!seconds) return 'N/A';
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-};
-
-// Helper function to format file size
-const formatFileSize = (bytes) => {
-  if (!bytes) return 'N/A';
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
-};
-
-
-// Function to load user data with debugging
-const loadUserData = async () => {
-  loading.value = true;
-  authError.value = null;
-
-  try {
-    const response = await apiClient.get('/auth/user-profile')
-    
-    userData.value = {
-      ...response.data,
-      name: response.data.name,
-      surname: response.data.surname,
-      email: response.data.email,
-      username: response.data.username,
-      roleName: response.data.roleName
-    };
-    
-
-  } catch (error) {
-    console.error('[DASHBOARD] Error loading profile:', error);
-    authError.value = error.message || 'Failed to load user profile';
-    userData.value = null;
-  } finally {
-    loading.value = false;
-  }
-};
-
-
-// Function to load user role details
-const getUserRoleDetails = async () => {
-  userRoleDetailsLoading.value = true;
-  userRoleDetailsError.value = null;
-  
-  try {
-    if (!userData.value?.id) return;
-    
-    const response = await apiClient.get('/auth/user-role-details')
-    
-    userRoleDetails.value = response.data;
-  
-
-  } catch (error) {
-    console.error('[DASHBOARD] Error loading role details:', error);
-    userRoleDetailsError.value = error.message || 'Failed to fetch role details';
-    userRoleDetails.value = null;
-  } finally {
-    userRoleDetailsLoading.value = false;
-  }
-};
-
-
-//Function to load users 5 most recent transcripts
-const getRecentTranscripts = async () => {
-  if (!userData.value?.id) return
-  const { data, error } = await supabase
-    .from('transactions')
-    .select(`
-      *,
-      videos (id, video_url)
-    `)
-    .eq('user_id', userData.value.id)
-    .order('last_updated_at', { ascending: false, nullsFirst: false })
-    .order('created_at', { ascending: false })
-    .limit(5)
-
-  if (!error && data) {
-    recentTranscripts.value = data.map(t => ({
-      ...t,
-      video_url: t.videos?.video_url || null,
-    }))
-  }
-}
-
-// Function to get user transcripts
-async function getTranscripts() {
-  transcriptsLoading.value = true;
-  
-  try {
-    const response = await apiClient.get('/auth/user-transcripts')
-    
-    userTrans.value = response.data.map(transaction => ({
-      ...transaction,
-      video_url: transaction.videos?.video_url || null,
-    }));
-
-  } catch (error) {
-    console.error('[DASHBOARD] Error loading transcripts:', error);
-    // Continue anyway - don't block the dashboard
-  } finally {
-    transcriptsLoading.value = false;
-  }
-}
-
-
-// Updated function to get all users from your custom users table (excluding current user)
-const getAllRoles = async () => {
-  rolesLoading.value = true;
-  
-  try {
-    const response = await apiClient.get('/auth/admin/roles')
-    
-    roles.value = response.data || [];
-
-  } catch (error) {
-    console.error('[DASHBOARD] Error loading roles:', error);
-    roles.value = [];
-  } finally {
-    rolesLoading.value = false;
-  }
-};
-
-async function getAllUsers() {
-  if (userData.value?.role !== 'd61d7768-a279-420b-a0ce-b65483794329') {
-    return; // Not admin
-  }
-  
-  allUsersLoading.value = true;
-  
-  try {
-    const response = await apiClient.get('/auth/admin/users')
-    
-    allUsers.value = response.data || [];
-    
-  } catch (error) {
-    console.error('[DASHBOARD] Error loading users:', error);
-    allUsers.value = [];
-  } finally {
-    allUsersLoading.value = false;
-  }
-}
 
 const confirmDelete = async () => {
   if (!transactionToDelete.value) return;
   const transactionId = transactionToDelete.value.id;
   const videoUrl = transactionToDelete.value.video_url;
   
-  try{
-
-    await apiClient.post(`/delete/transcription/${transactionId}`, {
-      video_url: videoUrl
-    });
+  try {
+    await apiClient.post(`/delete/transcription/${transactionId}`, { video_url: videoUrl });
     showDeleteModal.value = false;
     setTimeout(() => {
       showDeletionError.value = true;
@@ -1405,11 +1437,9 @@ const confirmDelete = async () => {
         showDeletionErrorMessage.value = '';
       }, 3000);
     }, 500);
-  }
-  catch (error) {
+  } catch (error) {
     console.error('[DASHBOARD] Error deleting transcript:', error);
     deleteError.value = error.message || 'Failed to delete transcript.';
-    return;
   }
 };
 
@@ -1419,21 +1449,15 @@ const cancelDelete = () => {
   deleteError.value = null;
 };
 
-// Helper function to check if user is admin
-const isAdmin = () => {
-  return userData.value?.role === 'd61d7768-a279-420b-a0ce-b65483794329';
-};
-
-// Helper function to check if a user can be deleted (not admin)
+// ============================================================
+// USER DELETION FUNCTIONS (kept but unused)
+// ============================================================
 const canDeleteUser = (user) => {
   return user.role !== 'd61d7768-a279-420b-a0ce-b65483794329';
 };
 
-// User deletion logic
 const promptDeleteUser = (user) => {
-  if (!canDeleteUser(user)) {
-    return;
-  }
+  if (!canDeleteUser(user)) return;
   userToDelete.value = user;
   showDeleteUserModal.value = true;
   deleteUserError.value = null;
@@ -1445,10 +1469,7 @@ const confirmDeleteUser = async () => {
   deleteUserError.value = null;
   
   try {
-    const { error } = await supabase
-      .from('users')
-      .delete()
-      .eq('id', userToDelete.value.id);
+    const { error } = await supabase.from('users').delete().eq('id', userToDelete.value.id);
     
     if (error) {
       deleteUserError.value = error.message || 'Failed to delete user.';
@@ -1476,7 +1497,9 @@ const cancelDeleteUser = () => {
   deleteUserError.value = null;
 };
 
-// Deactivate account logic
+// ============================================================
+// ACCOUNT DEACTIVATION FUNCTIONS
+// ============================================================
 const promptDeactivate = () => {
   showDeactivateModal.value = true;
   deactivateError.value = null;
@@ -1486,10 +1509,7 @@ const confirmDeactivate = async () => {
   deactivateLoading.value = true;
   deactivateError.value = null;
   try {
-    const { error } = await supabase
-      .from('users')
-      .delete()
-      .eq('id', userData.value.id);
+    const { error } = await supabase.from('users').delete().eq('id', userData.value.id);
 
     if (error) {
       deactivateError.value = error.message || 'Failed to deactivate account.';
@@ -1498,7 +1518,6 @@ const confirmDeactivate = async () => {
 
     await supabase.auth.signOut();
     router.push('/');
-
   } catch (err) {
     deactivateError.value = err.message || 'Failed to deactivate account.';
   } finally {
@@ -1511,16 +1530,112 @@ const cancelDeactivate = () => {
   deactivateError.value = null;
 };
 
-// Transaction deletion logic
-const promptDelete = (transaction) => {
-  console.log("Attempting transaction deletion")
-  transactionToDelete.value = transaction;
-  showDeleteModal.value = true;
-  console.log("Transaction set for deletion:", showDeleteModal.value)
-  console.log("Transaction to delete:", transactionToDelete.value)
-  deleteError.value = null;
+// ============================================================
+// PAGINATION FUNCTIONS
+// ============================================================
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+    jumpToPageInput.value = null;
+    
+    setTimeout(() => {
+      const videoGrid = document.querySelector('.grid');
+      if (videoGrid) {
+        videoGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  }
 };
 
+const jumpToPage = () => {
+  if (jumpToPageInput.value && jumpToPageInput.value >= 1 && jumpToPageInput.value <= totalPages.value) {
+    goToPage(jumpToPageInput.value);
+  }
+};
+
+const resetToFirstPage = () => {
+  currentPage.value = 1;
+  jumpToPageInput.value = null;
+};
+
+// ============================================================
+// MODAL PROMPT FUNCTIONS
+// ============================================================
+const promptEditProfile = () => {
+  showEditProfileModal.value = true;
+  editProfileForm.value = {
+    username: userData.value.username || '',
+    name: userData.value.name || '',
+    surname: userData.value.surname || ''
+  };
+  editProfileError.value = null;
+  editProfileSuccess.value = null;
+  showPasswordFields.value = false;
+  passwordForm.value = { current: '', new: '', confirm: '' };
+  passwordError.value = null;
+};
+
+const promptReportBugModal = () => {
+  showReportBugModal.value = true;
+};
+
+const promptConfigProfile = () => {
+  showConfigsModal.value = true;
+};
+
+const promptRoleModal = () => {
+  selectedRole.value = null
+  showRoleModal.value = true;
+};
+
+// ============================================================
+// NAVIGATION FUNCTIONS
+// ============================================================
+const goToDetails = (id) => {
+  router.push(`/transaction/${id}`);
+};
+
+const openTranscript = (id) => {
+  showEditDropdown.value = false
+  goToDetails(id)
+}
+
+const openCreate = () => {
+  showEditDropdown.value = false
+  router.push('/upload')
+}
+
+// ============================================================
+// DROPDOWN HANDLERS
+// ============================================================
+const handleHelpMouseEnter = () => { 
+  if (helpTimeout) clearTimeout(helpTimeout); 
+  showHelpDropdown.value = true 
+}
+const handleHelpMouseLeave = () => { 
+  helpTimeout = setTimeout(() => (showHelpDropdown.value = false), 150) 
+}
+const handleProfileMouseEnter = () => { 
+  if (profileTimeout) clearTimeout(profileTimeout); 
+  showProfileDropdown.value = true 
+}
+const handleProfileMouseLeave = () => { 
+  profileTimeout = setTimeout(() => (showProfileDropdown.value = false), 150) 
+}
+const handleEditMouseEnter = () => {
+  if (editTimeout) clearTimeout(editTimeout)
+  showEditDropdown.value = true
+}
+const handleEditMouseLeave = () => {
+  editTimeout = setTimeout(() => (showEditDropdown.value = false), 150)
+}
+
+// ============================================================
+// FILTER & MISC FUNCTIONS
+// ============================================================
+const setFilters = () => {
+  showFilters.value = !showFilters.value;
+};
 
 const checkActiveSubscription = async () => {
   if (!userData.value?.id) return;
@@ -1538,11 +1653,20 @@ const checkActiveSubscription = async () => {
   }
 };
 
-
 const handleSignOut = async () => {
   await supabase.auth.signOut();
 };
 
+// ============================================================
+// WATCHERS
+// ============================================================
+watch([searchFilename, dateFrom, dateTo, durationMin, durationMax, sortBy, sortOrder], () => {
+  resetToFirstPage();
+});
+
+// ============================================================
+// LIFECYCLE HOOKS
+// ============================================================
 onMounted(async () => {
   await loadUserData();
   if (userData.value) {
@@ -1578,9 +1702,7 @@ onMounted(async () => {
 });
 
 defineEmits(['upgrade'])
-
-// Props for dynamic data
-const props = defineProps({
+defineProps({
   user: {
     type: Object,
     default: () => ({ firstname: '' })
@@ -1595,83 +1717,6 @@ const props = defineProps({
     })
   }
 })
-
-// Progress (remaining)
-const videoPct = computed(() => {
-  const t = Number(userRoleDetails.value?.videos_quota) || 0
-  const v = Number(userRoleDetails.value?.videos_remaining) || 0
-  if (!t) return 0
-  return Math.max(0, Math.min(100, (v / t) * 100))
-})
-const minutesPct = computed(() => {
-  const t = Number(userRoleDetails.value?.seconds_quota) || 0
-  const v = Number(userRoleDetails.value?.seconds_remaining) || 0
-  if (!t) return 0
-  return Math.max(0, Math.min(100, (v / t) * 100))
-})
-
-// Dropdown state
-const showHelpDropdown = ref(false)
-const showProfileDropdown = ref(false)
-const helpTrigger = ref(null)
-const profileTrigger = ref(null)
-let helpTimeout = null
-let profileTimeout = null
-
-// Dropdown positions
-const helpDropdownStyle = computed(() => {
-  if (!helpTrigger.value) return {}
-  const rect = helpTrigger.value.getBoundingClientRect()
-  return { position: 'fixed', top: `${rect.bottom + 4}px`, right: `${window.innerWidth - rect.right}px`, zIndex: '9999' }
-})
-const profileDropdownStyle = computed(() => {
-  if (!profileTrigger.value) return {}
-  const rect = profileTrigger.value.getBoundingClientRect()
-  return { position: 'fixed', top: `${rect.bottom + 4}px`, right: `${window.innerWidth - rect.right}px`, zIndex: '9999' }
-})
-
-const showEditDropdown = ref(false)
-const editTrigger = ref(null)
-let editTimeout = null
-
-const editOffsetRightPx = 200
-const editDropdownStyle = computed(() => {
-  if (!editTrigger.value) return {}
-  const rect = editTrigger.value.getBoundingClientRect()
-  return {
-    position: 'fixed',
-    top: `${rect.bottom + 4}px`,
-    right: `${Math.max(8, window.innerWidth - rect.right - editOffsetRightPx)}px`,
-    zIndex: '9999'
-  }
-})
-
-const setFilters = () => {
-  showFilters.value = !showFilters.value;
-};
-
-// Hover handlers
-const handleHelpMouseEnter = () => { if (helpTimeout) clearTimeout(helpTimeout); showHelpDropdown.value = true }
-const handleHelpMouseLeave = () => { helpTimeout = setTimeout(() => (showHelpDropdown.value = false), 150) }
-const handleProfileMouseEnter = () => { if (profileTimeout) clearTimeout(profileTimeout); showProfileDropdown.value = true }
-const handleProfileMouseLeave = () => { profileTimeout = setTimeout(() => (showProfileDropdown.value = false), 150) }
-const handleEditMouseEnter = () => {
-  if (editTimeout) clearTimeout(editTimeout)
-  showEditDropdown.value = true
-}
-const handleEditMouseLeave = () => {
-  editTimeout = setTimeout(() => (showEditDropdown.value = false), 150)
-}
-
-const openTranscript = (id) => {
-  showEditDropdown.value = false
-  goToDetails(id)
-}
-
-const openCreate = () => {
-  showEditDropdown.value = false
-  router.push('/upload')
-}
 
 </script>
 
@@ -1688,7 +1733,6 @@ const openCreate = () => {
   width: fit-content;
 }
 
-/* Background grid */
 .angled-grid {
   --angle: 35deg;
   --grid-size: 20px;
@@ -1701,11 +1745,9 @@ const openCreate = () => {
   -webkit-mask-image: linear-gradient(to top right, rgba(0,0,0,0.95), rgba(0,0,0,0.1) 80%, rgba(0,0,0,0));
 }
 
-/* Simple text wipe for "Ngarko" */
 .wipe-text { display: inline-block; clip-path: inset(0 100% 0 0); transition: clip-path 260ms ease; }
 .group:hover .wipe-text { clip-path: inset(0 0 0 0); transition-delay: 300ms; }
 
-/* Minimal dropdown styles (kept as CSS for portal + animation) */
 .dropdown-item {
   display: flex; align-items: center; padding: 10px 14px; color: #052B28; text-decoration: none;
   font-size: 13px; font-family: 'Poppins', sans-serif; transition: all 0.2s ease; border-radius: 8px; margin: 2px 8px 0 0;

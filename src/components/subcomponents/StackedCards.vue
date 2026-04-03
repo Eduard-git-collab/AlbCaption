@@ -1,186 +1,340 @@
 <template>
-  <!-- 
-    Height 300vh: Defines total scroll distance/speed.
-  -->
-  <section ref="container" class="relative w-full h-[300vh] bg-white">
-    
-    <!-- 
-      Sticky Container: Pins the viewport.
-      Removed all background gradients/blobs for a clean white look.
-    -->
-    <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-white">
-      
-      <!-- Cards Wrapper -->
-      <div class="relative w-full max-w-[90rem] px-4 sm:px-6 lg:px-8">
-        <div class="relative w-full aspect-[16/10] lg:aspect-[2.4/1] min-h-[600px] flex items-center justify-center">
-          
-          <!-- Card 1 -->
-          <div 
-            ref="card1"
-            class="absolute inset-0 w-full h-full bg-white rounded-3xl border border-cream shadow-2xl overflow-hidden z-10"
-            style="will-change: transform, filter;"
+  <div class="relative w-full overflow-visible flex flex-col">
+
+    <div class="w-full">
+
+      <!-- ── Section 1: Centered hero-style with stat pills ── -->
+      <div class="w-full min-h-screen flex flex-col items-center justify-center p-10 sm:p-20 border-b border-primary/10">
+        <div class="w-full max-w-6xl mx-auto flex flex-col items-center gap-6 text-center">
+
+          <h1 class="font-kollektif font-bold text-primary leading-[0.92] tracking-tight text-[clamp(3.5rem,9vw,8rem)]"
+              v-html="sections[0].title" />
+
+          <div class="w-16 h-px bg-primary/20" />
+
+          <p class="text-base sm:text-lg font-poppins text-primary/60 max-w-2xl leading-relaxed">
+            {{ sections[0].body[0] }}
+          </p>
+
+          <div class="mt-4">
+            <RouterLink to="/signup"
+              class="inline-flex items-center gap-2 bg-primary text-secondary px-8 py-3 rounded-xl text-lg font-kollektif font-bold hover:ring-2 hover:ring-primary hover:bg-transparent hover:text-primary transition-all duration-300">
+              Regjistrohu Tani
+            </RouterLink>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Section 2: Split left text / right visual ── -->
+      <div class="w-full min-h-screen flex items-center p-10 sm:p-20 border-b border-primary/10 bg-primary/[0.02]">
+        <div class="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+          <!-- Left: text -->
+          <div class="flex flex-col gap-6">
+            <h2 class="font-kollektif font-bold text-primary leading-[0.95] tracking-tight text-[clamp(2.2rem,5vw,5rem)]"
+                v-html="sections[1].title" />
+            <div class="w-12 h-px bg-primary/20" />
+            <p class="text-base sm:text-lg font-poppins text-primary/60 leading-relaxed">
+              {{ sections[1].body[0] }}
+            </p>
+          </div>
+
+          <!-- Right: decorative block -->
+          <div class="relative w-full aspect-square max-w-sm lg:max-w-none mx-auto lg:mx-0 flex items-center justify-center">
+            
+            <!-- Background box -->
+            <div class="absolute inset-8 rounded-3xl border border-primary/10 bg-primary/[0.02]" />
+
+            <svg
+            ref="graphSvg"
+            xmlns="http://www.w3.org/2000/svg"
+            width="246"
+            height="234"
+            viewBox="0 0 246 234"
+            fill="none"
+            class="w-2/3 h-2/3 relative z-10"
           >
-            <div class="flex flex-col lg:flex-row h-full">
-               <!-- Text -->
-               <div class="w-full lg:w-3/5 p-8 lg:p-16 flex flex-col justify-center">
-                  <h3 class="text-3xl sm:text-4xl lg:text-6xl font-kollektif font-bold text-primary mb-6 lg:mb-8 leading-tight">
-                    Bizneset Moderne Kërkojnë Zgjidhje Praktike
-                  </h3>
-                  <p class="text-base sm:text-lg lg:text-2xl text-primary/80 font-poppins leading-relaxed">
-                    Nëse po përpiqesh të ndërtosh një audiencë në TikTok, Instagram apo YouTube për të shitur produkte ose për të rritur ndikimin tënd, titrimi manual i videove mund të të kushtojë orë të tëra.
-                  </p>
-               </div>
-               <!-- Image -->
-               <div class="w-full h-full lg:w-2/5 bg-primary/5 relative overflow-hidden flex items-center justify-center">
-                  <div class="absolute inset-0 text-primary opacity-[0.05]">
-                    <svg class="w-full h-full" viewBox="0 0 100 200" preserveAspectRatio="none"><path d="M-10 0 C 30 50 -10 150 30 200" stroke="currentColor" fill="none"/></svg>
-                  </div>
-                  <RouterLink to="/signup" class="relative z-10">
-                    <button class="text-kollektif text-xl hover:text-secondary hover:bg-primary text-primary py-3 px-6 rounded-xl transition-all duration-200 border-2 border-secondary bg-secondary">
-                      Provo Falas AlbCaptions
-                    </button>
-                  </RouterLink>
-                  <div class="absolute -right-16 top-1/2 -translate-y-1/2 w-64 h-64 opacity-50">
-                    <Albcaption_logo_nobg class="w-full h-full"/>
-                  </div>
-               </div>
+            <!-- The curve -->
+            <path
+              ref="graphLine"
+              d="M2.50024 229.426C77.5002 237.755 227.5 204.444 227.5 4.57227"
+              stroke="#9FE29E"
+              stroke-width="5"
+              stroke-linecap="round"
+            />
+
+            <!-- Arrowhead -->
+            <path
+              ref="graphArrow"
+              d="M211.096 18.5L227.096 2.5L243.096 18.5"
+              stroke="#9FE29E"
+              stroke-width="5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Section 3: Split right text / left visual ── -->
+      <div class="w-full min-h-screen flex items-center p-10 sm:p-20">
+        <div class="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+          <!-- Left: decorative accuracy ring -->
+          <div class="relative w-full aspect-square max-w-sm lg:max-w-none mx-auto lg:mx-0 order-2 lg:order-1">
+            <svg
+              ref="ringSvg"
+              class="absolute inset-0 w-full h-full -rotate-90"
+              viewBox="0 0 100 100"
+            >
+              <!-- Background track -->
+              <circle
+                cx="50" cy="50" r="40"
+                fill="none"
+                stroke="#052B28"
+                stroke-opacity="0.08"
+                stroke-width="3"
+              />
+
+              <!-- 98% arc — drawn on scroll -->
+              <circle
+                ref="ring98"
+                cx="50" cy="50" r="40"
+                fill="none"
+                stroke="#052B28"
+                stroke-width="3"
+                stroke-linecap="round"
+                style="stroke-dasharray: 251.2; stroke-dashoffset: 251.2;"
+              />
+
+              <!-- 2% arc — glows to show manual edit zone -->
+              <!-- starts at 98% mark (offset 246.2) and runs remaining 5 units -->
+              <!-- rotated so it sits right after the 98% arc ends -->
+              <circle
+                ref="ring2"
+                cx="50" cy="50" r="40"
+                fill="none"
+                stroke="#9FE29E"
+                stroke-width="3"
+                stroke-linecap="round"
+                style="stroke-dasharray: 5 251.2; stroke-dashoffset: -246.2; opacity: 0;"
+              />
+            </svg>
+
+            <!-- Center label -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center gap-1">
+              <span
+                ref="ringNumber"
+                class="font-kollektif font-bold text-primary leading-none"
+                style="font-size: clamp(3rem, 8vw, 6rem); opacity: 0;"
+              >
+                <span ref="ringCount">0</span>%
+              </span>
+              <span class="text-xs font-poppins text-primary/50 uppercase tracking-widest">Saktësi</span>
+
+              <!-- 2% label — fades in with glow arc -->
+              <span
+                ref="label2"
+                class="mt-3 text-xs font-poppins text-secondary/80 uppercase tracking-widest opacity-0"
+              >
+                +2% me redaktim manual
+              </span>
             </div>
           </div>
 
-          <!-- Card 2 -->
-          <div 
-            ref="card2"
-            class="absolute inset-0 w-full h-full bg-white rounded-3xl border border-cream shadow-2xl overflow-hidden z-20 translate-y-[110%]"
-            style="will-change: transform, filter;"
-          >
-            <div class="flex flex-col lg:flex-row h-full">
-               <!-- Image (Left) -->
-               <div class="w-full lg:w-2/5 bg-primary/5 relative overflow-hidden flex items-center justify-center order-1 border-r border-gray-100">
-                  <div class="absolute inset-0 text-primary opacity-[0.05]">
-                     <svg class="w-full h-full" viewBox="0 0 100 200" preserveAspectRatio="none"><path d="M110 0 C 70 50 110 150 70 200" stroke="currentColor" fill="none"/></svg>
-                  </div>
-                  <div class="w-48 h-48 opacity-20 text-primary">
-                      <svg class="w-full h-full" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                  </div>
-               </div>
-               <!-- Text -->
-               <div class="w-full lg:w-3/5 p-8 lg:p-16 flex flex-col justify-center order-2">
-                  <h3 class="text-3xl sm:text-4xl lg:text-6xl font-kollektif font-bold text-primary mb-6 lg:mb-8 leading-tight">
-                    Nuk ka rëndësi thelbi i videos nëse askush nuk po e shikon
-                  </h3>
-                  <p class="text-base sm:text-lg lg:text-2xl text-primary/80 font-poppins leading-relaxed">
-                    Audiencat nuk ndërtohen për një ditë. Suksesi në rrjetet sociale kërkon strategji dhe mjete specifike për të tërhequr vëmendjen dhe për të mbajtur audiencën të angazhuar.
-                  </p>
-               </div>
-            </div>
-          </div>
-
-          <!-- Card 3 -->
-          <div 
-            ref="card3"
-            class="absolute inset-0 w-full h-full bg-white rounded-3xl border border-cream shadow-2xl overflow-hidden z-30 translate-y-[110%]"
-            style="will-change: transform, filter;"
-          >
-            <div class="flex flex-col lg:flex-row h-full">
-               <!-- Text -->
-               <div class="w-full lg:w-3/5 p-8 lg:p-16 flex flex-col justify-center">
-                  <h3 class="text-3xl sm:text-4xl lg:text-6xl font-kollektif font-bold text-primary mb-6 lg:mb-8 leading-tight">
-                    98% saktësi në çdo dialekt nga AlbCaptions
-                  </h3>
-                  <div class="text-base sm:text-lg lg:text-2xl text-primary/80 font-poppins leading-relaxed space-y-4">
-                    <p>AlbCaptions përdor një proces të automatizuar që konverton zërin në titra dhe i sinkronizon ato me videon përkatëse (98% saktësi).</p>
-                    <p>Për 2% që mbetet, AlbCaptions ofron mjete të integruara për redaktim manual, ku përdoruesit mund të korrigjojnë tekstin me lehtësi.</p>
-                  </div>
-               </div>
-               <!-- Image -->
-               <div class="w-full h-full lg:w-2/5 bg-primary/5 relative overflow-hidden flex items-center justify-center border-l border-gray-100">
-                  <div class="absolute inset-0 text-primary opacity-[0.05]">
-                    <svg class="w-full h-full" viewBox="0 0 100 200" preserveAspectRatio="none"><path d="M-10 0 C 30 50 -10 150 30 200" stroke="currentColor" fill="none"/></svg>
-                  </div>
-                  <div class="w-48 h-48 opacity-40 text-secondary">
-                      <svg class="w-full h-full" fill="currentColor" viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
-                  </div>
-               </div>
+          <!-- Right: text -->
+          <div class="flex flex-col gap-6 order-1 lg:order-2">
+            <h2 class="font-kollektif font-bold text-primary leading-[0.95] tracking-tight text-[clamp(2.2rem,5vw,5rem)]"
+                v-html="sections[2].title" />
+            <div class="w-12 h-px bg-primary/20" />
+            <div class="flex flex-col gap-4">
+              <p v-for="(para, j) in sections[2].body" :key="j"
+                 class="text-base sm:text-lg font-poppins text-primary/60 leading-relaxed">
+                {{ para }}
+              </p>
             </div>
           </div>
 
         </div>
       </div>
+
     </div>
-  </section>
+
+    <!-- Bottom Banner: right → left -->
+    <div class="relative w-full -rotate-3 pointer-events-none select-none"
+         style="margin-left: -5vw; width: 110vw;">
+      <div class="banner-track bg-primary flex animate-scroll-rtl whitespace-nowrap">
+        <BannerContent />
+        <BannerContent />
+        <BannerContent />
+      </div>
+    </div>
+
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { defineComponent, h } from 'vue'
+import { RouterLink } from 'vue-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import Albcaption_logo_nobg from '../logos/Albcaption_logo_nobg.vue'
+import albcaption_logo_inv_nobg from '../logos/Albcaption_logo_inv_nobg.vue'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const container = ref(null)
-const card1 = ref(null)
-const card2 = ref(null)
-const card3 = ref(null)
-let ctx
+// ── Graph refs ────────────────────────────────────────────────────────────────
+const graphSvg   = ref(null)
+const graphLine  = ref(null)
+const graphArrow = ref(null)
+
+// ── Ring refs ─────────────────────────────────────────────────────────────────
+const ringSvg    = ref(null)
+const ring98     = ref(null)
+const ring2      = ref(null)
+const ringNumber = ref(null)
+const ringCount  = ref(null)
+const label2     = ref(null)
+
+let graphCtx
+let ringCtx
 
 onMounted(() => {
-  ctx = gsap.context(() => {
-    
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: container.value,
-        start: "top top", 
-        end: "bottom bottom",
-        scrub: 1, 
+
+  // ── Graph animation ──────────────────────────────────────────────────────
+  graphCtx = gsap.context(() => {
+    const lineLen  = graphLine.value.getTotalLength()
+    const arrowLen = graphArrow.value.getTotalLength()
+
+    gsap.set(graphLine.value,  { strokeDasharray: lineLen,  strokeDashoffset: lineLen })
+    gsap.set(graphArrow.value, { strokeDasharray: arrowLen, strokeDashoffset: arrowLen })
+
+    ScrollTrigger.create({
+      trigger: graphSvg.value,
+      start: 'top 75%',
+      once: true,
+      onEnter() {
+        const tl = gsap.timeline()
+        tl.to(graphLine.value,  { strokeDashoffset: 0, duration: 1.8, ease: 'power2.inOut' })
+        tl.to(graphArrow.value, { strokeDashoffset: 0, duration: 0.4, ease: 'power2.out' }, '-=0.3')
+      }
+    })
+  }, graphSvg.value)
+
+  // ── Ring animation ───────────────────────────────────────────────────────
+  ringCtx = gsap.context(() => {
+
+    // circumference = 2π × 40 ≈ 251.2
+    const circumference = 251.2
+    const target98 = circumference * 0.98  // 246.2
+
+    ScrollTrigger.create({
+      trigger: ringSvg.value,
+      start: 'top 75%',
+      once: true,
+      onEnter() {
+        const tl = gsap.timeline()
+
+        // 1. Fade in the number
+        tl.to(ringNumber.value, {
+          opacity: 1,
+          duration: 0.4,
+          ease: 'power2.out',
+        })
+
+        // 2. Count 0 → 98 and draw the arc simultaneously
+        const counter = { val: 0 }
+        tl.to(counter, {
+          val: 98,
+          duration: 1.8,
+          ease: 'power2.inOut',
+          onUpdate() {
+            ringCount.value.textContent = Math.round(counter.val)
+            // strokeDashoffset: circumference (empty) → circumference - target98 (full 98%)
+            const offset = circumference - (circumference * (counter.val / 100))
+            ring98.value.style.strokeDashoffset = offset
+          }
+        }, '<')
+
+        // 3. Hold briefly, then glow the 2% arc in
+        tl.to({}, { duration: 0.3 })
+        tl.to(ring2.value, {
+          opacity: 1,
+          duration: 0.5,
+          ease: 'power2.out',
+          // Pulse glow effect
+          filter: 'drop-shadow(0 0 6px #9FE29E)',
+        })
+
+        // 4. Fade in the 2% label
+        tl.to(label2.value, {
+          opacity: 1,
+          y: 0,
+          duration: 0.4,
+          ease: 'power2.out',
+        }, '-=0.3')
       }
     })
 
-    // PHASE 1: Reading Time (Delay)
-    tl.to({}, { duration: 0.5 }) 
+  }, ringSvg.value)
 
-    // PHASE 2: Card 2 Enters
-    tl.to(card2.value, {
-      yPercent: -110,
-      ease: "power1.inOut",
-      duration: 2
-    })
-    // RESTORED: Blur + Scale Effect (No black brightness/dimming)
-    .to(card1.value, {
-      scale: 0.90,
-      filter: "blur(5px)", // Smooth blur
-      duration: 2
-    }, "<")
-
-    // PHASE 3: Reading Time
-    .to({}, { duration: 0.5 })
-
-    // PHASE 4: Card 3 Enters
-    .to(card3.value, {
-      yPercent: -110,
-      ease: "power1.inOut",
-      duration: 2
-    })
-    // Card 2 blurs out
-    .to(card2.value, {
-      scale: 0.90,
-      filter: "blur(5px)",
-      duration: 2
-    }, "<")
-
-    // PHASE 5: Hold
-    .to({}, { duration: 0.5 })
-
-  }, container.value)
 })
 
 onUnmounted(() => {
-  if (ctx) ctx.revert()
+  if (graphCtx) graphCtx.revert()
+  if (ringCtx)  ringCtx.revert()
+})
+
+const sections = [
+  {
+    title: 'Bizneset Moderne<br />Kërkojnë<br />Zgjidhje Praktike',
+    body: [
+      "Nëse po përpiqesh të ndërtosh një audiencë në TikTok, Instagram apo YouTube për të shitur produkte ose për të rritur ndikimin tënd, titrimi manual i videove mund të të kushtojë orë të tëra. Orë që mund t'i shpenzosh për të krijuar videon e radhës, për të rritur biznesin apo për të kontaktuar klientin tënd të ardhshëm.",
+    ],
+  },
+  {
+    title: 'Nuk ka rëndësi thelbi i videos<br />nëse askush nuk po e shikon',
+    body: [
+      'Audiencat nuk ndërtohen për një ditë. Suksesi në rrjetet sociale kërkon strategji dhe mjete specifike për të tërhequr vëmendjen dhe për të mbajtur audiencën të angazhuar.',
+    ],
+  },
+  {
+    title: '98% saktësi në çdo dialekt<br />nga AlbCaptions',
+    body: [
+      'AlbCaptions përdor një proces të automatizuar që konverton zërin në titra dhe i sinkronizon ato me videon përkatëse. Me ndihmën e Inteligjencës Artificiale, sistemi ynë realizon pjesën më të madhe të punës, duke e bërë procesin të shpejtë dhe jashtëzakonisht të saktë (deri në 98%).',
+      'Për 2% që mbetet, AlbCaptions ofron mjete të integruara për redaktim manual, ku përdoruesit mund të korrigjojnë tekstin me lehtësi dhe të arrijnë rezultate 100% të sakta.',
+    ],
+  },
+]
+
+
+const BannerContent = defineComponent({
+  setup() {
+    const words = ['Ngarko', 'Gjenero', 'Redakto', 'Shkarko']
+    return () =>
+      h('div', { class: 'flex items-center bg-primary p-1' },
+        words.flatMap((word) => [
+          h('div', {
+            class: 'bg-secondary rounded-xl p-1 text-primary text-[clamp(30px,4vw,70px)] text-kollektif-bold font-bold uppercase px-4 font-poppins'
+          }, word),
+          h('div', {
+            class: 'w-[clamp(20px,3vw,48px)] h-[clamp(20px,3vw,48px)] bg-secondary/70 p-2 rounded-full flex items-center justify-center mx-3 shrink-0'
+          }, [
+            h(albcaption_logo_inv_nobg, { class: 'w-3/4 h-3/4' })
+          ])
+        ])
+      )
+  }
 })
 </script>
 
 <style scoped>
-:deep(*) {
-  user-select: none;
+@keyframes scroll-rtl {
+  0%   { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
 }
+.animate-scroll-rtl { animation: scroll-rtl 20s linear infinite; }
 </style>

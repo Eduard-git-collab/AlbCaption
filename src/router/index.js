@@ -73,7 +73,7 @@ const routes = [
     path: '/transaction/:id',
     name: 'Transaction Details',
     component: TransactionDetails,
-    meta: { requiresAuth: true }
+    // meta: { requiresAuth: true }
   },
   {
     path: '/pricing',

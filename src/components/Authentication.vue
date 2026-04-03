@@ -205,6 +205,10 @@
                           </div>
                       </div>
                       <div class="w-full flex flex-col items-center gap-3 sm:gap-4 mt-6 sm:mt-8 md:mt-10">
+                        <div>
+                          <h1> user: dcifligu </h1> 
+                          <h1> pass: DfVgnJNVyt6KWyn</h1>
+                        </div>
                           <input 
                           type="text" 
                           id="emailOrUsername" 
