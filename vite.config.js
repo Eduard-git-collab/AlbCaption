@@ -1,15 +1,19 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
-import * as path from 'path';
+import * as path from 'path'
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue({
-    compilerOptions: {
-          isCustomElement: (tag) => tag === 'wistia-player'
-        }
-  }), tailwindcss()],
+  plugins: [
+    vue({
+      compilerOptions: {
+        isCustomElement: (tag) => tag === 'wistia-player',
+      },
+    }),
+    tailwindcss({
+      config: path.resolve(__dirname, './tailwind.config.js'),
+    }),
+  ],
   assetsInclude: ['**/*.ttf', '**/*.woff', '**/*.woff2'],
   resolve: {
     alias: {
@@ -19,10 +23,12 @@ export default defineConfig({
   },
   server: {
     allowedHosts: [
-      'f588-95-107-209-153.ngrok-free.app',
+      'bc70-95-107-189-202.ngrok-free.app',
+      'hosted-lawyer-liked-alleged.trycloudflare.com',
+      'selection-alive-integral-beds.trycloudflare.com',
       'albcaptions.com',
       'www.albcaptions.com',
-      'localhost'
-    ]
-  }
+      'localhost',
+    ],
+  },
 })

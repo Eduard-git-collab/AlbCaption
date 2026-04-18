@@ -5,7 +5,13 @@
   --color-primary: var(--primary-color);
   --color-secondary: var(--secondary-color);
   --color-cream: var(--cream-color);
-}
+  --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1440px;
+    --breakpoint-2xl: 2560px;
+    --breakpoint-4xl: 3840px;
+  }
 
 /* Color Variables */
 :root {
@@ -34,6 +40,80 @@
   --color-charcoal-1: #888988;
   --color-charcoal: #666666;
   --color-charcoal1: #3F4240;
+}
+
+/* Add this somewhere global */
+:root {
+  --grid-size: 15px;
+  --grid-size-wide: 30px;
+  --grid-line-wide: 1px;
+  /* default */
+  --grid-line: 1px;
+  /* avoid 0.5px */
+  --grid-color: #9FE29E;
+  --grid-color-wide: #052B28;
+}
+
+/* Scale up on very large screens (tune values) */
+@media (width >=1536px) {
+
+  /* 2xl */
+  :root {
+    --grid-size: 18px;
+    --grid-size-wide: 60px;
+    --grid-line-wide: 2px;
+  }
+}
+
+@media (width >=1920px) {
+  :root {
+    --grid-size: 22px;
+    --grid-size-wide: 60px;
+    --grid-line-wide: 2px;
+  }
+}
+
+@media (width >=3840px) {
+  :root {
+    --grid-size: 28px;
+    --grid-size-wide: 90px;
+    --grid-line-wide: 3px;
+  }
+}
+
+.grid-overlay {
+  /* Two gradients: vertical + horizontal lines */
+  background-image:
+    linear-gradient(to right, var(--grid-color) var(--grid-line), transparent var(--grid-line)),
+    linear-gradient(to bottom, var(--grid-color) var(--grid-line), transparent var(--grid-line));
+
+  background-size: var(--grid-size) var(--grid-size);
+  background-position: 0 0;
+
+  opacity: 0.3;
+  transform: rotate(20deg);
+  /* prefer transform over rotate property */
+  transform-origin: center;
+
+  mask-image: radial-gradient(ellipse 90% 100% at right center, black 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 100% at right center, black 30%, transparent 100%);
+}
+
+.grid-overlay-wide{
+  background-image:
+      linear-gradient(to right, var(--grid-color-wide) var(--grid-line-wide), transparent var(--grid-line-wide)),
+      linear-gradient(to bottom, var(--grid-color-wide) var(--grid-line-wide), transparent var(--grid-line-wide));
+  
+    background-size: var(--grid-size-wide) var(--grid-size-wide);
+    background-position: 0 0;
+  
+    opacity: 0.3;
+    transform: rotate(20deg);
+    /* prefer transform over rotate property */
+    transform-origin: center;
+  
+    mask-image: radial-gradient(ellipse 90% 100% at right center, black 30%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 100% at right center, black 30%, transparent 100%);
 }
 
 /* Font Faces */

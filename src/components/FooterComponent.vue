@@ -53,21 +53,21 @@
         
         <!-- Main Content (Links & Socials) -->
         <div class="relative z-10 w-full h-full flex flex-col justify-center items-center pb-32 lg:pb-48">
-            <div class="flex flex-col gap-8 items-center justify-center max-w-4xl mx-auto px-6">
+            <div class="flex flex-col 4xl:gap-12  2xl:gap-10 lg:gap-8 items-center justify-center 4xl:max-w-8xl 2xl:max-w-[50%] xl:max-w-5xl  lg:max-w-4xl md:max-w-2xl max-w-4xl mx-auto px-6">
                 <!-- Logo -->
-                <div class="h-12 sm:h-16 w-auto mb-4">
+                <div class="4xl:h-32 2xl:h-28 xl:h-20 lg:h-20 h-16 w-auto mb-4">
                     <albcaption_logo_nobg class="h-full w-auto" />
                 </div>
                 
                 <!-- Navigation Links -->
-                <div class="flex flex-wrap justify-center gap-6 sm:gap-8 lg:gap-12 text-center">
-                    <RouterLink to="/about" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-lg sm:text-xl text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Rreth Nesh</RouterLink>
-                    <RouterLink to="/pricing" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-lg sm:text-xl text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Çmime</RouterLink>
-                    <RouterLink to="/upload" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-lg sm:text-xl text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Ngarko</RouterLink>
-                    <RouterLink to="/faq" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-lg sm:text-xl text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">FAQ</RouterLink>
-                    <RouterLink to="/contact" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-lg sm:text-xl text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Na Kontakto</RouterLink>
-                    <a href="" @click.prevent="promptToSModal" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-lg sm:text-xl text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Kushtet e Përdorimit</a>
-                    <a href="" @click.prevent="promptPrivacyPolicy" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-lg sm:text-xl text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Politikat e Privatësisë</a>
+                <div class="flex flex-wrap justify-center 4xl:gap-12  2xl:gap-10 md:gap-8 gap-3 text-center 4xl:text-6xl 2xl:text-5xl xl:text-3xl text-lg">
+                    <RouterLink to="/about" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Rreth Nesh</RouterLink>
+                    <RouterLink to="/pricing" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Çmime</RouterLink>
+                    <RouterLink to="/upload" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Ngarko</RouterLink>
+                    <RouterLink to="/faq" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">FAQ</RouterLink>
+                    <RouterLink to="/contact" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Na Kontakto</RouterLink>
+                    <a href="" @click.prevent="promptToSModal" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Kushtet e Përdorimit</a>
+                    <a href="" @click.prevent="promptPrivacyPolicy" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Politikat e Privatësisë</a>
                 </div>
                 
                 <!-- Divider -->
@@ -82,7 +82,7 @@
                 </div>
                 
                 <!-- Copyright -->
-                <div class="flex flex-col sm:flex-row gap-2 text-secondary/60 text-sm font-poppins mt-4">
+                <div class="flex flex-row gap-1 text-secondary/60 text-sm font-poppins mt-4">
                     <span>AlbCaptions |</span>
                     <span>Të gjitha të drejtat e rezervuara</span>
                 </div>

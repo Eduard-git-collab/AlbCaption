@@ -16,12 +16,24 @@ import PaymentSuccess from '../components/views/PaymentSuccess.vue';
 import Login from '../components/Login.vue';
 import AuthCallback from '../components/views/AuthCallback.vue';
 import UserSegmentation from '../components/views/UserSegmentation.vue';
+import About from '../components/About.vue';
+import Contact from '../components/Contact.vue';
 
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/about',
+    name: 'About',
+    component: About
+  },
+  {
+    path: '/contact',
+    name: 'Contact',
+    component: Contact
   },
   {
     path: '/payment/success',

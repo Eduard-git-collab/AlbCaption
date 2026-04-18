@@ -1,55 +1,171 @@
 <template>
-  <div class="w-full h-40 -mb-1 overflow-hidden">
-    <svg viewBox="0 0 1440 160" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" class="w-full h-full">
-      <path d="M0 80C200 0 500 0 720 40C940 80 1240 80 1440 0V160H0V80Z" fill="#052B28"/>
-    </svg>
-  </div>
-  <div class="min-h-screen bg-primary relative overflow-hidden">
-    <div class="absolute inset-0 grid-mask">
-      <div class="absolute inset-0 bg-grid-pattern opacity-100"></div>
-    </div>
-    <div class="w-full h-fit flex flex-col gap-2 items-center justify-center my-12 relative z-10">
-      <span class="text-5xl text-center leading-18 text-kollektif-bold text-secondary">
-        Zgjidh 
-        <span class="bg-secondary text-primary p-1 rounded-md">Abonimin</span>
-        <br> që të Përshtatet Ty
-      </span>
-      <toggle @toggle="handleBillingToggle"/>
+  <div class="w-screen min-h-screen bg-white">
+    <div class="w-full h-full p-10 block lg:hidden">
+      <div class="w-full h-fit flex flex-col my-5">
+        <h3 class="text-kollektif-bold text-primary text-3xl md:text-7xl">
+          Titro automatikisht <br>
+          Pa shkruar një fjalë
+        </h3>
+        <p class="font-poppins font-light hidden md:block md:text-3xl">
+          Zgjidh abonimin që të përshtatet
+        </p>
+        <div class="w-fit h-fit flex flex-row bg-[#D9D9D9]/50 rounded-md p-1 mt-5">
+          <div
+            class="px-2 py-0.5 rounded-md cursor-pointer transition-all duration-200"
+            :class="!isYearly
+              ? 'bg-white border border-[#353535]/70'
+              : 'bg-transparent border border-transparent'"
+            @click="isYearly = false"
+          >
+            <span class="text-primary font-poppins font-light text-sm whitespace-nowrap">
+              Abonim mujor
+            </span>
+          </div>
 
-      <div class="w-full h-full my-10 p-3">
-        <div class="w-full h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <PricingCard
-            v-for="plan in plans"
-            :key="plan.key"
-            :badge-text="plan.badgeText"
-            :badge-color="plan.badgeColor"
-            :price="isYearly ? plan.price.yearly : plan.price.monthly"
-            :decimal="isYearly ? plan.decimal.yearly : plan.decimal.monthly"
-            :old-monthly-price="isYearly ? plan.price.monthly : null"
-            :show-old-monthly-price="isYearly"
-            :percent-saved="isYearly ? plan.percentSaved : null"
-            :currency="plan.currency"
-            :price-description="isYearly ? 'muaj, tarifë vjetore' : 'muaj'"
-            :description="plan.description"
-            :features="plan.features"
-            :svg-color="plan.svgColor"
-            :isRecommended="plan.isRecommended"
-            @select="selectPlan(plan.key)"
-          />
-          <PricingCardEnterprise />
-          <div class="col-span-1 md:col-span-2 text-lg lg:col-span-3 text-center text-secondary font-poppins font-thin mt-10"> 
-            <RouterLink to="/pricing" class="text-xl text-secondary font-poppins relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-secondary after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">
-              Krahaso Planet
-            </RouterLink>
+          <div
+            class="flex gap-2 items-center px-2 py-0.5 rounded-md cursor-pointer transition-all duration-200"
+            :class="isYearly
+              ? 'bg-white border border-[#353535]/70'
+              : 'bg-transparent border border-transparent'"
+            @click="isYearly = true"
+          >
+            <span class="text-primary font-poppins font-light text-sm whitespace-nowrap">
+              Abonim vjetor
+            </span>
+            <div class="bg-secondary px-1 flex items-center py-0.5 rounded-sm">
+              <span class="text-primary font-poppins font-light text-[8px] whitespace-nowrap">
+                Kurse 30%
+              </span>
+            </div>
           </div>
         </div>
       </div>
-    </div>  
-  </div>
-  <div class="w-full h-40 -mb-1 overflow-hidden rotate-180">
-    <svg viewBox="0 0 1440 160" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" class="w-full h-full">
-      <path d="M0 80C200 0 500 0 720 40C940 80 1240 80 1440 0V160H0V80Z" fill="#052B28"/>
-    </svg>
+      <div class="w-full h-fit flex flex-col gap-5">
+        <div
+            v-for="plan in plans"
+            :key="plan.key"
+            class="h-1/3"
+          >
+            <MobPricingCard
+              :badge-text="plan.badgeText"
+              :badge-color="plan.badgeColor"
+              :price="isYearly ? plan.price.yearly : plan.price.monthly"
+              :decimal="isYearly ? plan.decimal.yearly : plan.decimal.monthly"
+              :old-monthly-price="isYearly ? plan.price.monthly : null"
+              :old-decimal="isYearly ? plan.decimal.monthly : '99'"
+              :show-old-monthly-price="isYearly"
+              :percent-saved="isYearly ? plan.percentSaved : null"
+              :currency="plan.currency"
+              :price-description="'për muaj'"
+              :description="plan.description"
+              :features="plan.features"
+              :svg-color="plan.svgColor"
+              :is-recommended="plan.isRecommended || false"
+              :plan-type="plan.key"
+              @select="selectPlan"
+            />
+        </div>
+        <PricingCardEnterprise class="my-10"/>      
+      </div>
+      <div class="w-full text-center mt-10">
+        <RouterLink
+            to="/pricing"
+            class="text-lg md:text-2xl text-primary font-poppins relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-primary after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100"
+          >
+            Krahaso Planet
+          </RouterLink>
+        </div>
+    </div>
+    
+    <div class="w-full h-full p-10  hidden lg:block">
+
+      <!-- ===== HEADER ===== -->
+      <div class="w-full h-fit flex flex-col 4xl:gap-10 xl:gap-7 lg:gap-5">
+        <h3 class="text-kollektif-bold text-primary 4xl:text-9xl xl:text-8xl lg:text-6xl">
+          Titro automatikisht <br>
+          Pa shkruar një fjalë
+        </h3>
+        <p class="font-poppins font-light 4xl:text-5xl xl:text-3xl lg:text-2xl">
+          Zgjidh abonimin që të përshtatet
+        </p>
+
+        <!-- ===== BILLING TOGGLE ===== --> 
+        <div class="w-fit flex flex-row items-center bg-[#D9D9D9]/50 gap-5 rounded-md">
+          <!-- Monthly -->
+          <div
+            class="px-6 4xl:py-3 xl:py-2 lg:py-1 rounded-md cursor-pointer transition-all duration-200"
+            :class="!isYearly
+              ? 'bg-white border border-[#353535]/70'
+              : 'bg-transparent border border-transparent'"
+            @click="isYearly = false"
+          >
+            <span class="text-primary font-poppins font-light 4xl:text-3xl xl:text-xl lg:text-lg whitespace-nowrap">
+              Abonim mujor
+            </span>
+          </div>
+
+          <!-- Yearly -->
+          <div
+            class="flex gap-3 items-center px-3 4xl:py-3 xl:py-2 lg:py-1 rounded-md cursor-pointer transition-all duration-200"
+            :class="isYearly
+              ? 'bg-white border border-[#353535]/70'
+              : 'bg-transparent border border-transparent'"
+            @click="isYearly = true"
+          >
+            <span class="text-primary font-poppins font-light 4xl:text-3xl xl:text-xl lg:text-lg whitespace-nowrap">
+              Abonim vjetor
+            </span>
+            <div class="bg-secondary xl:px-2 lg:px-1 lg:py-0.5 4xl:py-2 xl:py-1 lg:rounded-sm xl:rounded-lg">
+              <span class="text-primary font-poppins 4xl:font-normal xl:font-light lg:font-thin 4xl:text-md xl:text-sm lg:text-xs whitespace-nowrap">
+                Kurse 30%
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PRICING CARDS ===== -->
+      <div class="my-10 w-full h-full">
+        <div class="w-full h-full flex flex-row lg:gap-4 4xl:gap-12 xl:gap-10 my-5 items-stretch">
+          <div
+            v-for="plan in plans"
+            :key="plan.key"
+            class="w-1/3"
+          >
+            <PricingCard
+              :badge-text="plan.badgeText"
+              :badge-color="plan.badgeColor"
+              :price="isYearly ? plan.price.yearly : plan.price.monthly"
+              :decimal="isYearly ? plan.decimal.yearly : plan.decimal.monthly"
+              :old-monthly-price="isYearly ? plan.price.monthly : null"
+              :old-decimal="isYearly ? plan.decimal.monthly : '99'"
+              :show-old-monthly-price="isYearly"
+              :percent-saved="isYearly ? plan.percentSaved : null"
+              :currency="plan.currency"
+              :price-description="'për muaj'"
+              :description="plan.description"
+              :features="plan.features"
+              :svg-color="plan.svgColor"
+              :is-recommended="plan.isRecommended || false"
+              :plan-type="plan.key"
+              @select="selectPlan"
+            />
+          </div>
+        </div>
+
+        <PricingCardEnterprise class="my-10"/>
+
+        <!-- Compare plans link -->
+        <div class="w-full text-center mt-10">
+          <RouterLink
+            to="/pricing"
+            class="4xl:text-3xl xl:text-xl lg:text-lg text-primary font-poppins relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-primary after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100"
+          >
+            Krahaso Planet
+          </RouterLink>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Payment Modal -->
@@ -66,13 +182,11 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import toggle from './subcomponents/Toggle.vue'
 import PricingCard from './subcomponents/PricingCard.vue'
-import PricingCardEnterprise from './subcomponents/PricingCardEnterprise.vue'
 import PayPalPayment from './items/PayPalPayment.vue'
+import PricingCardEnterprise from './subcomponents/PricingCardEnterprise.vue'
+import MobPricingCard from './subcomponents/MobPricingCard.vue'
 
-// Calculate percent saved utility
 function getPercentSaved(monthly, yearly) {
   const m = parseFloat(monthly)
   const y = parseFloat(yearly)
@@ -80,12 +194,7 @@ function getPercentSaved(monthly, yearly) {
   return Math.round(((m - y) / m) * 100)
 }
 
-const router = useRouter()
 const isYearly = ref(true)
-
-function handleBillingToggle(yearly) {
-  isYearly.value = yearly
-}
 
 const plans = [
   {
@@ -94,10 +203,9 @@ const plans = [
     badgeColor: '#6B7280',
     price: { monthly: '7', yearly: '5' },
     decimal: { monthly: '99', yearly: '99' },
-    yearlytotal: {monthly:'', yearly:'59.99'},
+    yearlytotal: { monthly: '', yearly: '59.99' },
     currency: '€',
     description: 'Krijo video që zbulojnë audienca të reja',
-    priceDescription: 'muaj',
     percentSaved: getPercentSaved('7', '5'),
     features: [
       { text: '15 Video / Muaj' },
@@ -105,8 +213,8 @@ const plans = [
       { text: 'Suportohet Çdo Dialekt' },
       { text: 'Transkript i sinkronizuar' },
       { text: 'Ngarkim në çdo format video dhe audio' },
-      { text: 'Program Redaktimi'},
-      { text: 'Shërbim Prioritar', locked: true } 
+      { text: 'Program Redaktimi' },
+      { text: 'Shërbim Prioritar', locked: true }
     ],
     planfeatures: [
       { label: 'Video në muaj', value: '15 video' },
@@ -117,7 +225,7 @@ const plans = [
       { label: 'Kufizimi i Shkarkimeve', value: 'Pa limit' },
       { label: 'Redaktim Manual', value: 'I përfshirë' },
       { label: 'Njohje Dialekti Automatike', value: 'I përfshirë' },
-      { label: 'Transkript i Sinkronizuar', value: 'I përfshirë' },
+      { label: 'Transkript i Sinkronizuar', value: 'I përfshirë' }
     ],
     planId: 'P-93354509CK7566242NBNKHJQ',
     svgColor: '#E5E7EB'
@@ -128,10 +236,9 @@ const plans = [
     badgeColor: '#052B28',
     price: { monthly: '13', yearly: '9' },
     decimal: { monthly: '99', yearly: '99' },
-    yearlytotal: {monthly:'', yearly:'119.99'},
+    yearlytotal: { monthly: '', yearly: '119.99' },
     currency: '€',
     description: 'Transformo videot në mjete që të sjellin klientë',
-    priceDescription: 'muaj',
     percentSaved: getPercentSaved('13', '9'),
     features: [
       { text: '35 Video / Muaj' },
@@ -142,7 +249,7 @@ const plans = [
       { text: 'Program Redaktimi' },
       { text: 'Shkarko .srt .vtt' },
       { text: 'Shërbim Prioritar' },
-      { text: 'Funksionalitete për skuadra (së shpejti)'}
+      { text: 'Funksionalitete për skuadra (së shpejti)' }
     ],
     planfeatures: [
       { label: 'Video në muaj', value: '35 video' },
@@ -156,7 +263,6 @@ const plans = [
       { label: 'Transkript i Sinkronizuar', value: 'I përfshirë' },
       { label: 'Shërbim me prioritet', value: 'I përfshirë' }
     ],
-    //planId: 'P-40P32125KN1577439NBNKI4A',
     planId: 'P-2JR743181G189825MNDNFCIY',
     isRecommended: true,
     svgColor: '#9FE29E'
@@ -167,10 +273,9 @@ const plans = [
     badgeColor: '#6B7280',
     price: { monthly: '33', yearly: '24' },
     decimal: { monthly: '99', yearly: '99' },
-    yearlytotal: {monthly:'', yearly:'239'},
+    yearlytotal: { monthly: '', yearly: '239' },
     currency: '€',
     description: 'Optimizim i krijimit të videove për ekipe që mendojnë shpejt',
-    priceDescription: 'muaj',
     percentSaved: getPercentSaved('33', '24'),
     features: [
       { text: '70 Video / Muaj' },
@@ -200,14 +305,13 @@ const plans = [
   }
 ]
 
-// Modal state
+// Payment modal
 const showPayPalPayment = ref(false)
 const selectedPlan = ref(null)
 const selectedPlanId = ref(null)
 
-// Called when a PricingCard emits select with its key
-function selectPlan(planType) {
-  const plan = plans.find(p => p.key === planType)
+function selectPlan(planKey) {
+  const plan = plans.find(p => p.key === planKey)
   if (plan) {
     selectedPlan.value = plan
     selectedPlanId.value = plan.planId
@@ -215,18 +319,3 @@ function selectPlan(planType) {
   }
 }
 </script>
-
-<style scoped>
-.font-kollektif-bold { font-family: 'Kollektif', sans-serif; font-weight: bold; }
-.bg-grid-pattern {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3e%3cpath d='M0 0h40v40H0z' fill='none'/%3e%3cpath d='M20 0v40M0 20h40' stroke='%239FE29E' stroke-width='0.5' stroke-opacity='0.2'/%3e%3c/svg%3e");
-  background-size: 40px 40px;
-}
-.grid-mask {
-  -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 40%,rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 90%);
-  mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 40%,rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 90%);
-}
-@media (max-width: 1024px) {
-  .grid { grid-template-columns: 1fr !important; }
-}
-</style>

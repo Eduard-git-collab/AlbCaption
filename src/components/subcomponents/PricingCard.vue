@@ -1,155 +1,105 @@
 <template>
-  <div class="relative flex justify-center">
-    <!-- Clean Recommended Badge with border -->
+  <div 
+    class="relative h-full rounded-xl shadow-[10px_10px_0px_rgba(0,0,0,0.25)] 4xl:shadow-[12px_16px_12px_8px_rgba(0,0,0,0.25)]"
+    
+  >
+
+    <!-- Card -->
+    <div
+      class="w-full relative h-full rounded-xl z-10 border-2 border-[#353535]/70 overflow-hidden"
+      :class="isRecommended ? 'rounded-tr-none' : ''"
+    >
     <div
       v-if="isRecommended"
-      class="absolute left-1/2 -top-8 -translate-x-1/2 z-30 flex flex-col items-center"
+      class="absolute top-0 right-0 z-0"
     >
-      <span class="bg-primary text-white font-bold px-6 py-1 rounded-full border-[#C8BC9B] border-4 text-md shadow-lg">
-        Rekomanduar
-      </span>
+      <div class="bg-secondary px-3 py-1 rounded-bl-md border-[#353535]/70 border-l-2 border-b-2 border-0">
+        <span class="text-primary font-poppins font-normal 4xl:text-3xl xl:text-lg lg:text-md">
+          Rekomanduar
+        </span>
+      </div>
     </div>
-    
-    <div 
-      class="relative bg-cream border-[#C8BC9B] shadow-xl rounded-2xl p-8 pb-10 w-full h-full flex flex-col overflow-hidden transition-all duration-300"
-      :class="[
-        isRecommended ? 'border-8 scale-[1.03] z-10 shadow-2xl' : 'border-2',
-        !isRecommended ? 'opacity-85' : ''
-      ]"
-    >
-      <!-- Corner SVG Decoration -->
-      <div class="absolute right-5 top-5 z-0 w-48 h-48 md:w-60 md:h-60 lg:w-72 lg:h-72 pointer-events-none select-none">
-        <svg
-          viewBox="0 0 662 658"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-full h-full translate-x-1/3 -translate-y-1/3"
-          style="clip-path: inset(0 0 0 0 round 0 40px 0 0);"
-        >
-          <path d="M662 658H522V522.754C518.316 527.814 514.474 532.851 510.472 537.863C455.094 607.224 380.382 645.377 291.896 655.634C233.785 662.37 177.593 655.112 125.039 628.881C39.388 586.13 -8.86746 495.369 1.35454 402.504C12.3887 302.262 80.1582 226.324 174.537 203.194C210.519 194.376 246.389 194.849 282.427 202.922C291.698 204.999 294.305 208.58 291.358 218.122C280.287 253.973 269.522 289.934 259.62 326.121C256.349 338.076 248.913 334.754 241.648 333.623C191.621 325.837 143.195 362.237 137.081 412.36C130.553 465.882 164.451 509.095 220.627 518.865C330.099 537.905 432.57 466.452 448.351 356.514C464.957 240.825 382.968 153.318 288.47 138.233C248.136 131.795 209.625 137.198 172.829 154.944C168.219 157.168 163.482 160.972 159.448 153.583C139.331 116.733 119.046 79.9723 98.8838 43.295C202.674 -27.2779 408.036 -21.1039 522 133.565V5.02818e-05H662V658Z" :fill="svgColor"/>
-        </svg>
-      </div>
-      
-      <!-- Badge -->
-      <div class="absolute left-8 top-8">
-        <span class="text-cream text-sm text-kollektif-bold px-4 py-1 rounded-full"
-              :style="{ backgroundColor: badgeColor }">
-          {{ badgeText }}
-        </span>
-      </div>
-      
-      <!-- Subtle savings indicator -->
-      <div v-if="isRecommended && showOldMonthlyPrice" class="absolute right-8 top-8">
-        <span class="text-xs text-primary font-medium bg-secondary/20 px-3 py-1 rounded-full">
-            Kurse {{ Math.floor(((oldMonthlyPrice - price) / oldMonthlyPrice) * 100) }}%
-        </span>
-      </div>
-      
-      <!-- Price Section -->
-      <div class="mt-14 flex flex-row items-center gap-3 relative z-10">
-        <div class="flex flex-row items-end text-kollektif-bold leading-tight">
-          <span class="text-primary text-7xl text-kollektif-bold ml-1 tracking-tight flex items-baseline gap-1">
-            <!-- Subtle old price -->
-            <span
-              v-if="showOldMonthlyPrice && oldMonthlyPrice"
-              class="ml-0 text-sm text-gray-500 line-through font-normal tracking-normal"
-              style="vertical-align: super;"
+      <div class="w-full h-full flex flex-col">
+
+        <!-- ===== TOP SECTION ===== -->
+        <div class="w-full h-fit py-10 border-b-2 border-[#353535]/70">
+          <div class="w-full h-full px-3 flex flex-col justify-around 4xl:gap-10 xl:gap-8 lg:gap-5">
+            <!-- Plan Name -->
+            <h3 class="text-primary font-poppins font-semibold 4xl:text-5xl xl:text-3xl lg:text-xl my-2 mx-2">
+              {{ badgeText }}
+            </h3>
+
+            <!-- Price Row -->
+            <h2 class="text-primary font-poppins font-semibold 4xl:text-8xl xl:text-7xl lg:text-6xl">
+              {{ currency }} {{ price }}.{{ decimal }}
+              <span class="font-poppins font-normal 4xl:text-2xl xl:text-sm lg:text-xs">
+                / {{ priceDescription }}
+              </span>
+            </h2>
+
+            <!-- CTA Button -->
+            <button
+              @click="$emit('select', planType)"
+              class="w-full h-fit px-5 4xl:py-4 lg:py-2 bg-primary text-secondary text-kollektif-bold 4xl:text-3xl text-xl 4xl:rounded-lg lg:rounded-md hover:ring-2 hover:ring-primary hover:bg-secondary hover:text-primary duration-200 cursor-pointer"
             >
-              {{ currency }}{{ oldMonthlyPrice }}
-            </span>
-            <!-- Main Price -->
-            <span class="text-2xl align-super" style="vertical-align: super; font-size: 0.4em;">
-              {{ currency }}
-            </span>
-            {{ price }}
-            <span class="text-xl tracking-normal" style="font-size: 0.25em;">
-              .{{decimal}}
-            </span>
-          </span>
-          <span class="text-primary font-semibold ml-3 mb-2 text-sm font-poppins italic">/<sub>{{ priceDescription }}</sub></span>
+              Zgjidh Planin
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== BOTTOM SECTION: Features ===== -->
+        <div class="w-full flex-1">
+          <div class="w-full h-full flex flex-col 4xl:py-6 xl:py-4 lg:py-2 4xl:gap-5 xl:gap-5 lg:gap-2">
+            <h2 class="text-primary font-poppins font-semibold 4xl:text-4xl xl:text-3xl lg:text-xl mx-3 xl:mb-10 lg:mb-5">
+              Përfshirë:
+            </h2>
+
+            <div
+              v-for="(feature, i) in features"
+              :key="i"
+              class="w-full h-fit items-center flex flex-row"
+            >
+              <!-- Included -->
+              <template v-if="!feature.locked">
+                <div class="4xl:w-6 4xl:h-6 xl:w-5 xl:h-5 lg:w-3 lg:h-3 bg-gray-900 rounded-full mx-3 flex-shrink-0" />
+                <p class="text-primary font-poppins 4xl:text-xl xl:text-lg lg:text-md">
+                  {{ feature.text || feature }}
+                </p>
+              </template>
+
+              <!-- Locked -->
+              <template v-else>
+                <div class="4xl:w-6 4xl:h-6 xl:w-5 xl:h-5 lg:w-3 lg:h-3 bg-[#D9D9D9]/25 rounded-full mx-3 flex-shrink-0" />
+                <p class="font-poppins 4xl:text-xl xl:text-xl lg:text-md text-black/25">
+                  {{ feature.text || feature }}
+                </p>
+              </template>
+            </div>
+          </div>
         </div>
       </div>
-      
-      <!-- Plan Description -->
-      <div class="mt-2 text-primary flex items-center justify-center text-sm font-poppins relative z-10">
-        <p class="text-center w-3/4" :class="isRecommended ? 'font-medium' : ''">{{description}}</p>
-      </div>
-      
-      <!-- Action Button -->
-      <div class="mt-8 w-full flex justify-items-center relative z-10 font-kollektif cursor-pointer">
-        <router-link
-          v-if="to"
-          :to="to"
-          :class="isRecommended 
-          ? 'w-full text-center bg-primary font-semibold py-3 px-4 rounded-full hover:bg-secondary hover:text-secondary transition-all shadow-lg cursor-pointer'
-          : 'w-full text-center border-2 border-primary bg-transparent text-primary font-semibold py-2 px-4 rounded-full hover:bg-primary hover:text-primary transition-colors cursor-pointer'"
-        >
-          Zgjidh
-        </router-link>
-        <button
-          v-else
-          @click="$emit('select', planType)"
-          :class="isRecommended
-            ? 'w-full text-center bg-primary text-cream hover:text-primary font-semibold py-3 px-4 rounded-full hover:bg-secondary shadow-lg cursor-pointer transition-colors duration-300'
-            : 'w-full text-center border-2 border-primary bg-transparent text-primary font-semibold py-2 px-4 rounded-full hover:bg-primary hover:text-secondary transition-colors cursor-pointer duration-300'"
-        >
-          Zgjidh
-        </button>
-      </div>
-      
-      <!-- Feature List -->
-      <ul class="mt-8 space-y-4 font-poppins">
-        <li v-for="(feature, i) in features" :key="i"
-          class="flex items-center gap-3 text-base transition-opacity duration-200"
-          :class="[
-            feature.locked ? 'text-gray-400 opacity-60' : 'text-primary',
-            isRecommended && !feature.locked ? 'font-medium' : ''
-          ]"
-        >
-          <svg v-if="!feature.locked" class="w-5 h-5 text-secondary flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <svg v-else class="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span class="font-poppins flex-1"
-            :class="feature.locked ? 'line-through' : 'text-primary'"
-          >
-            {{ feature.text || feature }}
-          </span>
-          <span v-if="feature.locked" class="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-medium">Vetëm PRO +</span>
-        </li>
-      </ul>
     </div>
   </div>
 </template>
 
 <script setup>
-const props = defineProps({
-  badgeText: { type: String, default: 'Falas' },
-  badgeColor: { type: String, default: '#052B28' },
-  price: { type: [String, Number], default: '0' },
-  decimal: { type: String, default: '00' }, 
-  currency: { type: String, default: '€' },
-  description: { type: String, default: 'Përshkrimi i planit' },
-  priceDescription: { type: String, default: '*Falas për përdorim personal' },
-  features: { type: Array, default: () => ([
-    { text: "Akses te veçoritë bazë" },
-    { text: "Personalizim i konzolës" },
-    { text: "Inteligjencë Artificiale dhe ML" },
-    { text: "Ndaje deri në 5 të ftuar" }
-  ]) },
-  svgColor: { type: String, default: '#9FE29E' },
-  to: { type: String, default: null },
-  planType: { type: String, default: null },
-  isRecommended: { type: Boolean, default: false },
-  oldMonthlyPrice: { type: [String, Number], default: null },
+defineProps({
+  badgeText:           { type: String, default: 'PlanName' },
+  badgeColor:          { type: String, default: '#052B28' },
+  price:               { type: [String, Number], default: '0' },
+  decimal:             { type: String, default: '00' },
+  currency:            { type: String, default: '€' },
+  description:         { type: String, default: '' },
+  priceDescription:    { type: String, default: 'për muaj' },
+  features:            { type: Array, default: () => [] },
+  planType:            { type: String, default: null },
+  isRecommended:       { type: Boolean, default: false },
+  oldMonthlyPrice:     { type: [String, Number], default: null },
+  oldDecimal:          { type: String, default: '99' },
   showOldMonthlyPrice: { type: Boolean, default: false },
-  percentSaved: { type: [String, Number], default: null }
+  percentSaved:        { type: [String, Number], default: null },
+  svgColor:            { type: String, default: '#9FE29E' }
 });
-</script>
 
-<style scoped>
-.bg-cream { background: #FFFDEE; }
-.font-kollektif-bold { font-family: 'Kollektif', sans-serif; font-weight: bold; }
-</style>
+defineEmits(['select']);
+</script>

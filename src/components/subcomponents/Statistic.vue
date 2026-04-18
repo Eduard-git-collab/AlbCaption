@@ -1,234 +1,178 @@
 <template>
-    <div ref="root" class="w-screen h-screen p-4">
-      <div class="w-full h-full flex gap-3 items-center justify-start">
-        <div class="w-full h-[90%]">
-          <div class="relative h-full bg-primary rounded-2xl overflow-hidden"
-          :class="[
-            isVisible ? 'animate-swipe' : 'w-0',
-          ]">
-            <div
-            class="h-full w-full flex flex-col items-center justify-between"
-            :class="{ 'animate-text': isVisible }"
-            >
-              <div class="grid-overlay scale-200 absolute top-10 -right-1/4 w-full h-full"></div>
-              <div></div>
-  
-              <!-- Speaker SVG: fades out on mute, then removed -->
-              <svg
-                v-if="!showContent"
-                width="181"
-                height="141"
-                class="scale-200"
-                viewBox="-20 0 181 141"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                :class="{ muted: isMuted, 'fade-out': isMuted }"
-                style="overflow: visible;"
-              >
-                <defs>
-                  <clipPath id="speaker-body-clip">
-                    <path d="M89.7829 23.9797V117.663C89.7829 126.333 79.503 130.895 73.0737 125.078L39.37 94.5841H9.99999C4.47714 94.5841 -7.62939e-06 90.1069 -7.62939e-06 84.5841V59.9327C-7.62939e-06 54.4099 4.47715 49.9327 10 49.9327H39.37L72.7457 16.8749C79.0591 10.6217 89.7829 15.0937 89.7829 23.9797Z"/>
-                  </clipPath>
-                  <clipPath id="speaker-outside-clip">
-                    <path d="M-20 0 H161 V141 H-20 Z M89.7829 23.9797V117.663C89.7829 126.333 79.503 130.895 73.0737 125.078L39.37 94.5841H9.99999C4.47714 94.5841 -7.62939e-06 90.1069 -7.62939e-06 84.5841V59.9327C-7.62939e-06 54.4099 4.47715 49.9327 10 49.9327H39.37L72.7457 16.8749C79.0591 10.6217 89.7829 15.0937 89.7829 23.9797Z" fill-rule="evenodd"/>
-                  </clipPath>
-                </defs>
-  
-                <!-- Speaker body -->
-                <path
-                  d="M89.7829 23.9797V117.663C89.7829 126.333 79.503 130.895 73.0737 125.078L39.37 94.5841H9.99999C4.47714 94.5841 -7.62939e-06 90.1069 -7.62939e-06 84.5841V59.9327C-7.62939e-06 54.4099 4.47715 49.9327 10 49.9327H39.37L72.7457 16.8749C79.0591 10.6217 89.7829 15.0937 89.7829 23.9797Z"
-                  fill="#9FE29E"
-                />
-  
-                <!-- Arc 1: smallest -->
-                <path class="arc arc-1" d="M110.909 83.5413C119.919 81.2276 122.314 62.9645 110.909 56.6545" stroke="#9FE29E" stroke-width="7" stroke-linecap="round"/>
-                <!-- Arc 2: medium -->
-                <path class="arc arc-2" d="M122.431 96.0245C139.326 91.5624 143.816 56.3407 122.431 44.1713" stroke="#9FE29E" stroke-width="7" stroke-linecap="round"/>
-                <!-- Arc 3: largest -->
-                <path class="arc arc-3" d="M132.994 114.269C161.151 106.667 168.635 46.6597 132.994 25.9266" stroke="#9FE29E" stroke-width="7" stroke-linecap="round"/>
-  
-                <!-- Slash: secondary outside speaker -->
-                <line class="mute-slash" x1="135" y1="15" x2="-5" y2="130" stroke="#9FE29E"  stroke-width="7" stroke-linecap="round" clip-path="url(#speaker-outside-clip)"/>
-                <!-- Slash: primary over speaker body -->
-                <line class="mute-slash" x1="135" y1="15" x2="-5" y2="130" stroke="#052B28" stroke-width="7" stroke-linecap="round" clip-path="url(#speaker-body-clip)"/>
-              </svg>
-  
-              <!-- Content: fades in after SVG is gone -->
-              <div
-                v-else
-                class="fade-in flex flex-col items-center justify-center w-full h-full"
-              >
-                <div class="flex items-center">
-                  <div
-                    class="relative cursor-default"
-                    ref="xxContainer"
-                    @mousemove="onMouseMove"
-                    @mouseleave="onMouseLeave"
-                  >
-                    <h1 class="text-secondary text-9xl p-10 z-10 -m-10 text-kollektif-bold-italic select-none">
-                      69%
-                    </h1>
-                    <h1
-                      class="text-9xl text-kollektif-bold-italic p-10 -m-10 select-none absolute inset-0 stroke-text pointer-events-none"
-                      :style="strokeMaskStyle"
-                      aria-hidden="true"
-                    >
-                      69%
-                    </h1>
-                  </div>
-                  <h1 class="text-7xl text-kollektif-bold-italic text-secondary cursor-default select-none">
-                    &nbsp;e postimeve
-                  </h1>
-                </div>
-                <span class="text-secondary text-md max-w-3xl text-center">
-                  69% e postimeve në rrjete sociale
-                  shikohen me zërin e fikur. Gjasat janë që, nëse po publikon një video të pa titruar, audienca jote nuk ka për ta parë. 69% e shikuesëve ne ambjente publike ose zyra përdorin rrjete sociale me zërin e fikur.
-                </span>
+  <div ref="root" class="w-screen h-screen p-4">
+    <div class="w-full h-full">
+      <div class="w-full h-[90%]">
+        <div class="relative h-full w-full bg-primary rounded-2xl overflow-hidden">
+          <div class="grid-overlay scale-200 absolute top-10 -right-1/4 w-full h-full"></div>
+
+          <div class="w-full h-full grid grid-rows-6 lg:grid-rows-3">
+            <!-- Row 1 -->
+            <div class="w-full lg:h-fit h-8 row-span-1">
+              <div class="4xl:w-30 4xl:h-30 4xl:ml-20 4xl:mt-10
+                          2xl:w-20 2xl:h-20 2xl:ml-14 2xl:mt-14
+                          xl:w-15 xl:h-15 xl:ml-10 xl:mt-10
+                          lg:w-12 lg:h-12 lg:ml-8 lg:mt-8
+                          md:w-10 md:h-10 md:ml-6 md:mt-6 
+                          w-8 h-8 ml-4 mt-4 opacity-50
+                          ">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 252 265" fill="none">
+                  <path
+                    d="M144.416 39.4567V209.935C144.416 218.605 134.136 223.167 127.707 217.35L66.3883 161.872H15.4524C9.92957 161.872 5.45241 157.395 5.45241 151.872V102.762C5.45241 97.2387 9.92957 92.7615 15.4524 92.7615H66.3883L127.379 32.3519C133.692 26.0986 144.416 30.5707 144.416 39.4567Z"
+                    fill="#9FE29E"
+                  />
+                  <path
+                    opacity="0.1"
+                    d="M211.295 192.339C254.876 180.573 266.46 87.6953 211.295 55.6051"
+                    stroke="#9FE29E"
+                    stroke-width="7"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    opacity="0.14"
+                    d="M194.945 164.101C221.093 157.195 228.043 102.68 194.945 83.844"
+                    stroke="#9FE29E"
+                    stroke-width="7"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    opacity="0.19"
+                    d="M177.112 144.78C191.058 141.199 194.765 112.932 177.112 103.166"
+                    stroke="#9FE29E"
+                    stroke-width="7"
+                    stroke-linecap="round"
+                  />
+                  <line
+                    x1="186.924"
+                    y1="257.422"
+                    x2="6.99958"
+                    y2="9.77799"
+                    stroke="#9FE29E"
+                    stroke-width="14"
+                    stroke-linecap="round"
+                  />
+                  <line x1="159.565" y1="220.126" x2="54.9435" y2="76.1263" stroke="#052B28" stroke-width="15" />
+                </svg>
               </div>
-  
-              <div></div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="w-full h-fit flex flex-col lg:flex-row gap-3 xl:gap-10 4xl:gap-20 items-center justify-center row-span-2 lg:row-span-1">
+              <!-- Percent with stroke-reveal effect -->
+              <div
+                class="relative cursor-default"
+                ref="percentContainer"
+                @mousemove="onPercentMove"
+                @mouseleave="onPercentLeave"
+              >
+                <!-- Filled text -->
+                <h1
+                  class="4xl:text-[600px] 2xl:text-[400px] xl:text-[300px] md:text-[200px] text-9xl text-kollektif-bold-italic text-secondary select-none p-10 -m-10 z-10 relative"
+                >
+                  71%
+                </h1>
+
+                <!-- Stroked overlay -->
+                <h1
+                  class="4xl:text-[600px] 2xl:text-[400px] xl:text-[300px] md:text-[200px] text-9xl text-kollektif-bold-italic select-none p-10 -m-10 absolute inset-0 pointer-events-none percent-stroke"
+                  :style="percentStrokeMaskStyle"
+                  aria-hidden="true"
+                >
+                  71%
+                </h1>
+              </div>
+
+              <span class="text-secondary lg:text-left text-center 4xl:text-[128px] 2xl:text-8xl xl:text-7xl md:text-5xl text-2xl text-kollektif font-medium row-span-2">
+                e ndjekësve të tu përdorin<br />rrjetet sociale me zërin e fikur
+              </span>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="w-[75%] h-fit mx-auto flex items-center justify-center">
+              <span class="text-secondary font-poppins lg:font-thin font-light text-center 4xl:text-[57px] 2xl:text-4xl xl:text-3xl md:text-xl text-md">
+                Ti ke vetëm pak sekonda kohë ti tregosh një shikuesi të ri, që vëmendja e tyre duhet drejtuar tek ti.<br class="lg:hidden block"><br class="lg:hidden block">
+                Tërhiq shikues të rinj, ktheji në ndjekës, dhe përdor titrimin automatik për ti udhëzuar vëmendjen dhe
+                shikimin tek publikimet e tua.
+              </span>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, computed, onMounted } from 'vue'
-  
-  const root = ref(null)
-  const isMuted = ref(false)
-  const isVisible = ref(false)
-  const showContent = ref(false)
-  
-  onMounted(() => {
-  const observer = new IntersectionObserver(([entry]) => {
-    if (entry.isIntersecting) {
-      observer.disconnect() // only trigger once
-  
-      setTimeout(() => {
-        isVisible.value = true
-        setTimeout(() => {
-          isMuted.value = true
-        setTimeout(() => {
-          showContent.value = true
-            }, 1500)
-        },1500)
-      }, 400) // ← your delay after entering view goes here
-    }
-  }, {
-    threshold: 0.4 // fires when 40% of the component is visible
-  })
-  
-  observer.observe(root.value)
-  })
-  
-  const xxContainer = ref(null)
-  const mousePos = ref(null)
-  
-  function onMouseMove(e) {
-    const rect = xxContainer.value.getBoundingClientRect()
-    mousePos.value = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-      w: rect.width,
-      h: rect.height,
-    }
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+
+const root = ref(null)
+
+// Stroke reveal effect
+const percentContainer = ref(null)
+const percentMouse = ref(null)
+
+function onPercentMove(e) {
+  const rect = percentContainer.value.getBoundingClientRect()
+  percentMouse.value = {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top,
+    w: rect.width,
+    h: rect.height,
   }
-  
-  function onMouseLeave() {
-    mousePos.value = null
-  }
-  
-  const strokeMaskStyle = computed(() => {
-    if (!mousePos.value) {
-      return {
-        '-webkit-mask-image': 'radial-gradient(circle 0px at 50% 50%, black 0%, transparent 0%)',
-        'mask-image': 'radial-gradient(circle 0px at 50% 50%, black 0%, transparent 0%)',
-        opacity: 0,
-      }
-    }
-    const { x, y, w, h } = mousePos.value
-    const px = (x / w) * 100
-    const py = (y / h) * 100
+}
+
+function onPercentLeave() {
+  percentMouse.value = null
+}
+
+const percentStrokeMaskStyle = computed(() => {
+  if (!percentMouse.value) {
     return {
-      '-webkit-mask-image': `radial-gradient(circle 120px at ${px}% ${py}%, black 20%, transparent 80%)`,
-      'mask-image': `radial-gradient(circle 120px at ${px}% ${py}%, black 20%, transparent 80%)`,
-      opacity: 1,
+      '-webkit-mask-image': 'radial-gradient(circle 0px at 50% 50%, black 0%, transparent 0%)',
+      maskImage: 'radial-gradient(circle 0px at 50% 50%, black 0%, transparent 0%)',
+      opacity: 0,
     }
-  })
-  </script>
-  
-  <style>
-  /* ── existing animations ───────────────────────────────────���────────────── */
-  @keyframes swipe {
-    from { transform: scaleX(0); }
-    to   { transform: scaleX(1); }
   }
-  @keyframes revealText {
-    from { opacity: 0; transform: translateX(-20px); }
-    to   { opacity: 1; transform: translateX(0); }
+
+  const { x, y, w, h } = percentMouse.value
+  const px = (x / w) * 100
+  const py = (y / h) * 100
+
+  return {
+    '-webkit-mask-image': `radial-gradient(circle 120px at ${px}% ${py}%, black 20%, transparent 80%)`,
+    maskImage: `radial-gradient(circle 120px at ${px}% ${py}%, black 20%, transparent 80%)`,
+    opacity: 1,
   }
-  .animate-swipe  { animation: swipe 0.8s ease-out; transform-origin: left; }
-  .animate-text   { opacity: 0; animation: revealText 0.4s ease-out 0.5s forwards; }
-  .animate-behind { animation: swipe 0.8s ease-out; transform-origin: left; animation-delay: 0.5s; }
-  
-  .grid-overlay {
-    background-image:
-      repeating-linear-gradient(0deg,  transparent, transparent 15px, #9FE29E 15px, #9FE29E 15.5px),
-      repeating-linear-gradient(90deg, transparent, transparent 15px, #9FE29E 15px, #9FE29E 15.5px);
-    opacity: 0.3;
-    rotate: 20deg;
-    mask-image: radial-gradient(ellipse 90% 100% at right center, black 30%, transparent 100%);
-    -webkit-mask-image: radial-gradient(ellipse 90% 100% at right center, black 30%, transparent 100%);
+})
+</script>
+
+<style>
+.percent-stroke {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--color-secondary, #9FE29E);
+  transition: opacity 0.15s ease;
+}
+
+@media (min-width: 768px) {
+  .percent-stroke {
+    -webkit-text-stroke: 5px var(--color-secondary, #9FE29E);
   }
-  .stroke-text {
-    color: transparent;
-    -webkit-text-stroke: 6px var(--color-secondary, #9FE29E);
-    transition: opacity 0.15s ease;
+}
+
+@media (min-width: 1024px) {
+  .percent-stroke {
+    -webkit-text-stroke: 7px var(--color-secondary, #9FE29E);
   }
-  
-  /* ── Arc defaults ────────────────────────────────────────────────────────── */
-  .arc { transition: stroke-dashoffset 0.35s ease, opacity 0.25s ease; }
-  
-  .arc-1 { stroke-dasharray: 30;  stroke-dashoffset: 0; opacity: 1; }
-  .arc-2 { stroke-dasharray: 65;  stroke-dashoffset: 0; opacity: 1; }
-  .arc-3 { stroke-dasharray: 120; stroke-dashoffset: 0; opacity: 1; }
-  
-  .muted .arc-1 { stroke-dashoffset: 30;  opacity: 0; transition-delay: 0s;    }
-  .muted .arc-2 { stroke-dashoffset: 65;  opacity: 0; transition-delay: 0.18s; }
-  .muted .arc-3 { stroke-dashoffset: 120; opacity: 0; transition-delay: 0.36s; }
-  
-  /* ── Slash ───────────────────────────────────────────────────────────────��─ */
-  .mute-slash {
-    stroke-dasharray: 175;
-    stroke-dashoffset: 175;
-    opacity: 0;
-    transition:
-      stroke-dashoffset 0.4s ease 0.7s,
-      opacity           0.1s ease 0.7s;
+}
+
+@media (min-width: 1440px) {
+  .percent-stroke {
+    -webkit-text-stroke: 8px var(--color-secondary, #9FE29E);
   }
-  .muted .mute-slash {
-    stroke-dashoffset: 0;
-    opacity: 1;
+}
+
+@media (min-width: 2560px) {
+  .percent-stroke {
+    -webkit-text-stroke: 30px var(--color-secondary, #9FE29E);
   }
-  
-  /* ── SVG fade out: starts after slash finishes drawing (~1.1s total) ─────── */
-  @keyframes fadeOut {
-    from { opacity: 1; }
-    to   { opacity: 0; }
-  }
-  .fade-out {
-    animation: fadeOut 0.4s ease 1.1s forwards;
-  }
-  
-  /* ── Content fade in ─────────────────────────────────────────────────────── */
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .fade-in {
-    animation: fadeIn 0.5s ease forwards;
-  }
-  </style>
+}
+</style>

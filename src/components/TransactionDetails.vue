@@ -1245,7 +1245,7 @@ async function downloadWithSelectedStyle() {
       <div class="hidden lg:flex w-full h-full rounded-r-lg border-2 border-gray-200">
 
         <!-- Transcript Panel -->
-        <div ref="transcriptPanelRef" class="w-1/3 xl:w-[30%] 2xl:w-[28%] h-full border-r-2 border-r-gray-200 overflow-y-auto scroll-smooth">
+        <div ref="transcriptPanelRef" class="w-1/3 xl:w-[30%] 4xl:w-[28%] h-full border-r-2 border-r-gray-200 overflow-y-auto scroll-smooth">
           <SegmentRow
             v-for="(segment, index) in transcriptSegments"
             :ref="el => { if (el) segmentRefs[index] = el }"
@@ -1263,7 +1263,7 @@ async function downloadWithSelectedStyle() {
         </div>
 
         <!-- Video Panel -->
-        <div class="w-2/3 xl:w-[70%] 2xl:w-[72%] h-full flex flex-col relative">
+        <div class="w-2/3 xl:w-[70%] 4xl:w-[72%] h-full flex flex-col relative">
           <video
             ref="videoPlayer"
             class="w-full h-full bg-transparent"

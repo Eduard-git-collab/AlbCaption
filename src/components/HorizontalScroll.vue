@@ -6,10 +6,10 @@
         class="h-screen flex items-center relative whitespace-nowrap will-change-transform px-16"
       >
         <h2
-          class="4xl:text-[600px] xl:text-[300px] lg:text-[170px] font-black text-primary text-kollektif-bold leading-none"
+          class="4xl:text-[600px] 2xl:text-[400px] xl:text-[300px] lg:text-[170px] font-black text-primary text-kollektif-bold leading-none"
         >
           Nga regjistrimi në publikim
-          <span class="4xl:text-[700px] xl:text-[350px] lg:text-[200px] text-secondary text-kollektif-bold-italic">
+          <span class="4xl:text-[700px] 2xl:text-[500px] xl:text-[350px] lg:text-[200px] text-secondary text-kollektif-bold-italic">
             8x
           </span>
           më shpejtë
@@ -19,10 +19,10 @@
 
         <div ref="cream" class="w-[90vw] h-full relative rounded-3xl shrink-0">
           <div
-            class="w-full h-full relative flex flex-col 4xl:gap-30 xl:gap-15 lg:gap-8 items-center justify-center p-10"
+            class="w-full h-full relative flex flex-col 4xl:gap-30 2xl:gap-20 xl:gap-15 lg:gap-8 items-center justify-center p-10"
           >
             <h3
-              class="4xl:text-[90px] xl:text-5xl lg:text-3xl z-10 w-full text-center whitespace-normal font-poppins font-light leading-tight"
+              class="4xl:text-[90px] 2xl:text-[70px] xl:text-[50px] lg:text-[30px] z-10 w-full text-center whitespace-normal font-poppins font-light leading-tight"
             >
               Të titrosh video manualisht do të thotë të harxhosh gjysmën e ditës duke shkruar dhe gjysmën tjetër duke
               sinkronizuar. Përqëndrohu tek biznesi yt, shpenzo më pak kohë te montazhi duke titruar automatikisht IA.
@@ -33,15 +33,15 @@
             <div class="w-full flex z-10 flex-row items-center gap-10 justify-center">
               <RouterLink
                 to="/signup"
-                class="4xl:text-[48px] xl:text-2xl text-primary bg-secondary 4xl:px-12 4xl:py-4 4xl:rounded-xl xl:px-6 xl:py-3 px-3 py-2 rounded-md
+                class="4xl:text-[48px] 2xl:text-[36px] xl:text-2xl text-primary bg-secondary 4xl:px-12 4xl:py-4 4xl:rounded-xl xl:px-6 xl:py-3 px-3 py-2 rounded-md
                        text-kollektif-bold text-xl hover:ring-2 hover:ring-secondary hover:bg-primary hover:text-secondary duration-200"
               >
                 Titro 8x më Shpejtë
               </RouterLink>
 
-              <div class="w-fit h-fit flex flex-row items-center 4xl:gap-5 gap-2">
-                <CardIcon class="4xl:w-14 4xl:h-14 xl:w-9 xl:h-9 lg:w-6 lg:h-6 text-primary" />
-                <span class="4xl:text-[48px] xl:text-2xl lg:text-xl">Pa kartë krediti</span>
+              <div class="w-fit h-fit flex flex-row items-center 4xl:gap-5 2xl:gap-3 gap-2">
+                <CardIcon class="4xl:w-14 4xl:h-14 2xl:w-10 2xl:h-10 xl:w-9 xl:h-9 lg:w-6 lg:h-6 text-primary" />
+                <span class="4xl:text-[48px] 2xl:text-[36px] xl:text-2xl lg:text-xl">Pa kartë krediti</span>
               </div>
             </div>
           </div>
@@ -51,6 +51,7 @@
   </section>
 
   <div class="lg:hidden block">
+    <div class="w-screen h-[20vh]"></div>
     <div ref="sectionEl" class="relative h-screen overflow-hidden">
       <div
         ref="contentEl"
@@ -109,12 +110,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from "vue"
+import { ref, inject, onMounted, onBeforeUnmount, nextTick } from "vue"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import card from "./logos/card.vue"
 
 gsap.registerPlugin(ScrollTrigger)
+
+const isHeaderHidden = inject('isHeaderHidden')
 
 const pinSection  = ref(null)
 const viewport    = ref(null)
@@ -219,6 +222,10 @@ onMounted(() => {
         scrub: 1,
         pin: true,
         anticipatePin: 1,
+        onEnter: () => { if (isHeaderHidden) isHeaderHidden.value = true },
+        onLeave: () => { if (isHeaderHidden) isHeaderHidden.value = false },
+        onEnterBack: () => { if (isHeaderHidden) isHeaderHidden.value = true },
+        onLeaveBack: () => { if (isHeaderHidden) isHeaderHidden.value = false },
       }
     })
 

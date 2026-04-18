@@ -11,18 +11,18 @@
     >
       <div class="w-full px-4 sm:px-8 py-4 flex justify-center">
         <nav 
-          class="bg-[#EDE6D4] shadow-xl transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden"
+          class="bg-cream shadow-xl transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden"
           :class="[
             isMobileMenuOpen ? 'rounded-2xl' : 'rounded-2xl',
-            'w-full max-w-7xl px-6'
+            'w-full max-w-[90vw] px-6 xl:px-10 2xl:px-15 4xl:px-20 4xl:rounded-3xl'
           ]"
         >
           <!-- Navbar Top Row -->
-          <div class="flex flex-row justify-between items-center h-16">
+          <div class="flex flex-row justify-between items-center h-16 xl:h-20 2xl:h-25 4xl:h-36">
             
             <!-- Logo -->
             <RouterLink to="/" class="flex-shrink-0" @click="isMobileMenuOpen = false">  
-              <Albcaptions_logo_nobg class="w-10 h-10 cursor-pointer"/>
+              <Albcaptions_logo_nobg class="w-10 h-10 xl:w-14 xl:h-14 2xl:h-20 2xl:w-20 4xl:w-26 4xl:h-26 cursor-pointer"/>
             </RouterLink>
 
             <!-- Hamburger Button (lg:hidden) -->
@@ -43,7 +43,7 @@
             </button>
 
             <!-- Desktop Links -->
-            <div class="hidden lg:flex flex-row gap-8 items-center font-medium text-lg">
+            <div class="hidden lg:flex flex-row gap-8 items-center font-medium md:text-lg xl:text-2xl 2xl:text-4xl 4xl:text-5xl">
               <RouterLink to="/about" class="text-primary hover:text-secondary transition-colors">Rreth Nesh</RouterLink>
               <RouterLink to="/contact" class="text-primary hover:text-secondary transition-colors">Kontakt</RouterLink>
               <RouterLink to="/upload" class="text-primary hover:text-secondary transition-colors">Ngarko</RouterLink>
@@ -52,20 +52,20 @@
             </div>
 
             <!-- Desktop Auth Buttons -->
-            <div class="hidden lg:flex flex-row gap-2 items-center font-medium">
+            <div class="hidden lg:flex flex-row lg:gap-2 items-center font-medium">
               <template v-if="!session">
-                <RouterLink to="/signup" class="bg-primary min-w-32 text-center hover:bg-secondary p-2 rounded-lg text-secondary hover:text-primary transition-all duration-200 border-primary border-2">
+                <RouterLink to="/signup" class="bg-primary min-w-32 text-center hover:bg-secondary md:p-2 xl:px-5 xl:py-3 2xl:px-10 2xl:py-5 4xl:px-10 4xl:py-5 rounded-lg text-secondary hover:text-primary transition-all duration-200 border-primary border-2 xl:text-2xl 2xl:text-4xl 4xl:text-5xl">
                   Regjistrohu
                 </RouterLink>
-                <RouterLink to="/signin" class="bg-primary min-w-32 text-center hover:bg-secondary p-2 rounded-lg text-secondary hover:text-primary transition-all duration-200 border-primary border-2">
+                <RouterLink to="/signin" class="bg-primary min-w-32 text-center hover:bg-secondary md:p-2 xl:px-5 xl:py-3 2xl:px-10 2xl:py-5 4xl:px-10 4xl:py-5 rounded-lg text-secondary hover:text-primary transition-all duration-200 border-primary border-2 xl:text-2xl 2xl:text-4xl 4xl:text-5xl">
                   Hyr
                 </RouterLink>
               </template>
-              <div v-else class="flex gap-4 items-center">
-                <RouterLink to="/dashboard" class="text-primary hover:text-secondary transition-colors">
+              <div v-else class="flex 2xl:gap-6 xl:gap-5 lg:gap-4 items-center">
+                <RouterLink to="/dashboard" class="text-primary hover:text-secondary transition-colors xl:text-2xl 2xl:text-4xl 4xl:text-5xl">
                   Dashboard
                 </RouterLink>
-                <button @click="handleSignOut" class="bg-primary min-w-32 text-center hover:bg-secondary p-2 rounded-lg text-secondary hover:text-primary cursor-pointer transition-all duration-200 border-primary border-2">
+                <button @click="handleSignOut" class="bg-primary min-w-32 text-center hover:bg-secondary md:p-2 xl:px-5 xl:py-3 4xl:px-10 4xl:py-5 rounded-lg text-secondary hover:text-primary cursor-pointer transition-all duration-200 border-primary border-2 xl:text-2xl 2xl:text-4xl 4xl:text-5xl">
                   Sign Out
                 </button>
               </div>  
@@ -115,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, provide } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Albcaptions_logo_nobg from './components/logos/Albcaption_logo_inv_nobg.vue';
 import { supabase } from '@/lib/supabaseClient';
@@ -192,7 +192,7 @@ const toggleMobileMenu = () => {
 };
 
 const hideNavigation = computed(() => {
-  return route.name === 'Home' || route.name === 'Pricing';
+  return route.name === 'Home' || route.name === 'Pricing' || route.name === 'FAQ' || route.name === 'About' || route.name === 'Contact';
 });
 
 const handleScroll = () => {
@@ -257,6 +257,7 @@ const handleSignOut = async () => {
   await supabase.auth.signOut();
   isMobileMenuOpen.value = false;
 };
+
 </script>
 
 <style scoped>

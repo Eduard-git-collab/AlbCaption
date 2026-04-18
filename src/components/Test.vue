@@ -34,15 +34,15 @@
           </div>
 
           <div class="rounded-tab h-fit p-2 flex items-center gap-2 px-4 md:px-6 xl:px-8">
-            <RouterLink to="/upload" class="text-xs md:text-sm xl:text-base 2xl:text-lg text-primary font-poppins cursor-pointer hover:text-secondary transition-all duration-300 ease-in-out">Krijo</RouterLink>
+            <RouterLink to="/upload" class="text-xs md:text-sm xl:text-base 4xl:text-lg text-primary font-poppins cursor-pointer hover:text-secondary transition-all duration-300 ease-in-out">Krijo</RouterLink>
             
-            <RouterLink to="/upload" class="w-9 h-9 xl:w-11 xl:h-11 2xl:w-12 2xl:h-12 bg-primary rounded-full hover:w-32 xl:hover:w-36 2xl:hover:w-40 transition-all duration-300 cursor-pointer flex items-center justify-center gap-0 group overflow-hidden">
-              <albcaptions_logo_nobg_inv class="w-4 h-4 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6" />
+            <RouterLink to="/upload" class="w-9 h-9 xl:w-11 xl:h-11 4xl:w-12 4xl:h-12 bg-primary rounded-full hover:w-32 xl:hover:w-36 4xl:hover:w-40 transition-all duration-300 cursor-pointer flex items-center justify-center gap-0 group overflow-hidden">
+              <albcaptions_logo_nobg_inv class="w-4 h-4 xl:w-5 xl:h-5 4xl:w-6 4xl:h-6" />
               <div
                 class="overflow-hidden max-w-0 group-hover:max-w-[7ch] transition-[max-width] duration-300 ease-out"
               >
                 <span
-                  class="text-xs md:text-sm xl:text-base 2xl:text-lg text-secondary font-poppins font-medium whitespace-nowrap inline-block wipe-text ml-0 group-hover:ml-1 transition-[margin] duration-300"
+                  class="text-xs md:text-sm xl:text-base 4xl:text-lg text-secondary font-poppins font-medium whitespace-nowrap inline-block wipe-text ml-0 group-hover:ml-1 transition-[margin] duration-300"
                 >
                   Ngarko
                 </span>
@@ -54,7 +54,7 @@
               @mouseleave="handleEditMouseLeave"
               ref="editTrigger"
             >
-              <p class="text-xs md:text-sm xl:text-base 2xl:text-lg text-primary font-poppins cursor-pointer select-none">Edito</p>
+              <p class="text-xs md:text-sm xl:text-base 4xl:text-lg text-primary font-poppins cursor-pointer select-none">Edito</p>
             </div>
           </div>
 
@@ -62,7 +62,7 @@
           <div class="flex items-center justify-self-end w-fit gap-2 p-3 md:p-4 xl:p-5 text-secondary">
             <!-- Upgrade button (hidden on mobile/tablet, shown on lg+) -->
             <button
-              class="hidden lg:inline-flex items-center px-3 py-1.5 xl:px-4 xl:py-2 2xl:px-5 2xl:py-2.5 text-[11px] xl:text-xs 2xl:text-sm font-medium text-primary bg-secondary rounded-md ring-1 ring-primary/10 cursor-pointer transition-colors hover:bg-[#7dd87b] hover:ring-primary/20"
+              class="hidden lg:inline-flex items-center px-3 py-1.5 xl:px-4 xl:py-2 4xl:px-5 4xl:py-2.5 text-[11px] xl:text-xs 4xl:text-sm font-medium text-primary bg-secondary rounded-md ring-1 ring-primary/10 cursor-pointer transition-colors hover:bg-[#7dd87b] hover:ring-primary/20"
               @click.prevent="promptConfigProfile"
             >
               Përditëso planin
@@ -76,7 +76,7 @@
               ref="helpTrigger"
             >
               <svg
-                class="w-5 h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 cursor-pointer text-secondary hover:text-[#7dd87b] transition-colors duration-200"
+                class="w-5 h-5 xl:w-6 xl:h-6 4xl:w-7 4xl:h-7 cursor-pointer text-secondary hover:text-[#7dd87b] transition-colors duration-200"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -95,11 +95,11 @@
             >
 
               <div class="flex justify-center items-center" v-if="userData?.avatar_url">
-                <img :src="userData.avatar_url" alt="User Avatar" class="object-cover rounded-full w-7 h-7 xl:w-8 xl:h-8 2xl:w-9 2xl:h-9" />
+                <img :src="userData.avatar_url" alt="User Avatar" class="object-cover rounded-full w-7 h-7 xl:w-8 xl:h-8 4xl:w-9 4xl:h-9" />
               </div>
 
               <svg v-else
-                class="w-7 h-7 xl:w-8 xl:h-8 2xl:w-9 2xl:h-9 cursor-pointer text-secondary hover:text-[#7dd87b] transition-colors duration-200"
+                class="w-7 h-7 xl:w-8 xl:h-8 4xl:w-9 4xl:h-9 cursor-pointer text-secondary hover:text-[#7dd87b] transition-colors duration-200"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -114,13 +114,13 @@
 
         <!-- Content -->
         <div class="w-full p-3 z-10 relative">
-          <div class="w-full flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 xl:gap-4 2xl:gap-6">
-            <h1 class="w-fit mx-auto text-[28px] text-center md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl text-white text-kollektif-bold leading-tight">
+          <div class="w-full flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 xl:gap-4 4xl:gap-6">
+            <h1 class="w-fit mx-auto text-[28px] text-center md:text-4xl lg:text-5xl xl:text-6xl 4xl:text-7xl text-white text-kollektif-bold leading-tight">
               Mirësevini,<br> {{ userData?.name }} {{userData?.surname}}
             </h1>
 
             <!-- Micro bento grid (super-compact chips) -->
-            <div class="grid grid-cols-12 gap-2 md:gap-3 xl:gap-4 2xl:gap-5 w-full lg:w-1/2 items-stretch font-poppins">
+            <div class="grid grid-cols-12 gap-2 md:gap-3 xl:gap-4 4xl:gap-5 w-full lg:w-1/2 items-stretch font-poppins">
               <!-- Videos -->
               <div class="col-span-12 sm:col-span-6 lg:col-span-6 rounded-xl ring-1 ring-secondary/20 bg-secondary/5 h-full">
                 <!-- Mobile/Tablet: Horizontal bar layout -->
@@ -150,8 +150,8 @@
                 </div>
 
                 <!-- Desktop: Vertical circular ring (lg+) -->
-                <div class="px-4 py-4 xl:px-6 xl:py-6 2xl:px-8 2xl:py-8 h-full hidden lg:flex flex-col items-center justify-center gap-2 xl:gap-3">
-                  <div class="relative w-16 h-16 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24">
+                <div class="px-4 py-4 xl:px-6 xl:py-6 4xl:px-8 4xl:py-8 h-full hidden lg:flex flex-col items-center justify-center gap-2 xl:gap-3">
+                  <div class="relative w-16 h-16 xl:w-20 xl:h-20 4xl:w-24 4xl:h-24">
                     <svg class="w-full h-full transform -rotate-90" viewBox="0 0 64 64">
                       <circle
                         cx="32"
@@ -175,8 +175,8 @@
                       />
                     </svg>
                     <div class="absolute inset-0 flex items-center justify-center">
-                      <div class="w-fit h-fit p-1.5 xl:p-2 2xl:p-2.5 rounded-full flex items-center justify-center bg-secondary/10">
-                        <svg class="w-5 h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 text-secondary" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <div class="w-fit h-fit p-1.5 xl:p-2 4xl:p-2.5 rounded-full flex items-center justify-center bg-secondary/10">
+                        <svg class="w-5 h-5 xl:w-6 xl:h-6 4xl:w-7 4xl:h-7 text-secondary" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                           <path d="M3.5 7.5A2.5 2.5 0 016 5h7a2.5 2.5 0 012.5 2.5v3.2l3.2-1.8A1 1 0 0120 11v2a1 1 0 01-.3.7l-3.2-1.8v3.6A2.5 2.5 0 0113 18H6a2.5 2.5 0 01-2.5-2.5v-8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
                           <path d="M8.25 9.75h3.5M8.25 13h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
                         </svg>
@@ -184,11 +184,11 @@
                     </div>
                   </div>
                   
-                  <h2 class="text-white text-center font-poppins font-thin text-[11px] xl:text-xs 2xl:text-sm">
+                  <h2 class="text-white text-center font-poppins font-thin text-[11px] xl:text-xs 4xl:text-sm">
                     Video të mbetura
                   </h2>
-                  <span class="text-white text-center font-poppins font-semibold text-lg xl:text-xl 2xl:text-2xl">
-                    {{userRoleDetails?.videos_remaining}} <span class="text-xs xl:text-sm 2xl:text-base font-normal text-white/70">nga {{userRoleDetails?.videos_quota}}</span>
+                  <span class="text-white text-center font-poppins font-semibold text-lg xl:text-xl 4xl:text-2xl">
+                    {{userRoleDetails?.videos_remaining}} <span class="text-xs xl:text-sm 4xl:text-base font-normal text-white/70">nga {{userRoleDetails?.videos_quota}}</span>
                   </span>
                 </div>
               </div>
@@ -222,8 +222,8 @@
                 </div>
 
                 <!-- Desktop: Vertical circular ring (lg+) -->
-                <div class="px-4 py-4 xl:px-6 xl:py-6 2xl:px-8 2xl:py-8 h-full hidden lg:flex flex-col items-center justify-center gap-2 xl:gap-3">
-                  <div class="relative w-16 h-16 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24">
+                <div class="px-4 py-4 xl:px-6 xl:py-6 4xl:px-8 4xl:py-8 h-full hidden lg:flex flex-col items-center justify-center gap-2 xl:gap-3">
+                  <div class="relative w-16 h-16 xl:w-20 xl:h-20 4xl:w-24 4xl:h-24">
                     <svg class="w-full h-full transform -rotate-90" viewBox="0 0 64 64">
                       <circle
                         cx="32"
@@ -247,8 +247,8 @@
                       />
                     </svg>
                     <div class="absolute inset-0 flex items-center justify-center">
-                      <div class="w-fit h-fit p-1.5 xl:p-2 2xl:p-2.5 rounded-full flex items-center justify-center bg-secondary/10">
-                        <svg class="w-5 h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 text-secondary" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <div class="w-fit h-fit p-1.5 xl:p-2 4xl:p-2.5 rounded-full flex items-center justify-center bg-secondary/10">
+                        <svg class="w-5 h-5 xl:w-6 xl:h-6 4xl:w-7 4xl:h-7 text-secondary" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                           <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.4" />
                           <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -256,11 +256,11 @@
                     </div>
                   </div>
                   
-                  <h2 class="text-white text-center font-poppins font-thin text-[11px] xl:text-xs 2xl:text-sm">
+                  <h2 class="text-white text-center font-poppins font-thin text-[11px] xl:text-xs 4xl:text-sm">
                     Minuta të mbetura
                   </h2>
-                  <span class="text-white text-center font-poppins font-semibold text-lg xl:text-xl 2xl:text-2xl">
-                    {{userRoleDetails?.second_to_minutes_remaining}} <span class="text-xs xl:text-sm 2xl:text-base font-normal text-white/70">nga {{userRoleDetails?.minutes_quota}}</span>
+                  <span class="text-white text-center font-poppins font-semibold text-lg xl:text-xl 4xl:text-2xl">
+                    {{userRoleDetails?.second_to_minutes_remaining}} <span class="text-xs xl:text-sm 4xl:text-base font-normal text-white/70">nga {{userRoleDetails?.minutes_quota}}</span>
                   </span>
                 </div>
               </div>
@@ -283,12 +283,12 @@
       <section v-if="!isAdmin()" class="w-full p-3 z-10 relative">
         <div class="flex items-center justify-between">
           <div class="w-fit h-fit flex gap-3 items-center">
-            <h2 class="text-primary text-kollektif-bold text-base sm:text-lg xl:text-xl 2xl:text-2xl">Transkriptet e fundit</h2>
+            <h2 class="text-primary text-kollektif-bold text-base sm:text-lg xl:text-xl 4xl:text-2xl">Transkriptet e fundit</h2>
           </div>
         </div>
       
         <!-- Loading state -->
-        <div v-if="transcriptsLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 font-poppins">
+        <div v-if="transcriptsLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 4xl:grid-cols-7 gap-2 font-poppins">
           <div
             v-for="n in 5"
             :key="n"
@@ -301,7 +301,7 @@
         </div>
       
         <!-- Recent Transcriptions -->
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 my-5 font-poppins">
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 4xl:grid-cols-7 gap-2 my-5 font-poppins">
           <button
             v-for="t in recentTranscripts"
             :key="t.id"
@@ -329,15 +329,15 @@
       
             <!-- Meta -->
             <div class="mt-2">
-              <p class="font-poppins text-[12px] xl:text-[13px] 2xl:text-sm text-primary truncate">
+              <p class="font-poppins text-[12px] xl:text-[13px] 4xl:text-sm text-primary truncate">
                 {{ baseName(t.original_filename) }}
               </p>
               <div class="mt-0.5 flex items-center justify-between">
-                <span class="text-[11px] xl:text-xs 2xl:text-[13px] font-poppins text-primary/70">
+                <span class="text-[11px] xl:text-xs 4xl:text-[13px] font-poppins text-primary/70">
                   {{ formatDateShort(t.last_updated_at || t.created_at) }}
                 </span>
                 <span
-                  class="text-[11px] xl:text-xs 2xl:text-[13px] font-poppins text-primary bg-secondary/60 rounded px-1.5 py-0.5"
+                  class="text-[11px] xl:text-xs 4xl:text-[13px] font-poppins text-primary bg-secondary/60 rounded px-1.5 py-0.5"
                 >{{ formatDuration(t.duration) }}</span>
               </div>
             </div>
@@ -351,7 +351,7 @@
         <!-- All transcriptions (Table view) -->
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mt-2">
           <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-2 sm:gap-3 items-start sm:items-center">
-            <h2 class="text-primary text-kollektif-bold text-base sm:text-lg xl:text-xl 2xl:text-2xl">Transkriptet e mia</h2>
+            <h2 class="text-primary text-kollektif-bold text-base sm:text-lg xl:text-xl 4xl:text-2xl">Transkriptet e mia</h2>
             <div class="flex items-center border border-primary/20 rounded px-2 py-1 w-full sm:w-auto">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 xl:w-5 xl:h-5 text-primary mr-2" fill="currentcolor" viewBox="0 0 24 24">
                 <path d="M10.5 2a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm0 15a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13zM15.5 15.5l4.5 4.5-1.5 1.5-4.5-4.5z"/>
@@ -360,7 +360,7 @@
                 type="text"
                 v-model="searchFilename"
                 placeholder="Kërko..."
-                class="flex-1 text-xs xl:text-sm 2xl:text-base font-poppins py-1 ring-0 min-w-0"
+                class="flex-1 text-xs xl:text-sm 4xl:text-base font-poppins py-1 ring-0 min-w-0"
               />
             </div>
             
@@ -372,7 +372,7 @@
           </div>
           <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
             <!-- Items per page -->
-            <select v-model="itemsPerPage" class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1">
+            <select v-model="itemsPerPage" class="text-xs xl:text-sm 4xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1">
               <option value="20">20</option>
               <option value="60">60</option>
               <option value="100">100</option>
@@ -384,17 +384,17 @@
               <button
                 :disabled="currentPage === 1"
                 @click="goToPage(currentPage - 1)"
-                class="px-2 py-1 text-xs xl:text-sm 2xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded disabled:opacity-50"
+                class="px-2 py-1 text-xs xl:text-sm 4xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded disabled:opacity-50"
               >
                 &lt; 
               </button>
-              <span class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary whitespace-nowrap">
+              <span class="text-xs xl:text-sm 4xl:text-base font-poppins text-primary whitespace-nowrap">
                 <span class="hidden sm:inline">Faqja </span>{{ currentPage }}<span class="hidden sm:inline"> nga {{ totalPages }}</span>
               </span>
               <button
                 :disabled="currentPage === totalPages"
                 @click="goToPage(currentPage + 1)"
-                class="px-2 py-1 text-xs xl:text-sm 2xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded disabled:opacity-50"
+                class="px-2 py-1 text-xs xl:text-sm 4xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded disabled:opacity-50"
               >
                &gt;
               </button>
@@ -412,40 +412,40 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <!-- Date From -->
               <div class="flex flex-col">
-                <label class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary/80 mb-1">Nga data</label>
+                <label class="text-xs xl:text-sm 4xl:text-base font-poppins text-primary/80 mb-1">Nga data</label>
                 <input
                   type="date"
                   v-model="dateFrom"
-                  class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1"
+                  class="text-xs xl:text-sm 4xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1"
                 />
               </div>
 
               <!-- Date To -->
               <div class="flex flex-col">
-                <label class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary/80 mb-1">Deri në datë</label>
+                <label class="text-xs xl:text-sm 4xl:text-base font-poppins text-primary/80 mb-1">Deri në datë</label>
                 <input
                   type="date"
                   v-model="dateTo"
-                  class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1"
+                  class="text-xs xl:text-sm 4xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1"
                 />
               </div>
 
               <!-- Sort By -->
               <div class="flex flex-col">
-                <label class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary/80 mb-1">Rendit sipas</label>
+                <label class="text-xs xl:text-sm 4xl:text-base font-poppins text-primary/80 mb-1">Rendit sipas</label>
                 <select
                   v-model="sortBy"
-                  class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1">
+                  class="text-xs xl:text-sm 4xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1">
                   <option value="created_at">Data e krijimit</option>
                   <option value="original_filename">Emri</option>
                   <option value="duration">Kohëzgjatja</option>
                 </select>
               </div>
               <div class="flex flex-col">
-                <label class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary/80 mb-1">Rendi</label>
+                <label class="text-xs xl:text-sm 4xl:text-base font-poppins text-primary/80 mb-1">Rendi</label>
                 <select
                   v-model="sortOrder"
-                  class="text-xs xl:text-sm 2xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1">
+                  class="text-xs xl:text-sm 4xl:text-base font-poppins text-primary bg-white border border-primary/20 rounded px-2 py-1">
                   <option value="desc">Zbritës</option>
                   <option value="asc">Ngjitës</option>
                 </select>
@@ -458,10 +458,10 @@
             <table class="min-w-full divide-y divide-primary/10">
               <thead class="bg-secondary/10">
                 <tr>
-                  <th scope="col" class="px-3 md:px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80 tracking-wide">Emri</th>
-                  <th scope="col" class="px-3 md:px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80 tracking-wide hidden sm:table-cell">Krijuar</th>
-                  <th scope="col" class="px-3 md:px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80 tracking-wide hidden md:table-cell">Përditësuar</th>
-                  <th scope="col" class="px-3 md:px-4 xl:px-5 py-2 text-right text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80 tracking-wide">Veprime</th>
+                  <th scope="col" class="px-3 md:px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80 tracking-wide">Emri</th>
+                  <th scope="col" class="px-3 md:px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80 tracking-wide hidden sm:table-cell">Krijuar</th>
+                  <th scope="col" class="px-3 md:px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80 tracking-wide hidden md:table-cell">Përditësuar</th>
+                  <th scope="col" class="px-3 md:px-4 xl:px-5 py-2 text-right text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80 tracking-wide">Veprime</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-primary/10">
@@ -473,7 +473,7 @@
                   <!-- File with media icon and truncated name -->
                   <td class="px-3 md:px-4 xl:px-5 py-2">
                     <div class="flex items-center gap-2">
-                      <span class="inline-flex items-center justify-center w-7 h-7 xl:w-8 xl:h-8 2xl:w-9 2xl:h-9 rounded-md ring-1 ring-primary/10 bg-primary/5 text-primary">
+                      <span class="inline-flex items-center justify-center w-7 h-7 xl:w-8 xl:h-8 4xl:w-9 4xl:h-9 rounded-md ring-1 ring-primary/10 bg-primary/5 text-primary">
                         <!-- Video icon -->
                         <svg v-if="getMediaType(t.original_filename) === 'video'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 xl:w-5 xl:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                           <rect x="3" y="5" width="18" height="14" rx="2" ry="2" stroke-width="1.6"/>
@@ -492,7 +492,7 @@
                       </span>
                       <button
                         type="button"
-                        class="text-sm md:text-[13px] xl:text-sm 2xl:text-base text-primary font-medium truncate max-w-[14ch] md:max-w-[24ch] xl:max-w-[30ch] hover:underline text-left"
+                        class="text-sm md:text-[13px] xl:text-sm 4xl:text-base text-primary font-medium truncate max-w-[14ch] md:max-w-[24ch] xl:max-w-[30ch] hover:underline text-left"
                         :title="baseName(t.original_filename) || 'Video'"
                         @click="goToDetails(t.id)"
                       >
@@ -502,12 +502,12 @@
                   </td>
 
                   <!-- Created date -->
-                  <td class="px-3 md:px-4 xl:px-5 py-2 text-[12px] xl:text-[13px] 2xl:text-sm text-primary/80 hidden sm:table-cell">
+                  <td class="px-3 md:px-4 xl:px-5 py-2 text-[12px] xl:text-[13px] 4xl:text-sm text-primary/80 hidden sm:table-cell">
                     {{ formatDateShort(t.created_at) }}
                   </td>
 
                   <!-- Last updated date -->
-                  <td class="px-3 md:px-4 xl:px-5 py-2 text-[12px] xl:text-[13px] 2xl:text-sm text-primary/80 hidden md:table-cell">
+                  <td class="px-3 md:px-4 xl:px-5 py-2 text-[12px] xl:text-[13px] 4xl:text-sm text-primary/80 hidden md:table-cell">
                     {{ t.last_updated_at ? formatDateShort(t.last_updated_at) : '—' }}
                   </td>
 
@@ -536,7 +536,7 @@
       <!-- Admin Panel Section -->
       <section v-if="isAdmin()" class="w-full p-3 z-10 relative mt-6">
         <div class="bg-white rounded-xl ring-1 ring-primary/10 p-6">
-          <h2 class="text-primary text-kollektif-bold text-lg xl:text-xl 2xl:text-2xl mb-6">Admin Panel</h2>
+          <h2 class="text-primary text-kollektif-bold text-lg xl:text-xl 4xl:text-2xl mb-6">Admin Panel</h2>
           
           <!-- Tabs -->
           <div class="flex gap-2 mb-6 border-b border-primary/10 justify-between">
@@ -544,14 +544,14 @@
               <button
               @click="adminTab = 'users'"
               :class="adminTab === 'users' ? 'border-b-2 border-secondary text-secondary' : 'text-primary/60'"
-              class="pb-2 px-4 font-poppins text-sm xl:text-base 2xl:text-lg transition-colors"
+              class="pb-2 px-4 font-poppins text-sm xl:text-base 4xl:text-lg transition-colors"
             >
               Users ({{ allUsers.length }})
             </button>
             <button
               @click="adminTab = 'roles'"
               :class="adminTab === 'roles' ? 'border-b-2 border-secondary text-secondary' : 'text-primary/60'"
-              class="pb-2 px-4 font-poppins text-sm xl:text-base 2xl:text-lg transition-colors"
+              class="pb-2 px-4 font-poppins text-sm xl:text-base 4xl:text-lg transition-colors"
             >
               Roles ({{ roles.length }})
             </button>
@@ -560,7 +560,7 @@
               <a
               @click.prevent="promptRoleModal"
               :class="adminTab === 'roles' ? 'bg-primary text-secondary rounded-md px-4 py-2 hover:text-primary hover:bg-secondary cursor-pointer' : 'hidden'"
-              class="font-poppins text-sm xl:text-base 2xl:text-lg transition-colors"
+              class="font-poppins text-sm xl:text-base 4xl:text-lg transition-colors"
               >
                 Krijo Rol
               </a>
@@ -576,20 +576,20 @@
             <table v-else-if="allUsers.length > 0" class="min-w-full divide-y divide-primary/10">
               <thead class="bg-secondary/10">
                 <tr>
-                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Username</th>
-                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Name</th>
-                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Email</th>
-                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Role</th>
-                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Created</th>
-                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Veprime</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80">Username</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80">Name</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80">Email</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80">Role</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80">Created</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80">Veprime</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-primary/10">
                 <tr v-for="user in allUsers" :key="user.id" class="hover:bg-secondary/5">
-                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80">{{ user.username }}</td>
-                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary">{{ user.name }} {{ user.surname }}</td>
-                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80">{{ user.email }}</td>
-                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg">
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 4xl:text-lg text-primary/80">{{ user.username }}</td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 4xl:text-lg text-primary">{{ user.name }} {{ user.surname }}</td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 4xl:text-lg text-primary/80">{{ user.email }}</td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 4xl:text-lg">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs xl:text-sm font-medium"
                       :class="{
                         'bg-purple-100 text-purple-800': user.role_name === 'admin',
@@ -602,7 +602,7 @@
                       {{ user.role_name || 'N/A' }}
                     </span>
                   </td>
-                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80">{{ formatDateShort(user.created_at) }}</td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 4xl:text-lg text-primary/80">{{ formatDateShort(user.created_at) }}</td>
                   <td class="px-4 xl:px-5 py-3 flex items-center justify-center gap-3"> 
                     <edit @click.prevent="assignRole(user)" class="w-5 h-5 xl:w-6 xl:h-6"/>
                   </td>
@@ -624,23 +624,23 @@
             <table v-else-if="roles.length > 0" class="min-w-full divide-y divide-primary/10">
               <thead class="bg-secondary/10">
                 <tr>
-                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Roli</th>
-                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Çmimi</th>
-                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Video/muaj</th>
-                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Minuta/muaj</th>
-                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Kohëzgjatja max.</th>
-                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Përmasa(MB)</th>
-                  <th scope="col" class="px-4 xl:px-5 py-2 text-center text-xs xl:text-sm 2xl:text-base font-semibold text-primary/80">Veprime</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80">Roli</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80">Çmimi</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80">Video/muaj</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80">Minuta/muaj</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80">Kohëzgjatja max.</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-left text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80">Përmasa(MB)</th>
+                  <th scope="col" class="px-4 xl:px-5 py-2 text-center text-xs xl:text-sm 4xl:text-base font-semibold text-primary/80">Veprime</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-primary/10">
                 <tr v-for="role in roles" :key="role.id" class="hover:bg-secondary/5">
-                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg font-medium text-primary text-left">{{ role.name }}</td>
-                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80 text-left">€ {{ role.price }}<span class="text-[9px] xl:text-[10px] text-primary/30"> .00</span></td>
-                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80 text-center">{{ role.videos_per_month }}</td>
-                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80 text-center">{{ role.total_minutes_per_month }}<span class="text-[9px] xl:text-[10px] text-primary/30 subscript"> /min</span></td>
-                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80 text-center">{{ role.max_video_duration }}<span class="text-[9px] xl:text-[10px] text-primary/30 subscript"> /min</span></td>
-                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 2xl:text-lg text-primary/80 text-center">{{ role.max_file_size_mb }}<span class="text-[9px] xl:text-[10px] text-primary/30 subscript"> /mb</span></td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 4xl:text-lg font-medium text-primary text-left">{{ role.name }}</td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 4xl:text-lg text-primary/80 text-left">€ {{ role.price }}<span class="text-[9px] xl:text-[10px] text-primary/30"> .00</span></td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 4xl:text-lg text-primary/80 text-center">{{ role.videos_per_month }}</td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 4xl:text-lg text-primary/80 text-center">{{ role.total_minutes_per_month }}<span class="text-[9px] xl:text-[10px] text-primary/30 subscript"> /min</span></td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 4xl:text-lg text-primary/80 text-center">{{ role.max_video_duration }}<span class="text-[9px] xl:text-[10px] text-primary/30 subscript"> /min</span></td>
+                  <td class="px-4 xl:px-5 py-3 text-sm xl:text-base 4xl:text-lg text-primary/80 text-center">{{ role.max_file_size_mb }}<span class="text-[9px] xl:text-[10px] text-primary/30 subscript"> /mb</span></td>
                   <td class="px-4 xl:px-5 py-3 flex items-center justify-center gap-3"> 
                     <edit @click.prevent="editRole(role)" class="w-5 h-5 xl:w-6 xl:h-6"/>
                     <trash @click.prevent="deleteRole(role)" class="w-5 h-5 xl:w-6 xl:h-6"/>

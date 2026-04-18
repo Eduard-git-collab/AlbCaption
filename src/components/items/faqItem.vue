@@ -5,7 +5,7 @@
         @click="toggle"
       >
         <span 
-        class="text-lg group-hover:text-secondary transition-all duration-500 text-kollektif-bold"
+        class="4xl:text-6xl 2xl:text-4xl md:text-2xl text-lg group-hover:text-secondary transition-all duration-500 text-kollektif-bold"
         :class="isOpen ? 'text-secondary' : 'text-primary'"
         >
           {{ question }}
@@ -29,7 +29,7 @@
         @leave="onLeave"
       >
         <div v-show="isOpen" class="overflow-hidden">
-          <div class="px-5 pb-5 text-gray-700 font-poppins text-base">
+          <div class="px-5 pb-5 text-gray-700 font-poppins 4xl:text-4xl 2xl:text-2xl xl:text-xl md:text-xl lg:text-base">
             {{ answer }}
           </div>
         </div>
