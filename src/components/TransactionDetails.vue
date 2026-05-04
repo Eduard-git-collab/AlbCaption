@@ -5,6 +5,40 @@ import { supabase } from '@/lib/supabaseClient';
 import SegmentRow from '@/components/subcomponents/SegmentRow.vue';
 import Timeline from '@/components/subcomponents/Timeline.vue';
 import apiClient from '@/stores/apiClient';
+import DownloadModal from './items/DownloadModal.vue';
+import {useAlert} from '@/stores/useAlert';
+
+// ─── Props ───────────────────────────────────────────────────
+const props = defineProps({
+  // When used as embedded component, pass these directly.
+  // When used as a route-based page, these are omitted and data
+  // is fetched from Supabase using the :id route param.
+  apiUrl: {
+    type: String,
+    default: null,
+  },
+  processingId: {
+    type: String,
+    default: null,
+  },
+  videoUrl: {
+    type: String,
+    default: null,
+  },
+  originalTranscriptionJson: {
+    type: Object,
+    default: null,
+  },
+  originalFilename: {
+    type: String,
+    default: null,
+  },
+});
+
+const { showAlert } = useAlert();
+
+// True when the component is used in props/embedded mode
+const isPropsMode = computed(() => !!props.processingId);
 
 // ─── Constants ───────────────────────────────────────────────
 const REFERENCE_HEIGHT = 1920;
@@ -144,7 +178,12 @@ const route = useRoute();
 const loading = ref(true);
 const unauthorized = ref(false);
 const transaction = ref(null);
-const apiUrl = ref(import.meta.env.VITE_API_URL || 'http://localhost:3000');
+
+// Resolved apiUrl: props take priority, then env var, then fallback
+const resolvedApiUrl = computed(
+  () => props.apiUrl || import.meta.env.VITE_API_URL || 'http://localhost:3000'
+);
+
 const isDesktop = ref(window.innerWidth >= LG_BREAKPOINT);
 
 // ─── Video Player ────────────────────────────────────────────
@@ -156,7 +195,7 @@ const loopingSegment = ref(null);
 const isLoopingSeek = ref(false);
 const playbackRate = ref(1);
 
-// ─── Timeline ────────────────────────────────────────────��───
+// ─── Timeline ────────────────────────────────────────────────
 const videoFrames = ref([]);
 const framesLoading = ref(false);
 
@@ -320,30 +359,42 @@ onMounted(async () => {
 
   loading.value = true;
 
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
-    unauthorized.value = true;
-    loading.value = false;
-    return;
-  }
-
-  const { data, error } = await supabase
-    .from('transactions')
-    .select('*, videos(id, video_url)')
-    .eq('id', route.params.id)
-    .single();
-
-  if (error || !data) {
-    unauthorized.value = true;
-    transaction.value = null;
-  } else {
+  if (isPropsMode.value) {
+    // ── Props mode: data is passed in directly, no Supabase fetch needed ──
     transaction.value = {
-      ...data,
-      video_url: data.videos?.video_url || null,
+      processing_id: props.processingId,
+      video_url: props.videoUrl,
+      original_filename: props.originalFilename,
+      transcription_json: props.originalTranscriptionJson,
     };
-  }
+    loading.value = false;
+  } else {
+    // ── Route mode: fetch data from Supabase using :id param ──
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      unauthorized.value = true;
+      loading.value = false;
+      return;
+    }
 
-  loading.value = false;
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*, videos(id, video_url)')
+      .eq('id', route.params.id)
+      .single();
+
+    if (error || !data) {
+      unauthorized.value = true;
+      transaction.value = null;
+    } else {
+      transaction.value = {
+        ...data,
+        video_url: data.videos?.video_url || null,
+      };
+    }
+
+    loading.value = false;
+  }
 
   nextTick(() => {
     if (videoPlayer.value) {
@@ -610,7 +661,7 @@ async function extractVideoFrames() {
   }
 }
 
-// ─── Video Scaling ──────────────────────────────────────────���
+// ─── Video Scaling ───────────────────────────────────────────
 function getVideoDimensions() {
   const videoEl = videoPlayer.value;
   if (videoEl) {
@@ -686,22 +737,25 @@ async function saveFilename() {
       { original_filename: editedFilename.value.trim() }
     );
 
-    const { error } = await supabase
-      .from('transactions')
-      .update({
-        original_filename: editedFilename.value.trim(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', transaction.value.id);
+    // In route mode, also persist to Supabase
+    if (!isPropsMode.value) {
+      const { error } = await supabase
+        .from('transactions')
+        .update({
+          original_filename: editedFilename.value.trim(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', transaction.value.id);
 
-    if (error) throw error;
+      if (error) throw error;
+    }
 
     originalFilenameLocal.value = editedFilename.value.trim();
     transaction.value.original_filename = editedFilename.value.trim();
     isEditingFilename.value = false;
     editedFilename.value = '';
     setInteracting(false);
-    showMessage('Filename updated successfully');
+    showAlert('success', 'Emri i ri u ruajt me sukses');
   } catch (e) {
     filenameError.value = e.response?.data?.message || e.message;
   } finally {
@@ -785,7 +839,7 @@ function reprocessSegments() {
   if (!hasOriginalTranscription.value) return;
   if (hasUnsavedChanges.value && !confirm('Unsaved changes will be lost. Continue?')) return;
   createTranscriptSegments();
-  showMessage('Segments reprocessed');
+  showAlert('success','Segmentet u përpunuan përsëri');
 }
 
 // ─── Transcript Editing ──────────────────────────────────────
@@ -877,28 +931,36 @@ async function saveAllSegments() {
       { transcription_json: updatedJson }
     );
 
-    const { data: updatedTransaction, error: fetchError } = await supabase
-      .from('transactions')
-      .select('*')
-      .eq('processing_id', transaction.value.processing_id)
-      .single();
+    if (!isPropsMode.value) {
+      // Route mode: re-fetch the canonical data from Supabase
+      const { data: updatedTransaction, error: fetchError } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('processing_id', transaction.value.processing_id)
+        .single();
 
-    if (fetchError) throw new Error(`Failed to fetch updated data: ${fetchError.message}`);
+      if (fetchError) throw new Error(`Failed to fetch updated data: ${fetchError.message}`);
 
-    if (updatedTransaction) {
-      transaction.value = { ...updatedTransaction, video_url: transaction.value.video_url };
-      if (updatedTransaction.transcription_json) {
-        createTranscriptSegments(updatedTransaction.transcription_json);
+      if (updatedTransaction) {
+        transaction.value = { ...updatedTransaction, video_url: transaction.value.video_url };
+        if (updatedTransaction.transcription_json) {
+          createTranscriptSegments(updatedTransaction.transcription_json);
+        }
       }
-      transcriptSegments.value.forEach(segment => {
-        segment.isEditing = false;
-      });
+    } else {
+      // Props mode: update local transaction state directly from rebuilt JSON
+      transaction.value = { ...transaction.value, transcription_json: updatedJson };
+      createTranscriptSegments(updatedJson);
     }
 
-    showMessage('Transcription saved successfully');
+    transcriptSegments.value.forEach(segment => {
+      segment.isEditing = false;
+    });
+
+    showAlert('success', 'Transkripti u ruajt me sukses');
   } catch (error) {
     console.error('Error:', error);
-    showMessage(`Error: ${error.message}`, true);
+    showAlert('error', `${error.message}`);
   } finally {
     isSavingTranscript.value = false;
   }
@@ -997,41 +1059,53 @@ function scrollToCurrentSegment() {
 }
 
 // ─── Subtitle Downloads ──────────────────────────────────────
-async function downloadSubtitles(format) {
-  if (!transaction.value?.processing_id) return;
+async function handleSubtitleDownload({ format, maxChars, minSeconds, gapBetweenFrames, subtitleStyle }) {
+  if (!transaction.value?.processing_id) return
 
   if (hasUnsavedChanges.value) {
-    showMessage('Please save all transcript edits before downloading.', true);
-    return;
+    showAlert('warning', 'Ju lutemi ruani të gjitha ndryshimet e transkriptit para se të shkarkoni.');
+    return
   }
 
   try {
-    const downloadUrl = `${apiUrl.value}/download-${format.toLowerCase()}/${transaction.value.processing_id}?t=${Date.now()}`;
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = `${originalFilenameLocal.value
-      ? originalFilenameLocal.value.replace(/\.[^/.]+$/, '')
-      : 'transcript'}.${format.toUpperCase()}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const params = new URLSearchParams({
+      maxChars,
+      minSeconds,
+      gapBetweenFrames,
+      subtitleStyle,
+      t: Date.now(),
+    })
+
+    const downloadUrl = `${resolvedApiUrl.value}/download-${format.toLowerCase()}/${transaction.value.processing_id}?${params}`
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = `${
+      originalFilenameLocal.value
+        ? originalFilenameLocal.value.replace(/\.[^/.]+$/, '')
+        : 'transcript'
+    }.${format.toUpperCase()}`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    closeDownloadModal()
   } catch (e) {
-    console.error('Download error:', e);
-    showMessage(`Failed to download: ${e.message || 'Unknown error'}`, true);
+    console.error('Download error:', e)
+    showAlert('error', `Shkarkimi dështoi: ${e.message || 'Gabim i panjohur'}`);
   }
 }
+
 
 function copyTranscript() {
   const fullText = transcriptSegments.value.map(s => s.text).join(' ');
   navigator.clipboard.writeText(fullText)
-    .then(() => showMessage('Transkripti u kopjua'))
-    .catch(() => showMessage('Kopjimi dështoi', true));
+    .then(() => showAlert('success', 'Transkripti u kopjua'))
+    .catch(() => showAlert('error', 'Kopjimi dështoi'));
 }
 
-// ─── Embedded Captions Download ─────���────────────────────────
+// ─── Embedded Captions Download ──────────────────────────────
 function downloadEmbeddedCaptionsModalCall() {
   downloadModal.value = true;
-  selectedPresetId.value = 'tiktok';
 }
 
 function closeDownloadModal() {
@@ -1040,16 +1114,16 @@ function closeDownloadModal() {
 
 async function downloadWithSelectedStyle() {
   if (hasUnsavedChanges.value) {
-    showMessage('Please save all transcript edits before downloading the video.', true);
+    showAlert('warning', 'Ju lutemi ruani të gjitha ndryshimet e transkriptit para se të shkarkoni videon.');
     return;
   }
   if (!transaction.value?.video_url) {
-    showMessage('Video URL is missing.', true);
+    showAlert('warning', 'URL e videos mungon.');
     return;
   }
 
   isDownloadingVideo.value = true;
-  showMessage('Duke përpunuar videon...');
+  showAlert('warning', 'Përgatitja e videos me titra të integruar, ju lutemi prisni...');
 
   try {
     const preset = currentPreset.value;
@@ -1098,19 +1172,19 @@ async function downloadWithSelectedStyle() {
     URL.revokeObjectURL(url);
 
     closeDownloadModal();
-    setTimeout(() => showMessage('Video shkarkuar me sukses!'), 2500);
+    setTimeout(() => showAlert('success', 'Video shkarkuar me sukses!'), 2500);
   } catch (error) {
     console.error('Error downloading video:', error);
-    showMessage(`Gabim: ${error.message}`, true);
+    showAlert('error', `Gabim: ${error.message}`);
   } finally {
     isDownloadingVideo.value = false;
   }
 }
+
 </script>
 
 <template>
   <div class="relative h-screen w-screen flex flex-col">
-
     <!-- Status Message -->
     <div v-if="showSaveStatus" class="absolute inset-x-0 top-0 flex justify-center z-[100]">
       <div
@@ -1129,61 +1203,89 @@ async function downloadWithSelectedStyle() {
       </div>
     </div>
 
-    <!-- Header -->
-    <div class="w-full sticky top-0 left-0 right-0 z-40 flex-shrink-0">
-      <div class="flex justify-between items-center bg-gray-50/80 backdrop-blur-sm border-y border-primary/10 px-3 py-2 lg:px-4 lg:py-4">
-        <div
-          @click="downloadEmbeddedCaptionsModalCall"
-          class="bg-primary font-poppins text-white px-3 py-1.5 lg:px-4 lg:py-2 text-sm lg:text-base rounded-md hover:bg-secondary cursor-pointer hover:text-primary duration-300 transition-all flex-shrink-0"
+    <div class="w-full sticky top-0 z-40 bg-white 2xl:border-b-4 border-b border-gray-200">
+  <div class="flex items-center gap-3 px-5 4xl:h-22 2xl:h-20 xl:h-17 lg:h-14">
+
+    <!-- LEFT: back -->
+    <RouterLink
+      to="/dashboard"
+      class="4xl:text-3xl 2xl:text-xl lg:text-lg inline-flex items-center gap-1.5 text-gray-500 hover:text-gray-800 border border-gray-200 rounded-md px-2.5 py-1.5 transition-colors flex-shrink-0"
+    >
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Kthehu
+    </RouterLink>
+
+    <div class="w-px h-5 bg-gray-200 flex-shrink-0"></div>
+
+    <!-- CENTER: filename -->
+    <div class="flex-1 flex items-center gap-2 min-w-0">
+      <template v-if="!isEditingFilename">
+        <span class="4xl:text-3xl 2xl:text-xl lg:text-lg font-medium text-gray-900 truncate">{{ originalFilenameLocal }}</span>
+        <button
+          @click="startEditingFilename"
+          class="w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 transition-colors flex-shrink-0"
         >
-          Download
-        </div>
-        <div class="flex-1 flex items-center justify-center gap-2 min-w-0 px-2">
-          <div class="min-w-0">
-            <h1 v-if="!isEditingFilename" class="text-primary text-kollektif text-lg md:text-xl lg:text-2xl truncate">
-              {{ originalFilenameLocal }}
-            </h1>
-            <input
-              ref="filenameInput"
-              v-else
-              v-model="editedFilename"
-              @blur="cancelEditingFilename"
-              @keydown="handleFilenameKeydown"
-              @focus="setInteracting(true)"
-              class="border text-sm lg:text-base w-full"
-              autofocus
-            />
-          </div>
-          <div>
-            <svg
-              v-if="isEditingFilename"
-              @click="saveFilename"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              class="w-5 h-5 lg:w-6 lg:h-6 text-primary hover:text-secondary transition-all duration-200 cursor-pointer flex-shrink-0"
-            >
-              <path d="M12 17.27L18.18 11.09L16.77 9.68L12 14.45L7.23 9.68L5.82 11.09L12 17.27Z" fill="currentColor"/>
-            </svg>
-            <svg
-              v-else
-              @click="startEditingFilename"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              class="w-5 h-5 lg:w-6 lg:h-6 text-primary hover:text-secondary transition-all duration-200 cursor-pointer flex-shrink-0"
-            >
-              <path d="M3 17.25V21h3.75l11.39-11.39-3.75-3.75L3 17.25zm15.6-10.79l1.44 1.44c.39.39.39 1.02 0 1.41l-1.44 1.44-3.75-3.75 1.44-1.44c.39-.39 1.02-.39 1.41 0z" fill="currentColor"/>
-            </svg>
-          </div>
-        </div>
-      </div>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213 3 21l1.787-4.5L16.862 3.487z"/>
+          </svg>
+        </button>
+      </template>
+      <template v-else>
+        <input
+          ref="filenameInput"
+          v-model="editedFilename"
+          @blur="cancelEditingFilename"
+          @keydown="handleFilenameKeydown"
+          @focus="setInteracting(true)"
+          class="flex-1 4xl:text-3xl 2xl:text-xl lg:text-lg font-medium text-gray-900 bg-transparent border-0 border-b-2 border-primary outline-none min-w-0 pb-px"
+        />
+        <button
+          @mousedown.prevent="saveFilename"
+          @keydown.prevent.enter="saveFilename"
+          class="w-6 h-6 flex items-center justify-center rounded text-primary flex-shrink-0"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+        </button>
+        <button
+          @mousedown.prevent="cancelEditingFilename"
+          class="w-6 h-6 flex items-center justify-center rounded text-gray-400 flex-shrink-0"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </template>
     </div>
+
+    <!-- RIGHT: actions -->
+    <div
+      class="flex items-center gap-2 flex-shrink-0 transition-opacity"
+      :class="isEditingFilename ? 'opacity-30 pointer-events-none' : 'opacity-100'"
+    >
+
+      <div class="w-px h-5 bg-gray-200"></div>
+
+      <button
+        @click="downloadEmbeddedCaptionsModalCall"
+        class="4xl:text-3xl 2xl:text-xl lg:text-lg inline-flex items-center gap-1.5 font-medium text-white bg-primary rounded-md px-3.5 py-1.5 hover:bg-primary/90 transition-colors"
+      >
+        Shkarko Titrat
+      </button>
+    </div>
+
+  </div>
+</div>
 
     <!-- Loading -->
     <div v-if="loading" class="text-center py-24 text-xl text-[#92a3bb]">
       Duke mbledhur të dhënat e transkriptit
     </div>
 
-    <!-- Unauthorized -->
+    <!-- Unauthorized (route mode only) -->
     <div v-else-if="unauthorized" class="text-center py-24 text-red-400 text-xl">
       Ky veprim është i pa autorizuar.
       <RouterLink to='/signin' class="bg-primary text-white text-xl p-3">Auth</RouterLink>
@@ -1335,78 +1437,14 @@ async function downloadWithSelectedStyle() {
       />
     </div>
   </div>
-
-  <!-- Download Modal -->
-  <teleport to="body">
     <transition name="fade">
-      <div v-if="downloadModal" class="fixed inset-0 z-[50] bg-black/60 backdrop-blur-sm flex items-end lg:items-center justify-center p-0 lg:p-4 font-poppins">
-        <div class="w-full lg:max-w-4xl xl:max-w-5xl bg-white rounded-t-2xl lg:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-
-          <!-- Modal Header -->
-          <div class="bg-primary px-4 py-3 lg:px-6 lg:py-4 flex items-center justify-between shrink-0">
-            <div>
-              <h2 class="text-lg lg:text-xl font-bold text-white">Shkarko videon me titra</h2>
-              <p class="text-white/60 text-xs mt-0.5">Zgjidhni një stil për titrat tuaja</p>
-            </div>
-            <button @click="closeDownloadModal" class="text-white/70 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 lg:w-6 lg:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l12 12M18 6L6 18"/>
-              </svg>
-            </button>
-          </div>
-
-          <!-- Modal Content -->
-          <div class="flex-1 overflow-hidden flex flex-col lg:flex-row">
-
-            <!-- Style Selection -->
-            <div class="w-full lg:w-5/12 bg-gray-50 border-b lg:border-b-0 lg:border-r border-gray-200 overflow-y-auto p-3 lg:p-4 space-y-2 lg:space-y-3">
-              <div
-                v-for="preset in captionPresets"
-                :key="preset.id"
-                @click="selectedPresetId = preset.id"
-                class="group cursor-pointer p-3 lg:p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md bg-white"
-                :class="selectedPresetId === preset.id ? 'border-secondary ring-1 ring-secondary/30' : 'border-transparent hover:border-gray-200'"
-              >
-                <div class="flex items-center justify-between mb-1">
-                  <span class="font-bold text-primary text-sm lg:text-base">{{ preset.name }}</span>
-                  <div class="w-4 h-4 rounded-full border flex items-center justify-center" :class="selectedPresetId === preset.id ? 'border-secondary bg-secondary' : 'border-gray-300'">
-                    <div v-if="selectedPresetId === preset.id" class="w-1.5 h-1.5 rounded-full bg-white"></div>
-                  </div>
-                </div>
-                <p class="text-xs text-gray-500">{{ preset.description }}</p>
-              </div>
-            </div>
-
-            <!-- Preview -->
-            <div class="w-full lg:w-7/12 bg-[#1a1a1a] relative flex items-center justify-center p-4 lg:p-8 overflow-hidden">
-              <div class="relative w-full aspect-[9/16] max-h-[40vh] lg:max-h-[60vh] bg-black shadow-2xl rounded-lg overflow-hidden border border-white/10">
-                <div :style="currentPreviewWrapperStyle">
-                  <div :style="currentPreviewCaptionStyle">
-                    Këtu shfaqen titrat<br>për videon tuaj
-                  </div>
-                </div>
-                <div class="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm font-bold">PREVIEW</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Modal Footer -->
-          <div class="px-4 py-3 lg:px-6 lg:py-4 border-t border-gray-200 bg-white flex items-center justify-end gap-3 shrink-0">
-            <button @click="closeDownloadModal" class="px-4 py-2 lg:px-6 lg:py-2.5 text-sm text-gray-600 font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" :disabled="isDownloadingVideo">
-              Anulo
-            </button>
-            <button @click="downloadWithSelectedStyle" class="px-4 py-2 lg:px-6 lg:py-2.5 text-sm bg-secondary text-primary font-bold rounded-lg hover:bg-[#8cd68b] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm hover:shadow transition-all" :disabled="isDownloadingVideo">
-              <svg v-if="isDownloadingVideo" class="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              {{ isDownloadingVideo ? 'Duke shkarkuar...' : 'Shkarko Videon' }}
-            </button>
-          </div>
-        </div>
-      </div>
+      <DownloadModal
+        v-if="downloadModal"
+        :segments="transcriptSegments"
+        @close="closeDownloadModal"
+        @download="handleSubtitleDownload"
+      />
     </transition>
-  </teleport>
 </template>
 
 <style scoped>

@@ -85,11 +85,10 @@
             </div>
 
             <div class="relative z-10 flex flex-col items-center h-full justify-center gap-2">
-              <div class="md:w-30 md:h-30 w-28 h-28 rounded-full bg-primary">
-                  <!-- <img src="../assets/images/pexels-amina-filkins-5427978.png" class="w-full h-full rounded-full object-cover"> -->
+              <div class="md:w-30 md:h-30 w-28 h-28 rounded-full">
+                  <img src="../assets/images/Eduard_headshot.png" class="w-full h-full rounded-full object-cover">
               </div>
-              <h3 class="text-primary md:text-7xl text-3xl text-center text-kollektif-bold">Name Surname</h3>
-              <p class="text-primary md:text-3xl text-sm text-center font-poppins">Role</p>
+              <h3 class="text-primary md:text-7xl text-3xl text-center text-kollektif-bold">Eduard Yzellari</h3>
             </div>
 
             <div class="absolute z-0 top-0 left-0 -translate-y-1/4 -translate-x-1/4 md:w-80 md:h-80 w-50 h-50 -rotate-200">
@@ -104,10 +103,10 @@
             </div>
 
             <div class="relative z-10 flex flex-col items-center h-full justify-center gap-2">
-              <div class="md:w-30 md:h-30 w-28 h-28 rounded-full bg-primary">
-                  <!-- <img src="../assets/images/pexels-amina-filkins-5427978.png" class="w-full h-full rounded-full object-cover"> -->
+              <div class="md:w-30 md:h-30 w-28 h-28 rounded-full">
+                  <img src="../assets/images/Deivid_headshot.jpeg" class="w-full h-full rounded-full object-cover">
               </div>
-              <h3 class="text-primary md:text-7xl text-3xl text-center text-kollektif-bold">Name Surname</h3>
+              <h3 class="text-primary md:text-7xl text-3xl text-center text-kollektif-bold">Deivid Çifligu</h3>
               <p class="text-primary md:text-3xl text-sm text-center font-poppins">Role</p>
             </div>
 
@@ -127,11 +126,10 @@
             </div>
 
             <div class="relative z-10 flex flex-col items-center h-full justify-center 4xl:gap-8 2xl:gap-5 xl:gap-3">
-              <div class="4xl:w-80 4xl:h-80 2xl:w-60 2xl:h-60 xl:w-40 xl:h-40 w-28 h-28 rounded-full bg-primary">
-                  <!-- <img src="../assets/images/pexels-amina-filkins-5427978.png" class="w-full h-full rounded-full object-cover"> -->
+              <div class="4xl:w-80 4xl:h-80 2xl:w-60 2xl:h-60 xl:w-40 xl:h-40 w-28 h-28 rounded-full">
+                  <img src="../assets/images/Eduard_headshot.png" class="w-full h-full rounded-full object-cover">
               </div>
-              <h3 class="text-primary 4xl:text-[160px] 2xl:text-8xl xl:text-7xl text-5xl text-center text-kollektif-bold">Name Surname</h3>
-              <p class="text-primary 4xl:text-[64px] 2xl:text-4xl xl:text-xl text-lg text-centerfont-poppins">Role</p>
+              <h3 class="text-primary 4xl:text-[160px] 2xl:text-8xl xl:text-7xl text-5xl text-center text-kollektif-bold">Eduard Yzellari</h3>
             </div>
 
             <div class="absolute z-0 top-0 left-0 -translate-y-1/4 -translate-x-1/4 4xl:w-[800px] 4xl:h-[800px] 2xl:w-[600px] 2xl:h-[600px] xl:w-90 xl:h-90 w-70 h-70 -rotate-200">
@@ -147,11 +145,10 @@
           </div>
             
             <div class="relative z-10 flex flex-col items-center h-full justify-center 4xl:gap-8 2xl:gap-5 xl:gap-3">
-              <div class="4xl:w-80 4xl:h-80 2xl:w-60 2xl:h-60 xl:w-40 xl:h-40 w-28 h-28 rounded-full bg-primary">
-                  <!-- <img src="../assets/images/pexels-amina-filkins-5427978.png" class="w-full h-full rounded-full object-cover"> -->
+              <div class="4xl:w-80 4xl:h-80 2xl:w-60 2xl:h-60 xl:w-40 xl:h-40 w-28 h-28 rounded-full">
+                  <img src="../assets/images/Deivid_headshot.jpeg" class="w-full h-full rounded-full object-cover">
               </div>
-              <h3 class="text-primary 4xl:text-[160px] 2xl:text-8xl xl:text-7xl text-5xl text-center text-kollektif-bold">Name Surname</h3>
-              <p class="text-primary 4xl:text-[64px] 2xl:text-4xl xl:text-xl text-lg text-center font-poppins">Role</p>
+              <h3 class="text-primary 4xl:text-[160px] 2xl:text-8xl xl:text-7xl text-5xl text-center text-kollektif-bold">Deivid Çifligu</h3>
             </div>
 
             <div class="absolute z-0 top-0 right-0 -translate-y-1/4 translate-x-1/4 4xl:w-[800px] 4xl:h-[800px] 2xl:w-[600px] 2xl:h-[600px] xl:w-90 xl:h-90 w-70 h-70 rotate-200 -scale-x-100">

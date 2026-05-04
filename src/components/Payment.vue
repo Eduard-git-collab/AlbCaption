@@ -1,5 +1,6 @@
 <template>
-  <div class="w-screen min-h-screen bg-white">
+  <div class="w-screen min-h-screen bg-white"
+  :class="isPricingPage ? '4xl:pt-50 2xl:pt-40 xl:pt-30 lg:pt-20 md:pt-20 pt-10' : ''">
     <div class="w-full h-full p-10 block lg:hidden">
       <div class="w-full h-fit flex flex-col my-5">
         <h3 class="text-kollektif-bold text-primary text-3xl md:text-7xl">
@@ -67,7 +68,7 @@
         </div>
         <PricingCardEnterprise class="my-10"/>      
       </div>
-      <div class="w-full text-center mt-10">
+      <div v-if="!isPricingPage" class="w-full text-center mt-10">
         <RouterLink
             to="/pricing"
             class="text-lg md:text-2xl text-primary font-poppins relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-primary after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100"
@@ -75,8 +76,9 @@
             Krahaso Planet
           </RouterLink>
         </div>
+      
     </div>
-    
+    <PricingDetails v-if="isPricingPage" class="lg:hidden block"/>
     <div class="w-full h-full p-10  hidden lg:block">
 
       <!-- ===== HEADER ===== -->
@@ -156,7 +158,7 @@
         <PricingCardEnterprise class="my-10"/>
 
         <!-- Compare plans link -->
-        <div class="w-full text-center mt-10">
+        <div v-if="!isPricingPage" class="w-full text-center mt-10">
           <RouterLink
             to="/pricing"
             class="4xl:text-3xl xl:text-xl lg:text-lg text-primary font-poppins relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-primary after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100"
@@ -166,6 +168,9 @@
         </div>
       </div>
     </div>
+
+    <PricingDetails v-if="isPricingPage" class="hidden lg:block"/>
+    <FooterComponent v-if="isPricingPage" class="hidden lg:block"/>
   </div>
 
   <!-- Payment Modal -->
@@ -181,11 +186,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import PricingCard from './subcomponents/PricingCard.vue'
 import PayPalPayment from './items/PayPalPayment.vue'
 import PricingCardEnterprise from './subcomponents/PricingCardEnterprise.vue'
 import MobPricingCard from './subcomponents/MobPricingCard.vue'
+import PricingDetails from './PricingDetails.vue'
+import { useRoute } from 'vue-router'
+import FooterComponent from './FooterComponent.vue'
+
+
+const route = useRoute()
+const isPricingPage = computed(() => route.path === '/pricing')
 
 function getPercentSaved(monthly, yearly) {
   const m = parseFloat(monthly)
@@ -201,15 +213,16 @@ const plans = [
     key: 'starter',
     badgeText: 'Starter',
     badgeColor: '#6B7280',
-    price: { monthly: '7', yearly: '5' },
-    decimal: { monthly: '99', yearly: '99' },
-    yearlytotal: { monthly: '', yearly: '59.99' },
+    price: { monthly: '10', yearly: '8' },
+    decimal: { monthly: '0', yearly: '00' },
+    yearlytotal: { monthly: '', yearly: '96' },
     currency: '€',
     description: 'Krijo video që zbulojnë audienca të reja',
-    percentSaved: getPercentSaved('7', '5'),
+    percentSaved: getPercentSaved('10', '8'),
     features: [
       { text: '15 Video / Muaj' },
       { text: 'Limit 250MB / Video' },
+      {text:  '60 Min / Muaj'},
       { text: 'Suportohet Çdo Dialekt' },
       { text: 'Transkript i sinkronizuar' },
       { text: 'Ngarkim në çdo format video dhe audio' },
@@ -234,15 +247,16 @@ const plans = [
     key: 'pro',
     badgeText: 'Pro',
     badgeColor: '#052B28',
-    price: { monthly: '13', yearly: '9' },
-    decimal: { monthly: '99', yearly: '99' },
-    yearlytotal: { monthly: '', yearly: '119.99' },
+    price: { monthly: '25', yearly: '20' },
+    decimal: { monthly: '00', yearly: '00' },
+    yearlytotal: { monthly: '', yearly: '240' },
     currency: '€',
     description: 'Transformo videot në mjete që të sjellin klientë',
-    percentSaved: getPercentSaved('13', '9'),
+    percentSaved: getPercentSaved('25', '20'),
     features: [
       { text: '35 Video / Muaj' },
       { text: 'Limit 500MB / Video' },
+      { text:  '240 Min / Muaj'},
       { text: 'Suportohet Çdo Dialekt' },
       { text: 'Transkript i sinkronizuar' },
       { text: 'Ngarkim në çdo format video dhe audio' },
@@ -263,7 +277,7 @@ const plans = [
       { label: 'Transkript i Sinkronizuar', value: 'I përfshirë' },
       { label: 'Shërbim me prioritet', value: 'I përfshirë' }
     ],
-    planId: 'P-2JR743181G189825MNDNFCIY',
+    planId: 'P-0E8458666N319325DNHZBTKQ',
     isRecommended: true,
     svgColor: '#9FE29E'
   },
@@ -271,15 +285,16 @@ const plans = [
     key: 'business',
     badgeText: 'Business',
     badgeColor: '#6B7280',
-    price: { monthly: '33', yearly: '24' },
-    decimal: { monthly: '99', yearly: '99' },
-    yearlytotal: { monthly: '', yearly: '239' },
+    price: { monthly: '40', yearly: '32' },
+    decimal: { monthly: '00', yearly: '00' },
+    yearlytotal: { monthly: '', yearly: '384' },
     currency: '€',
     description: 'Optimizim i krijimit të videove për ekipe që mendojnë shpejt',
-    percentSaved: getPercentSaved('33', '24'),
+    percentSaved: getPercentSaved('40', '32'),
     features: [
       { text: '70 Video / Muaj' },
       { text: 'Limit 1GB / Video' },
+      { text:  '450 Min / Muaj'},
       { text: 'Suportohet Çdo Dialekt' },
       { text: 'Transkript i sinkronizuar' },
       { text: 'Ngarkim në çdo format video dhe audio' },

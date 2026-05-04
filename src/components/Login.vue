@@ -1,15 +1,23 @@
+<!-- HorizontalScroll Component -->
+
 <template>
   <section ref="pinSection" class="relative bg-white text-black lg:block hidden">
-    <div ref="viewport" class="h-screen w-screen overflow-hidden">
+    <div ref="viewport" class="h-screen relative w-screen overflow-hidden">
       <div
         ref="wideContent"
-        class="h-screen flex items-center relative whitespace-nowrap will-change-transform px-16"
+        class="w-full h-screen flex items-center relative whitespace-nowrap will-change-transform px-16"
       >
+      <div class="absolute z-10 w-full h-full">
+        <Albcaption_logo_nobg class="w-200 h-auto rounded-2xl translate-y-[70%] left-[70%] absolute z-10 opacity-45"/>
+      </div>
+      <div class="absolute z-10 w-full h-full">
+        <img src="../assets/images/BentoCurves.png" class="w-200 h-auto rounded-2xl -translate-y-[30%] left-[300%] absolute z-10 opacity-45"/>
+      </div>
         <h2
-          class="4xl:text-[600px] xl:text-[300px] lg:text-[170px] font-black text-primary text-kollektif-bold leading-none"
+          class="relative items-center 4xl:text-[600px] 2xl:text-[400px] xl:text-[300px] lg:text-[170px] font-black text-primary text-kollektif-bold leading-none z-20"
         >
           Nga regjistrimi në publikim
-          <span class="4xl:text-[700px] xl:text-[350px] lg:text-[200px] text-secondary text-kollektif-bold-italic">
+          <span class="4xl:text-[700px] 2xl:text-[500px] xl:text-[350px] lg:text-[200px] text-secondary text-kollektif-bold-italic">
             8x
           </span>
           më shpejtë
@@ -19,10 +27,10 @@
 
         <div ref="cream" class="w-[90vw] h-full relative rounded-3xl shrink-0">
           <div
-            class="w-full h-full relative flex flex-col 4xl:gap-30 xl:gap-15 lg:gap-8 items-center justify-center p-10"
+            class="w-full h-full relative flex flex-col 4xl:gap-30 2xl:gap-20 xl:gap-15 lg:gap-8 items-center justify-center p-10"
           >
             <h3
-              class="4xl:text-[90px] xl:text-5xl lg:text-3xl z-10 w-full text-center whitespace-normal font-poppins font-light leading-tight"
+              class="4xl:text-[90px] 2xl:text-[70px] xl:text-[50px] lg:text-[30px] z-10 w-full text-center whitespace-normal font-poppins font-light leading-tight"
             >
               Të titrosh video manualisht do të thotë të harxhosh gjysmën e ditës duke shkruar dhe gjysmën tjetër duke
               sinkronizuar. Përqëndrohu tek biznesi yt, shpenzo më pak kohë te montazhi duke titruar automatikisht IA.
@@ -33,15 +41,15 @@
             <div class="w-full flex z-10 flex-row items-center gap-10 justify-center">
               <RouterLink
                 to="/signup"
-                class="4xl:text-[48px] xl:text-2xl text-primary bg-secondary 4xl:px-12 4xl:py-4 4xl:rounded-xl xl:px-6 xl:py-3 px-3 py-2 rounded-md
+                class="4xl:text-[48px] 2xl:text-[36px] xl:text-2xl text-primary bg-secondary 4xl:px-12 4xl:py-4 4xl:rounded-xl xl:px-6 xl:py-3 px-3 py-2 rounded-md
                        text-kollektif-bold text-xl hover:ring-2 hover:ring-secondary hover:bg-primary hover:text-secondary duration-200"
               >
                 Titro 8x më Shpejtë
               </RouterLink>
 
-              <div class="w-fit h-fit flex flex-row items-center 4xl:gap-5 gap-2">
-                <CardIcon class="4xl:w-14 4xl:h-14 xl:w-9 xl:h-9 lg:w-6 lg:h-6 text-primary" />
-                <span class="4xl:text-[48px] xl:text-2xl lg:text-xl">Pa kartë krediti</span>
+              <div class="w-fit h-fit flex flex-row items-center 4xl:gap-5 2xl:gap-3 gap-2">
+                <card class="4xl:w-14 4xl:h-14 2xl:w-10 2xl:h-10 xl:w-9 xl:h-9 lg:w-6 lg:h-6 text-primary" />
+                <span class="4xl:text-[48px] 2xl:text-[36px] xl:text-2xl lg:text-xl">Pa kartë krediti</span>
               </div>
             </div>
           </div>
@@ -51,6 +59,7 @@
   </section>
 
   <div class="lg:hidden block">
+    <div class="w-screen h-[20vh]"></div>
     <div ref="sectionEl" class="relative h-screen overflow-hidden">
       <div
         ref="contentEl"
@@ -109,27 +118,33 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from "vue"
+import { ref, inject, onMounted, onBeforeUnmount, nextTick } from "vue"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import card from "./logos/card.vue"
+import Albcaption_logo_nobg from "./logos/Albcaption_logo_nobg.vue"
 
 gsap.registerPlugin(ScrollTrigger)
 
+const isHeaderHidden = inject('isHeaderHidden')
+
+// Desktop refs
 const pinSection  = ref(null)
 const viewport    = ref(null)
 const wideContent = ref(null)
 const cream       = ref(null)
 
-let tween = null
-let st    = null
+// Mobile refs
+const sectionEl = ref(null)
+const contentEl = ref(null)
+const squareEl  = ref(null)
+const circleEl  = ref(null)
 
-function build() {
-  tween?.kill()
-  st?.kill()
-  tween = null
-  st    = null
+// Single GSAP context owns ALL animations in this component
+let ctx = null
+let resizeTimer = null
 
+function buildDesktop() {
   const elSection  = pinSection.value
   const elViewport = viewport.value
   const elWide     = wideContent.value
@@ -139,19 +154,14 @@ function build() {
   gsap.set(elWide, { x: 0 })
 
   const viewportWidth = elViewport.clientWidth
-  const wideRect    = elWide.getBoundingClientRect()
-  const creamRect   = elCream.getBoundingClientRect()
-  const totalX = Math.round(creamRect.right - wideRect.left - viewportWidth + 80)
-
+  const wideRect      = elWide.getBoundingClientRect()
+  const creamRect     = elCream.getBoundingClientRect()
+  const totalX        = Math.round(creamRect.right - wideRect.left - viewportWidth + 80)
   if (totalX <= 0) return
 
-  tween = gsap.to(elWide, {
-    x: -totalX,
-    ease: "none",
-    paused: true,
-  })
+  const tween = gsap.to(elWide, { x: -totalX, ease: "none", paused: true })
 
-  st = ScrollTrigger.create({
+  ScrollTrigger.create({
     trigger: elSection,
     start: "top top",
     end: "+=" + totalX,
@@ -159,16 +169,57 @@ function build() {
     pinSpacing: true,
     scrub: 0.6,
     animation: tween,
-    anticipatePin: 1,
+    //anticipatePin: 1,
     invalidateOnRefresh: true,
+    id: "desktop-wide-scroll", // named so it's easy to find in devtools
   })
 }
 
-let resizeTimer = null
+function buildMobile() {
+  const section = sectionEl.value
+  const content = contentEl.value
+  const square  = squareEl.value
+  const circle  = circleEl.value
+  if (!section || !content || !square || !circle) return
+
+  const contentHeight = section.offsetHeight * 0.85
+
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: section,
+      start: "top top",
+      end: "+=150%",
+      scrub: 1,
+      pin: true,
+      //anticipatePin: 1,
+      id: "mobile-reveal",
+      onEnter:     () => { if (isHeaderHidden) isHeaderHidden.value = true  },
+      onLeave:     () => { if (isHeaderHidden) isHeaderHidden.value = false },
+      onEnterBack: () => { if (isHeaderHidden) isHeaderHidden.value = true  },
+      onLeaveBack: () => { if (isHeaderHidden) isHeaderHidden.value = false },
+    }
+  })
+
+  tl.to(content, { y: "0%",         ease: "none" }, 0)
+  tl.to(square,  { y: contentHeight, ease: "none" }, 0)
+  tl.to(circle,  { y: contentHeight, ease: "none" }, 0)
+}
+
+function build() {
+  // Revert and recreate the entire context so no stale triggers survive
+  ctx?.revert()
+
+  ctx = gsap.context(() => {
+    buildDesktop()
+    buildMobile()
+  })
+}
+
 function onResize() {
   clearTimeout(resizeTimer)
   resizeTimer = setTimeout(() => {
     build()
+    // refresh AFTER the new triggers are registered, not before
     ScrollTrigger.refresh()
   }, 150)
 }
@@ -176,16 +227,14 @@ function onResize() {
 onMounted(async () => {
   await nextTick()
 
+  // Two rAFs are enough; three is unnecessary. fonts.ready is the real gate.
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        build()
+      build()
+      // Defer refresh until fonts are measured — avoids a second full refresh
+      // on the same frame if fonts happen to already be loaded
+      document.fonts?.ready?.then(() => {
         ScrollTrigger.refresh()
-
-        document.fonts?.ready?.then(() => {
-          build()
-          ScrollTrigger.refresh()
-        })
       })
     })
   })
@@ -196,37 +245,6 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   clearTimeout(resizeTimer)
   window.removeEventListener("resize", onResize)
-  tween?.kill()
-  st?.kill()
+  ctx?.revert() // kills ALL tweens and ScrollTriggers created inside ctx
 })
-
-const sectionEl = ref(null)
-const contentEl = ref(null)
-const squareEl  = ref(null)
-const circleEl  = ref(null)
-
-let ctx
-
-onMounted(() => {
-  ctx = gsap.context(() => {
-    const contentHeight = sectionEl.value.offsetHeight * 0.85
-
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionEl.value,
-        start: 'top top',
-        end: '+=150%',
-        scrub: 1,
-        pin: true,
-        anticipatePin: 1,
-      }
-    })
-
-    tl.to(contentEl.value, { y: '0%', ease: 'none' }, 0)
-    tl.to(squareEl.value, { y: contentHeight, ease: 'none' }, 0)
-    tl.to(circleEl.value, { y: contentHeight, ease: 'none' }, 0)
-  })
-})
-
-onBeforeUnmount(() => ctx?.revert())
 </script>

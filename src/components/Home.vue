@@ -15,30 +15,50 @@
           class="w-full min-h-screen relative z-10 flex flex-col 2xl:gap-15 4xl:gap-20 lg:gap-10 gap-5
                  items-center justify-center xl:mx-10 4xl:mx-15 lg:mx-5 md:mx-3 mx-2"
         >
-          <div class="w-fit mx-auto h-fit flex flex-col">
+          <div           
+            data-aos="fade-up"
+            data-aos-delay="700"
+            data-aos-duration="600"
+            class="w-fit mx-auto h-fit flex flex-col">
             <div class="w-fit h-fit items-center justify-center flex flex-row">
               <h1 class="2xl:text-[130px] 4xl:text-[172px] xl:text-8xl lg:text-6xl md:text-5xl text-4xl text-kollektif-bold text-secondary">
                 Titro&nbsp;
               </h1>
   
-              <h1
-                class="2xl:text-[130px] 4xl:text-[172px] xl:text-8xl lg:text-6xl md:text-5xl text-4xl text-kollektif-bold
-                       text-primary bg-secondary lg:rounded-2xl rounded-lg lg:py-3 2xl:px-18 4xl:px-24 lg:px-10 px-5 py-1"
-              >
-                Dokumentarin
-              </h1>
+              <div class="relative overflow-hidden h-[1.2em] flex items-center justify-center 2xl:text-[130px] 4xl:text-[172px] xl:text-8xl lg:text-6xl md:text-5xl text-4xl text-kollektif-bold w-[12ch] text-center text-primary bg-secondary lg:rounded-2xl rounded-lg lg:py-3 2xl:px-18 4xl:px-24 lg:px-10 px-5 py-1">
+    
+                <TransitionGroup name="slot">
+                  <h1 
+                    v-for="word in currentWord" 
+                    :key="word" 
+                    class="absolute w-full left-0 right-0"
+                  >
+                    {{ word }}
+                  </h1>
+                </TransitionGroup>
+
+              </div>
             </div>
-  
             <h1 class="2xl:text-[130px] 4xl:text-[172px] xl:text-8xl lg:text-6xl md:text-5xl text-4xl text-kollektif-bold text-secondary">
               pa shkruar asnjë fjalë
             </h1>
           </div>
   
-          <h3 class="4xl:text-[60px] 2xl:text-4xl xl:text-3xl lg:text-xl md:text-xl text-md text-secondary font-poppins lg:font-light mx-3 text-center">
+          <h3 
+            data-aos="fade-up" 
+            data-aos-easing="linear"
+            data-aos-duration="600"
+            data-aos-delay="1200"  
+            class="4xl:text-[60px] 2xl:text-4xl xl:text-3xl lg:text-xl md:text-xl text-md text-secondary font-poppins lg:font-light mx-3 text-center">
             Kthe videon në tekst me saktësi maksimale, për rrjete sociale, montazh dhe biznese. Fuqizuar nga IA.
           </h3>
   
-          <div class="w-fit h-fit flex 2xl:gap-7 4xl:gap-10 gap-3 flex-col items-center justify-center">
+          <div
+            data-aos="fade-up" 
+            data-aos-duration="600"
+            data-aos-easing="linear"
+            data-aos-delay="1400"  
+           class="w-fit h-fit flex 2xl:gap-7 4xl:gap-10 gap-3 flex-col items-center justify-center">
             <RouterLink
               to="/signup"
               class="4xl:text-[48px] 2xl:text-4xl xl:text-2xl text-primary bg-secondary 2xl:px-6 2xl:py-3 4xl:px-8 4xl:py-4 4xl:rounded-xl px-3 py-2 rounded-md
@@ -68,7 +88,9 @@
         -translate-y-1/6  (less overlap / pushed down)
     -->
     <div
-      class="max-w-[90vw] w-full mx-auto relative z-20
+      data-aos="fade-up"
+      data-aos-delay="300"
+      class="max-w-[90vw] aspect-video w-full mx-auto relative z-20
              -translate-y-1/6 md:-translate-y-1/5 lg:-translate-y-1/4
              rounded-2xl 4xl:shadow-[12px_16px_12px_8px_rgba(0,0,0,0.25)] shadow-[5px_5px_0px_rgba(0,0,0,0.25)]"
     >
@@ -76,9 +98,8 @@
     </div>
     <Statistic />
   </section>
-  <div class="my-20 ">
-    <HorizontalScroll />
-  </div>
+  <div class="h-[20vh]"></div>
+  <HorizontalScroll />
   <div class="my-20 overflow-x-clip">
     <Dialektet />
   </div>
@@ -117,8 +138,23 @@ import card from './logos/card.vue';
 import HorizontalScroll from './HorizontalScroll.vue';
 import Dialektet from './Dialektet.vue';
 import Redaktim from './Redaktim.vue';
-import { onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, inject, watch, nextTick } from 'vue'
 import BannerContent from './subcomponents/BannerContent.vue';
+import AOS from 'aos'
+import 'aos/dist/aos.css'
+
+const isLoading = inject('isLoading')
+
+watch(isLoading, (loading) => {
+  if (!loading) {
+    nextTick(() => {
+      AOS.init({
+        once: true, 
+      })
+      AOS.refresh()
+    })
+  }
+}, { immediate: true })
 
 onMounted(() => {
   // Load the embed script for this specific video
@@ -134,4 +170,38 @@ onMounted(() => {
   playerScript.async = true
   document.head.appendChild(playerScript)
 })
+
+const allWords = ['TikTok-un', 'Podcastin', 'Intervistën', 'Dokumentarin', 'Filmin', 'Webinar-in', 'Vlogun', 'Leksionin', 'Livestreamin', 'Reklamën', 'Videoklipin'];
+const currentWord = ref([allWords[0]]);
+let index = 0;
+let interval = null;
+
+onMounted(() => {
+  interval = setInterval(() => {
+    index = (index + 1) % allWords.length;
+    currentWord.value = [allWords[index]];
+  }, 1500); 
+});
+
+onUnmounted(() => clearInterval(interval));
 </script>
+
+<style scoped>
+.slot-enter-from {
+  transform: translateY(-100%);
+}
+
+.slot-leave-to {
+  transform: translateY(100%);
+}
+
+.slot-enter-active,
+.slot-leave-active {
+  transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+/* Maintain layout during the swap */
+.slot-leave-active {
+  position: absolute;
+}
+</style>

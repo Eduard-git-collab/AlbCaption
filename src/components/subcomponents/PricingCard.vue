@@ -31,7 +31,7 @@
 
             <!-- Price Row -->
             <h2 class="text-primary font-poppins font-semibold 4xl:text-8xl xl:text-7xl lg:text-6xl">
-              {{ currency }} {{ price }}.{{ decimal }}
+              {{ currency }} {{ price }}<span class="4xl:text-5xl xl:text-4xl lg:text-3xl opacity-50">.{{ decimal }}</span>
               <span class="font-poppins font-normal 4xl:text-2xl xl:text-sm lg:text-xs">
                 / {{ priceDescription }}
               </span>

@@ -250,30 +250,6 @@
                 </div>
               </div>
             </div>
-
-
-            <!-- Deactivate Account Modal (Nested) -->
-            <div v-if="showDeactivateModal" class="absolute inset-0 z-[90] bg-white/80 backdrop-blur-md flex items-center justify-center p-4">
-              <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl ring-1 ring-primary/10 border border-primary/5">
-                 <!-- ... (same modal content as before, just simpler responsive sizing) ... -->
-                 <div class="text-center space-y-4">
-                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-                       <svg class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    </div>
-                    <div>
-                      <h3 class="text-lg font-bold text-primary">A jeni i sigurt?</h3>
-                      <p class="text-sm text-primary/60 mt-1">Ky veprim nuk mund të zhbëhet.</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                       <button @click="cancelDeactivate" class="px-4 py-2.5 rounded-lg border border-gray-200 text-sm font-medium hover:bg-gray-50">Anulo</button>
-                       <button @click="confirmDeactivate" :disabled="deactivateLoading" class="px-4 py-2.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700">
-                          {{ deactivateLoading ? '...' : 'Fshi' }}
-                       </button>
-                    </div>
-                 </div>
-              </div>
-            </div>
-            
           </div>
         </div>
       </div>
@@ -286,6 +262,8 @@ import { ref, reactive, watch, onMounted, onBeforeUnmount } from 'vue'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'vue-router'
 import apiClient from '@/stores/apiClient'
+import {useConfirm} from '@/stores/useConfirm'
+import {useAlert} from '@/stores/useAlert'
 
 const props = defineProps({
   open: { type: Boolean, default: false }
@@ -305,6 +283,8 @@ const dbSettings = ref(null)
 const showDeactivateModal = ref(false)
 const deactivateLoading = ref(false)
 const deactivateError = ref(null)
+const { showConfirm } = useConfirm()
+const { showAlert } = useAlert()
 
 // Subscription data
 const loadingSubscription = ref(false)
@@ -387,21 +367,30 @@ function goToUpgradePlan() {
 }
 
 function promptCancelSubscription() {
-  if(confirm("A jeni i sigurt që doni të anuloni abonimin?")) confirmCancelSubscription()
+  showConfirm('error', `Jeni të sigurt që doni të anuloni abonimin? Ky veprim nuk mund të zhbëhet.`, 'Konfirmo', 'Anulo').then((confirmed) => {
+    if (confirmed) {
+      confirmCancelSubscription();
+    }
+  });
 }
 
 async function confirmCancelSubscription() {
   try {
     await apiClient.post('/api/paypal/cancel')
-    alert("Abonimi u anulua.")
+    showAlert('success', "Abonimi u anulua.")
     await loadSubscriptionData()
   } catch (err) {
-    alert("Gabim gjatë anulimit")
+    showAlert('error', "Gabim gjatë anulimit")
   }
 }
 
 function promptDeactivate() {
-  showDeactivateModal.value = true
+  showConfirm('error', `Jeni të sigurt që doni të çaktivizoni llogarinë? Ky veprim do të fshijë përgjithmonë të gjitha të dhënat tuaja dhe nuk mund të zhbëhet.`, 'Çaktivizo', 'Anulo').then((confirmed) => {
+    if (confirmed) {
+      showAlert('success', "Llogaria juaj është çaktivizuar dhe do të fshihet brenda 24 orëve.")
+      confirmDeactivate();
+    }
+  });
 }
 
 async function confirmDeactivate() {
@@ -411,14 +400,8 @@ async function confirmDeactivate() {
     await supabase.auth.signOut()
     router.push('/')
   } catch (err) {
-    alert("Gabim gjatë çaktivizimit")
-  } finally {
-    deactivateLoading.value = false
+    showAlert('error', "Gabim gjatë çaktivizimit")
   }
-}
-
-function cancelDeactivate() {
-  showDeactivateModal.value = false
 }
 
 function close() {

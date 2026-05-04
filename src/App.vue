@@ -109,25 +109,39 @@
     </header>
 
     <main class="bg-white min-h-screen">
+      <Alert
+        v-if="state.show"
+        :key="state.title + state.message"
+        v-bind="state"
+        @close="closeAlert"
+      />
+      <Modal/>
       <router-view />
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch, provide } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, provide, inject } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Albcaptions_logo_nobg from './components/logos/Albcaption_logo_inv_nobg.vue';
 import { supabase } from '@/lib/supabaseClient';
 import Loading from './components/subcomponents/Loading.vue';
+import Alert from './components/subcomponents/Alert.vue';
+import { useAlert } from '@/stores/useAlert'
+import Modal from './components/items/Modal.vue'
+
+const { state, closeAlert } = useAlert()
 
 const route = useRoute();
 const router = useRouter();
 const session = ref(null);
 
 // --- LOADING LOGIC ---
-const isLoading = ref(false);
 const isHome = ref(false);
+const isLoading = ref(false) 
+provide('isLoading', isLoading)
+
 
 // 3500ms matches the CSS 'animation: lift 3.5s' in LoadingScreen.vue
 const MIN_ANIMATION_DURATION = 3500; 
@@ -234,17 +248,28 @@ onMounted(async () => {
   lastScrollY.value = window.scrollY;
   
   // 3. Auth State
-  supabase.auth.onAuthStateChange((event, currentSession) => {
-    session.value = currentSession;
-    
-    if (event === 'SIGNED_IN') {
-      if (route.name === 'SignIn' || route.name === 'SignUp') {
-        router.push('/dashboard');
-      }
-    } else if (event === 'SIGNED_OUT') {
+  // App.vue - in your onAuthStateChange
+let isRecoveryFlow = false;
+
+supabase.auth.onAuthStateChange((event, currentSession) => {
+  session.value = currentSession;
+  
+  if (event === 'PASSWORD_RECOVERY') {
+    isRecoveryFlow = true;
+  }
+  
+  if (event === 'SIGNED_IN') {
+    isRecoveryFlow = false;
+    if (route.name === 'SignIn' || route.name === 'SignUp') {
+      router.push('/dashboard');
+    }
+  } else if (event === 'SIGNED_OUT') {
+    if (!isRecoveryFlow) {
       router.push('/');
     }
-  });
+    isRecoveryFlow = false;
+  }
+});
 });
 
 onUnmounted(() => {

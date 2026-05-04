@@ -23,7 +23,7 @@
 
     <div class="min-h-screen relative w-full">
       <!-- Back Button -->
-      <div v-if="$route.path === '/upload'"  class="sticky top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-sm border-b border-primary/10 py-3 px-4">
+      <div v-if="!isComplete && $route.path === '/upload'"  class="sticky top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-sm border-b border-primary/10 py-3 px-4">
         <div class="container mx-auto flex items-center">
           <RouterLink to="/"
             class="inline-flex cursor-pointer items-center gap-2 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-all duration-200 group"
@@ -42,12 +42,11 @@
         - pointer-events-none ensures the absolute overlay doesn't block clicks on the header.
       -->
       <div 
-        class="container mx-auto px-4 py-6"
         :class="!isComplete ? 'absolute inset-0 flex items-center justify-center pointer-events-none' : 'h-fit my-auto'"
       >
         <!-- File Upload Section -->
         <!-- Added pointer-events-auto to restore interactivity for the uploader -->
-        <div v-if="!isComplete" class="w-full max-w-5xl pointer-events-auto">
+        <div v-if="!isComplete" class="w-full max-w-5xl pointer-events-auto relative">
           <FileUploader
             :api-url="apiUrl"
             @auth-required="onAuthRequired"
@@ -60,7 +59,7 @@
         </div>
 
         <!-- Complete State - Combined Editor View -->
-        <TranscriptEditor
+        <TransactionDetails
           v-if="isComplete"
           :api-url="apiUrl"
           :processing-id="processingId"
@@ -77,16 +76,18 @@
 import ModalDialog from './items/ModalDialog.vue';
 import ProcessingOverlay from './subcomponents/ProcessingOverlay.vue';
 import FileUploader from './subcomponents/FileUploader.vue'
-import TranscriptEditor from './subcomponents/TranscriptEditor.vue'
 import { RouterLink } from 'vue-router';
+import { useConfirm } from '@/stores/useConfirm';
+import TransactionDetails from './TransactionDetails.vue';
 
+const { showConfirm } = useConfirm()
 export default {
   name: 'VideoUpload',
   components: {
     ModalDialog,
     ProcessingOverlay,
     FileUploader,
-    TranscriptEditor,
+    TransactionDetails,
     RouterLink
 },
   data() {
@@ -124,7 +125,13 @@ export default {
     },
 
     onAuthRequired() {
-      this.modalVisible = true
+      showConfirm('info', 'Duhet të identifikoheni për të ngarkuar një video. A dëshironi të regjistroheni?', 'Regjistrohu', 'Hyr').then((confirmed) => {
+        if (confirmed) {
+          this.handleSignUp()
+        } else {
+          this.handleLogin()
+        }
+      })
     },
 
     onUploadStart() {
@@ -154,15 +161,17 @@ export default {
     },
 
     onUploadComplete(payload) {
-      // payload contains: processingId, videoUrl, originalTranscriptionJson, originalFilename
       this.processingState = 'complete'
       this.processingStep = null
       this.processingId = payload.processingId
       this.videoUrl = payload.videoUrl
       this.originalTranscriptionJson = payload.originalTranscriptionJson || null
       this.originalFilename = payload.originalFilename || null
-      this.isComplete = true
-      this.$refs.overlay?.stop()
+      
+      setTimeout(() => {
+        this.$refs.overlay?.stop()
+        this.isComplete = true
+      }, 800)
     }
   }
 }

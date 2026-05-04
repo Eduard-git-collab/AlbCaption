@@ -1,8 +1,14 @@
+<!-- Statistic Component -->
+
 <template>
   <div ref="root" class="w-screen h-screen p-4">
-    <div class="w-full h-full">
-      <div class="w-full h-[90%]">
-        <div class="relative h-full w-full bg-primary rounded-2xl overflow-hidden">
+    <div class="w-full h-full flex items-center">
+      <div ref="sectionEl" class="w-full h-[90%]">
+        <div
+          ref="wipeEl"
+          class="relative h-full w-full bg-primary rounded-2xl overflow-hidden"
+          :class="startWipe ? 'wipe' : 'opacity-0'"
+        >
           <div class="grid-overlay scale-200 absolute top-10 -right-1/4 w-full h-full"></div>
 
           <div class="w-full h-full grid grid-rows-6 lg:grid-rows-3">
@@ -56,39 +62,38 @@
             </div>
 
             <!-- Row 2 -->
-            <div class="w-full h-fit flex flex-col lg:flex-row gap-3 xl:gap-10 4xl:gap-20 items-center justify-center row-span-2 lg:row-span-1">
-              <!-- Percent with stroke-reveal effect -->
-              <div
-                class="relative cursor-default"
-                ref="percentContainer"
-                @mousemove="onPercentMove"
-                @mouseleave="onPercentLeave"
-              >
-                <!-- Filled text -->
-                <h1
-                  class="4xl:text-[600px] 2xl:text-[400px] xl:text-[300px] md:text-[200px] text-9xl text-kollektif-bold-italic text-secondary select-none p-10 -m-10 z-10 relative"
-                >
-                  71%
+            <div class="w-full flex flex-col lg:flex-row gap-3 xl:gap-10 4xl:gap-20 items-center justify-center row-span-2 lg:row-span-1 overflow-visible">
+              
+              <div 
+                :class="!showPercent ? 'opacity-0':'opacity-100'"
+                class="relative cursor-default transition-all duration-200 ease-in-out" ref="percentContainer" @mousemove="onPercentMove" @mouseleave="onPercentLeave">
+                <h1 class="4xl:text-[600px] 2xl:text-[400px] xl:text-[300px] md:text-[200px] text-9xl text-kollektif-bold-italic text-secondary select-none p-10 -m-10 z-10 relative">
+                  {{ value }}%
                 </h1>
-
-                <!-- Stroked overlay -->
-                <h1
-                  class="4xl:text-[600px] 2xl:text-[400px] xl:text-[300px] md:text-[200px] text-9xl text-kollektif-bold-italic select-none p-10 -m-10 absolute inset-0 pointer-events-none percent-stroke"
-                  :style="percentStrokeMaskStyle"
-                  aria-hidden="true"
-                >
-                  71%
+                <h1 class="4xl:text-[600px] 2xl:text-[400px] xl:text-[300px] md:text-[200px] text-9xl text-kollektif-bold-italic select-none p-10 -m-10 absolute inset-0 pointer-events-none percent-stroke"
+                  :style="percentStrokeMaskStyle" aria-hidden="true">
+                  {{ value }}%
                 </h1>
               </div>
 
-              <span class="text-secondary lg:text-left text-center 4xl:text-[128px] 2xl:text-8xl xl:text-7xl md:text-5xl text-2xl text-kollektif font-medium row-span-2">
+              <span
+                class="text-secondary lg:text-left text-center 4xl:text-[128px] 2xl:text-8xl xl:text-7xl md:text-5xl text-2xl text-kollektif font-medium whitespace-nowrap overflow-visible"
+                :style="{
+                  maxWidth: showText ? '1000px' : '0px',
+                  opacity: showText ? 1 : 0,
+                  transition: 'max-width 0.9s cubic-bezier(0.4, 0, 0.2, 1) 0.1s, opacity 0.5s ease 0.3s'
+                }"
+              >
                 e ndjekësve të tu përdorin<br />rrjetet sociale me zërin e fikur
               </span>
+
             </div>
 
             <!-- Row 3 -->
             <div class="w-[75%] h-fit mx-auto flex items-center justify-center">
-              <span class="text-secondary font-poppins lg:font-thin font-light text-center 4xl:text-[57px] 2xl:text-4xl xl:text-3xl md:text-xl text-md">
+              <span 
+              :class="!showSubtext ? 'opacity-0 translate-y-full':'translate-y-0 opacity-100'"
+              class="text-secondary font-poppins lg:font-thin font-light text-center 4xl:text-[57px] 2xl:text-4xl xl:text-3xl md:text-xl text-md transition-all duration-700 ease-in-out">
                 Ti ke vetëm pak sekonda kohë ti tregosh një shikuesi të ri, që vëmendja e tyre duhet drejtuar tek ti.<br class="lg:hidden block"><br class="lg:hidden block">
                 Tërhiq shikues të rinj, ktheji në ndjekës, dhe përdor titrimin automatik për ti udhëzuar vëmendjen dhe
                 shikimin tek publikimet e tua.
@@ -101,15 +106,28 @@
   </div>
 </template>
 
+
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+
+const value = ref(0)
+const target = 71
+const duration = 3000
 
 const root = ref(null)
+const showText = ref(false)
+const showSubtext = ref(false)
+const showPercent = ref(false)
+const sectionEl = ref(null)
+
+// animation control
+const startWipe = ref(false)
 
 // Stroke reveal effect
 const percentContainer = ref(null)
 const percentMouse = ref(null)
 
+// --- Mouse logic ---
 function onPercentMove(e) {
   const rect = percentContainer.value.getBoundingClientRect()
   percentMouse.value = {
@@ -124,6 +142,7 @@ function onPercentLeave() {
   percentMouse.value = null
 }
 
+// --- Mask effect ---
 const percentStrokeMaskStyle = computed(() => {
   if (!percentMouse.value) {
     return {
@@ -143,6 +162,100 @@ const percentStrokeMaskStyle = computed(() => {
     opacity: 1,
   }
 })
+
+// --- easing ---
+function easeInOutSine(t) {
+  return -(Math.cos(Math.PI * t) - 1) / 2
+}
+
+// --- helpers ---
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function waitForWipe() {
+  return new Promise(resolve => {
+    const el = document.querySelector('.wipe')
+    if (!el) return resolve()
+
+    const handler = () => {
+      el.removeEventListener('animationend', handler)
+      resolve()
+    }
+
+    el.addEventListener('animationend', handler)
+  })
+}
+
+// --- percent animation ---
+function runPercentAnimation() {
+  return new Promise(resolve => {
+    let start = null
+
+    function animate(timestamp) {
+      if (!start) start = timestamp
+      const progress = timestamp - start
+
+      const t = Math.min(progress / duration, 1)
+      const eased = easeInOutSine(t)
+
+      value.value = Math.floor(eased * target)
+
+      if (t < 1) {
+        requestAnimationFrame(animate)
+      } else {
+        resolve()
+      }
+    }
+
+    requestAnimationFrame(animate)
+  })
+}
+
+let observer = null
+let hasRun = false
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+  async ([entry]) => {
+    if (entry.isIntersecting && !hasRun) {
+      hasRun = true
+      observer.disconnect()
+
+      // your sequence
+      startWipe.value = true
+
+      await waitForWipe()
+      await delay(300)
+
+      showPercent.value = true
+
+      await runPercentAnimation()
+
+      showText.value = true
+
+      await delay(1000)
+
+      showSubtext.value = true
+    }
+  },
+  {
+    root: null,
+
+    rootMargin: '-50% 0px -50% 0px',
+
+    threshold: 0,
+  }
+)
+
+  if (sectionEl.value) {
+    observer.observe(sectionEl.value)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (observer) observer.disconnect()
+})
 </script>
 
 <style>
@@ -151,6 +264,20 @@ const percentStrokeMaskStyle = computed(() => {
   -webkit-text-stroke: 2px var(--color-secondary, #9FE29E);
   transition: opacity 0.15s ease;
 }
+
+.wipe {
+  animation: wipe 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes wipe {
+  0% {
+    clip-path: inset(0 50% 0 50%);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
 
 @media (min-width: 768px) {
   .percent-stroke {

@@ -6,7 +6,7 @@
       @touchstart.prevent="handleTimelineTouchStart"
       @touchmove.prevent="handleTimelineTouchMove"
       @touchend="handleTimelineTouchEnd"
-      class="w-full h-10 bg-black/80 rounded-lg relative overflow-hidden cursor-pointer select-none timeline-touch"
+      class="w-full h-10 bg-black/80 rounded-lg relative cursor-pointer select-none timeline-touch"
     >
       <!-- Video Frames Background -->
       <div class="absolute inset-0 flex">
@@ -41,7 +41,7 @@
       <!-- Playhead -->
       <div
         :style="{ left: `${playheadPosition}%` }"
-        class="absolute top-0 bottom-0 z-10 pointer-events-none"
+        class="absolute -top-3 -bottom-3 z-10 pointer-events-none"
       >
         <div class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[3px] bg-secondary rounded-full shadow-playhead"></div>
         <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-secondary rounded-full border-2 border-white shadow-md"></div>

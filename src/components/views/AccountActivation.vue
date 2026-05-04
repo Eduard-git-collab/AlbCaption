@@ -26,21 +26,18 @@
                 <input
                   v-model.trim="username"
                   type="text"
-                  required
                   class="w-full rounded-full bg-white/10 border border-secondary/40 focus:border-secondary focus:ring-2 focus:ring-secondary/30 px-6 py-4 text-white placeholder:text-white/60 outline-none transition-all"
                   placeholder="Username"
                 />
                 <input
                   v-model.trim="email"
                   type="email"
-                  required
                   class="w-full rounded-full bg-white/10 border border-secondary/40 focus:border-secondary focus:ring-2 focus:ring-secondary/30 px-6 py-4 text-white placeholder:text-white/60 outline-none transition-all"
                   placeholder="Email"
                 />
                 <input
                   v-model="password"
                   type="password"
-                  required
                   class="w-full rounded-full bg-white/10 border border-secondary/40 focus:border-secondary focus:ring-2 focus:ring-secondary/30 px-6 py-4 text-white placeholder:text-white/60 outline-none transition-all"
                   placeholder="Fjalëkalimi"
                 />
@@ -81,18 +78,21 @@
   import { ref } from 'vue'
   import logo_lines from '../logos/Logo_lines.vue'
   import apiClient from '@/stores/apiClient'
+  import { useAlert } from '@/stores/useAlert'
 
+  
   const username = ref('')
   const password = ref('')
   const email = ref('')
   const busy = ref(false)
-
+  const { showAlert } = useAlert()
+  
   const handleSubmit = async() =>{
     busy.value=true;
     try{
-      if(!username.value || !email.value){
-        alert("Ju lutem plotësoni të gjitha fushat.");
-        busy.value=false;
+      if(!username.value || !email.value || !password.value){
+        showAlert('warning', "Ju lutem plotësoni të gjitha fushat.");
+        busy.value = false;
         return;
       }
       const response = await apiClient.put('/auth/account-reactivation', {
@@ -101,16 +101,13 @@
         password: password.value
       });
       if(response.data.success){
-        setTimeout(() => {
-          alert("Llogaria juaj është riaktivizuar me sukses. Tani mund të identifikoheni.");
-          window.location.href="/dashboard";
-        }, 1000);
+        showAlert('success', "Llogaria juaj është riaktivizuar me sukses. Tani mund të identifikoheni.");
       }else{
-        alert(response.data.message || "Ndodhi një gabim gjatë përpjekjes për riaktivizimin e llogarisë.");
+        showAlert('error', response.data.message || "Ndodhi një gabim gjatë përpjekjes për riaktivizimin e llogarisë.");
       }
     }catch(error){
       console.error(error);
-      alert("Ndodhi një gabim gjatë përpjekjes për riaktivizimin e llogarisë.");
+      showAlert('error', "Ndodhi një gabim gjatë përpjekjes për riaktivizimin e llogarisë.");
     }
     busy.value=false;
   }

@@ -13,7 +13,6 @@ import Test from '../components/Test.vue';
 import ResetPassword from '../components/views/reset-password.vue'; 
 import Upload from '../components/Upload.vue';
 import PaymentSuccess from '../components/views/PaymentSuccess.vue';
-import Login from '../components/Login.vue';
 import AuthCallback from '../components/views/AuthCallback.vue';
 import UserSegmentation from '../components/views/UserSegmentation.vue';
 import About from '../components/About.vue';
@@ -34,6 +33,11 @@ const routes = [
     path: '/contact',
     name: 'Contact',
     component: Contact
+  },
+  {
+    path: '/faq',
+    name: 'FAQ',
+    component: () => import('../components/FAQ.vue') // Lazy load FAQ component
   },
   {
     path: '/payment/success',
@@ -74,7 +78,7 @@ const routes = [
     path: '/upload',
     name: 'Ngarko',
     component: Upload,
-    meta: { requiresAuth: true }
+    // meta: { requiresAuth: true }
   },
   {
     path: '/confirm-email',
@@ -114,11 +118,6 @@ const routes = [
     component: AuthCallback
   },
   {
-    path: '/login',
-    name: 'Login',
-    component: Login,
-  },
-  {
     path: '/segmentation',
     name: 'Segmentation',
     component: UserSegmentation,
@@ -133,7 +132,14 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+  if (savedPosition) {
+    return savedPosition
+  } else {
+    return { top: 0 }
+  }
+}
 });
 
 // New Global Navigation Guard
@@ -143,10 +149,18 @@ router.beforeEach(async (to, from, next) => {
   // If user lands on Home ('/') with "type=recovery" in the hash,
   // it means the email link was incorrect. Redirect them to ResetPassword.
   // -----------------------------------------------------------------------
-  if (to.path === '/' && to.hash && to.hash.includes('type=recovery')) {
-    next({ name: 'ResetPassword', hash: to.hash, query: to.query });
+  if (to.name === 'ResetPassword') {
+  const hash = new URLSearchParams(to.hash.slice(1));
+  const hasToken = hash.get('access_token') || 
+                   hash.get('code') || 
+                   to.query.code || 
+                   to.query.token;
+  
+  if (!hasToken) {
+    next({ name: 'SignIn' });
     return;
   }
+}
 
   const { data: { session } } = await supabase.auth.getSession();
 
@@ -213,5 +227,6 @@ router.beforeEach(async (to, from, next) => {
   // Default fallback
   next();
 });
+
 
 export default router;

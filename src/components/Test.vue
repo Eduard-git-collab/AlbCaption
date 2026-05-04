@@ -1,19 +1,4 @@
 <template>
-  
-  <div
-    v-if="showDeletionError"
-    class="fixed top-0 flex justify-center h-fit w-full z-100 p-3 duration-300 transition-all"
-    :class="showDeletionError ? 'translate-y-[30px]' : '-translate-y-[100px]'"
-  >
-    <div 
-      class="w-fit h-fit p-3 rounded-xl flex items-center border justify-center text-sm font-poppins"
-      :class="isError ? 'bg-red-300 border-red-500 text-red-700' : 'bg-[#ffffff]/75 border-secondary text-[#12998e]'"
-    >
-      {{ showDeletionErrorMessage }} 
-    </div>
-  </div>
-  
-
   <div class="w-screen h-screen bg-white overflow-y-auto">
     <div class="p-2 sm:p-3 w-full h-full">
       <div class="relative bg-primary w-full rounded-2xl sm:rounded-3xl overflow-hidden">
@@ -756,9 +741,6 @@
       @mouseenter="handleHelpMouseEnter"
       @mouseleave="handleHelpMouseLeave"
     >
-      <RouterLink to="/usage" class="dropdown-item">
-        <span>Përdorimi</span>
-      </RouterLink>
       <RouterLink to="/contact" class="dropdown-item">
         <span>Kontakt</span>
       </RouterLink>
@@ -917,6 +899,8 @@ import RoleModal from './items/RoleModal.vue';
 import UserEditModal from './items/UserEditModal.vue';
 import ReportBugModal from './items/ReportBugModal.vue';
 import apiClient from '@/stores/apiClient';
+import { useAlert } from '@/stores/useAlert'
+import { useConfirm } from '@/stores/useConfirm';
 
 // ============================================================
 // HELPER FUNCTIONS
@@ -954,6 +938,7 @@ const formatFileSize = (bytes) => {
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
 };
+const { showAlert } = useAlert()
 
 // ============================================================
 // ROUTER & STATE
@@ -970,6 +955,7 @@ const deleteLoading = ref(false);
 const deleteUserLoading = ref(false);
 const deactivateLoading = ref(false);
 const editProfileLoading = ref(false);
+const { showConfirm } = useConfirm()
 
 // User data
 const userData = ref(null);
@@ -1378,6 +1364,7 @@ async function handleRoleDelete() {
     showDeletionError.value = true;
     isError.value = true;
     showDeletionErrorMessage.value = 'Nuk mund të fshihet roli, përdorues janë të lidhur me të.';
+    showAlert('error', 'Nuk mund të fshihet roli, përdorues janë të lidhur me të.');
     setTimeout(() => {
       showDeletionError.value = false;
       isError.value = false;
@@ -1392,7 +1379,7 @@ async function handleRoleDelete() {
     
   if (deleteError) {
     console.error('Error deleting role:', deleteError);
-    DeletemodalMessage.value = 'Gabim gjatë fshirjes së rolit.';
+    showAlert('error', error.response?.data?.error || 'Ndodhi një gabim në server')
     return;
   }
   
@@ -1400,7 +1387,7 @@ async function handleRoleDelete() {
   selectedRole.value = null;
   showDeletionError.value = true;
   isError.value = false;
-  showDeletionErrorMessage.value = 'Roli u fshi me sukses.';
+  showAlert('success', 'Roli u fshi me sukses.');
   setTimeout(() => {
     showDeletionError.value = false;
     isError.value = false;
@@ -1414,39 +1401,36 @@ async function handleRoleDelete() {
 // ============================================================
 const promptDelete = (transaction) => {
   transactionToDelete.value = transaction;
-  showDeleteModal.value = true;
-  deleteError.value = null;
+  showConfirm('error', `Jeni të sigurt që doni të fshini transkriptin '${transaction.original_filename}' ? Ky veprim nuk mund të zhbëhet.`, 'Konfirmo', 'Anulo').then((confirmed) => {
+    if (confirmed) {
+      confirmDelete();
+    } else {
+      cancelDelete();
+    }
+  });
 };
 
 const confirmDelete = async () => {
+  console.log('Attempting to delete transcript with ID:', transactionToDelete.value?.id);
   if (!transactionToDelete.value) return;
   const transactionId = transactionToDelete.value.id;
   const videoUrl = transactionToDelete.value.video_url;
   
   try {
     await apiClient.post(`/delete/transcription/${transactionId}`, { video_url: videoUrl });
-    showDeleteModal.value = false;
     setTimeout(() => {
-      showDeletionError.value = true;
-      isError.value = false;
-      showDeletionErrorMessage.value = 'Transkripti u fshi me sukses.';
+      showAlert('success', 'Transkripti u fshi me sukses.');
       getTranscripts();
       getRecentTranscripts();
-      setTimeout(() => {
-        showDeletionError.value = false;
-        showDeletionErrorMessage.value = '';
-      }, 3000);
     }, 500);
   } catch (error) {
     console.error('[DASHBOARD] Error deleting transcript:', error);
-    deleteError.value = error.message || 'Failed to delete transcript.';
+    showAlert('error', 'Ndodhi një gabim gjatë fshirjes së transkriptit.');
   }
 };
 
 const cancelDelete = () => {
-  showDeleteModal.value = false;
   transactionToDelete.value = null;
-  deleteError.value = null;
 };
 
 // ============================================================
@@ -1485,7 +1469,7 @@ const confirmDeleteUser = async () => {
       }, 3000);
     }
   } catch (err) {
-    deleteUserError.value = err.message || 'Failed to delete user.';
+    showAlert('error', 'Ndodhi një gabim gjatë fshirjes së përdoruesit.');
   } finally {
     deleteUserLoading.value = false;
   }

@@ -22,10 +22,8 @@ export default defineConfig({
     },
   },
   server: {
+    strictPort: true,
     allowedHosts: [
-      'bc70-95-107-189-202.ngrok-free.app',
-      'hosted-lawyer-liked-alleged.trycloudflare.com',
-      'selection-alive-integral-beds.trycloudflare.com',
       'albcaptions.com',
       'www.albcaptions.com',
       'localhost',

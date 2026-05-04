@@ -100,7 +100,6 @@ function start() {
 
 function stop() {
   showText.value = false
-  disableScroll() 
   setTimeout(() => {
     isClicked.value = false
     setTimeout(() => { enableScroll() }, 500)

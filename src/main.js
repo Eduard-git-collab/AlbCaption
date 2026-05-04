@@ -4,23 +4,14 @@ import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia'
 import { useAuthStore } from './stores/auth'
+import Modal from './components/items/Modal.vue'
 
 const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
 app.use(router)
+app.component('Modal', Modal)
 
-import AOS from 'aos'
-import 'aos/dist/aos.css'
-
-// Initialize AOS
-// once: true means animations happen only once (don't reset when scrolling up)
-AOS.init({
-  once: true,
-  offset: 100, // offset (in px) from the original trigger point
-  duration: 800, // values from 0 to 3000, with step 50ms
-  easing: 'ease-out-cubic', // default easing for AOS animations
-})
 
 const initApp = async () => {
   try {

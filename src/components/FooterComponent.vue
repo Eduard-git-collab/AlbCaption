@@ -65,7 +65,7 @@
                     <RouterLink to="/pricing" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Çmime</RouterLink>
                     <RouterLink to="/upload" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Ngarko</RouterLink>
                     <RouterLink to="/faq" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">FAQ</RouterLink>
-                    <RouterLink to="/contact" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Na Kontakto</RouterLink>
+                    <RouterLink to="/contact" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Kontakt</RouterLink>
                     <a href="" @click.prevent="promptToSModal" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Kushtet e Përdorimit</a>
                     <a href="" @click.prevent="promptPrivacyPolicy" class="cursor-pointer relative after:absolute after:bottom-0 after:left-0 after:h-[2px] text-secondary font-poppins hover:text-white transition-colors after:w-full after:origin-bottom-right after:scale-x-0 after:bg-white after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.65_0.05_0.36_1)] hover:after:origin-bottom-left hover:after:scale-x-100">Politikat e Privatësisë</a>
                 </div>
@@ -75,10 +75,8 @@
                 
                 <!-- Social Icons -->
                 <div class="flex gap-6 items-center justify-center">
-                    <gmail_logo class="h-6 w-6 sm:h-8 sm:w-8 fill-secondary hover:fill-white transition-colors cursor-pointer"/>
-                    <facebook_logo class="h-6 w-6 sm:h-8 sm:w-8 fill-secondary hover:fill-white transition-colors cursor-pointer"/>
-                    <instagram_logo class="h-6 w-6 sm:h-8 sm:w-8 fill-secondary hover:fill-white transition-colors cursor-pointer"/>
-                    <linkedin_logo class="h-6 w-6 sm:h-8 sm:w-8 fill-secondary hover:fill-white transition-colors cursor-pointer"/>
+                    <a href="mailto:albcaptionai@gmail.com"><gmail_logo class="h-6 w-6 sm:h-8 sm:w-8 fill-secondary hover:fill-white transition-colors cursor-pointer"/></a>
+                    <a href="https://www.linkedin.com/company/albcaptions" target="_blank" rel="noopener noreferrer"><linkedin_logo class="h-6 w-6 sm:h-8 sm:w-8 fill-secondary hover:fill-white transition-colors cursor-pointer"/></a>
                 </div>
                 
                 <!-- Copyright -->

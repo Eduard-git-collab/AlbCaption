@@ -182,7 +182,7 @@
         { text: 'Funksionalitete për skuadra (së shpejti)'}
       ],
       //planId: 'P-40P32125KN1577439NBNKI4A',
-      planId:'P-2JR743181G189825MNDNFCIY',
+      planId:'P-0E8458666N319325DNHZBTKQ',
       isRecommended: true,
       svgColor: '#9FE29E'
     },

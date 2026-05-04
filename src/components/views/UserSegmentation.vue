@@ -526,7 +526,7 @@
         { label: 'Transkript i Sinkronizuar', value: 'I përfshirë' },
         { label: 'Shërbim me prioritet', value: 'I përfshirë' }
       ],
-      planId: 'P-2JR743181G189825MNDNFCIY'
+      planId: 'P-0E8458666N319325DNHZBTKQ'
     },
     {
       key: 'business',

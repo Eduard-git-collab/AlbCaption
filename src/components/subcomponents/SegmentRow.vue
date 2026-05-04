@@ -3,26 +3,26 @@
     <!-- Non-current segment -->
     <div v-if="!isCurrent" @dblclick="jumpAndEdit" class="w-full flex flex-col p-1 opacity-40 text-sm cursor-pointer">
       <div class="flex items-center gap-2 px-2 py-1 bg-gray-100">
-        <p class="text-xs font-poppins text-primary">
+        <p class="4xl:text-2xl 2xl:text-xl text-xs font-poppins text-primary">
           {{ formatVideoTime(segment.startTime) }} - {{ formatVideoTime(segment.endTime) }}
         </p>
         <svg
           @click.stop="$emit('loop', segment)"
-          class="w-4 h-4 cursor-pointer text-primary hover:text-secondary transition-all duration-200"
+          class="2xl:w-6 2xl:h-6 w-4 h-4 cursor-pointer text-primary hover:text-secondary transition-all duration-200"
           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
         >
           <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
         </svg>
         <svg
           @click.stop="$emit('play', segment)"
-          class="w-4 h-4 cursor-pointer hover:text-secondary text-primary transition-all duration-200"
+          class="2xl:w-6 2xl:h-6 w-4 h-4 cursor-pointer hover:text-secondary text-primary transition-all duration-200"
           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
         >
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
         </svg>
       </div>
       <div class="px-2 py-1 bg-gray-100 wrap-break-word">
-        <p class="line-clamp-2 font-poppins text-primary font-light">
+        <p class="line-clamp-2 font-poppins text-primary font-light 4xl:text-2xl 2xl:text-xl">
           <span
             v-for="(word, wordIndex) in segment.words"
             :key="`${index}-${wordIndex}`"
@@ -34,18 +34,18 @@
 
     <!-- Current segment -->
     <div v-else class="w-full h-fit flex flex-col p-2 bg-secondary/20">
-      <div class="w-full h-fit flex flex-row gap-2 items-center p-2 text-primary">
+      <div class="w-full h-fit flex flex-row gap-2 items-center p-2 text-primary 4xl:text-3xl 2xl:text-2xl">
         <p>{{ formatVideoTime(segment.startTime) }} - {{ formatVideoTime(segment.endTime) }}</p>
         <svg
           @click="$emit('loop', segment)"
-          class="w-5 h-5 cursor-pointer text-primary hover:text-secondary transition-all duration-200"
+          class="4xl:w-10 4xl:h-10 2xl:w-7 2xl:h-7 w-5 h-5 cursor-pointer text-primary hover:text-secondary transition-all duration-200"
           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
         >
           <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
         </svg>
         <svg
           @click="$emit('play', segment)"
-          class="w-5 h-5 cursor-pointer text-primary hover:text-secondary transition-all duration-200"
+          class="4xl:w-10 4xl:h-10 2xl:w-8 2xl:h-8 w-5 h-5 cursor-pointer text-primary hover:text-secondary transition-all duration-200"
           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
         >
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
@@ -67,9 +67,9 @@
             v-for="(word, wordIndex) in segment.words"
             :key="`${index}-${wordIndex}`"
             :class="[
-              'inline mr-1 text-primary font-medium',
-              isWordActive(word) ? 'text-secondary bg-primary font-bold px-1 py-0.5 rounded-md' :
-              isWordPast(word) ? 'text-gray-400' : ''
+              'inline mr-1 text-primary font-medium text-xl',
+              isWordActive(word) ? 'text-2xl text-secondary bg-primary font-bold px-1 py-0.5 rounded-md' :
+              isWordPast(word) ? 'text-gray-400 text-xl' : ''
             ]"
           >{{ word.text }}&shy;</span>
         </p>

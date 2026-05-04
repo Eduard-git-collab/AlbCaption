@@ -19,7 +19,7 @@
         </h3>
 
         <h2 class="text-primary font-semibold text-2xl md:text-4xl">
-          {{ currency }}{{ price }}.{{ decimal }}
+          {{ currency }}{{ price }}<span class="text-sm md:text-xl opacity-50">.{{ decimal }}</span>
           <span class="text-xs font-normal text-gray-500">
             / {{ priceDescription }}
           </span>

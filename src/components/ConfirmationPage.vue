@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import logo_lines from './logos/Logo_lines.vue'
 
 const route = useRoute();
 const router = useRouter();
@@ -91,8 +92,13 @@ const goToHome = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-primary flex items-center justify-center px-4 font-poppins">
-    <div class="bg-[#084742] bg-opacity-50 p-8 rounded-2xl max-w-lg w-full text-center">
+  <div class="min-h-screen bg-primary flex items-center justify-center px-4 font-poppins relative">
+    <div class="fixed bottom-0 left-0 z-0 w-full h-full pointer-events-none">
+        <div class="w-full h-full flex items-end lg:block">
+          <logo_lines class="h-1/2 w-full pointer-events-none text-secondary/10" />
+        </div>
+      </div>
+    <div class="bg-[#084742] bg-opacity-50 p-8 rounded-2xl max-w-lg w-full text-center z-10">
       <div class="h-20 w-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />

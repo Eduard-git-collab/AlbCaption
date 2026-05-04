@@ -4,6 +4,17 @@ import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabaseClient'
 import Logo_lines from '../logos/Logo_lines.vue'
 import PaypalSubscribeButton from '../PaypalSubscribeButton.vue'
+import PrivacyPolicyModal from '../items/PrivacyPolicyModal.vue';
+import ToSModal from '../items/ToSModal.vue';
+
+const ShowPrivacyPolicy = ref(false);
+const ShowToSModal = ref(false);
+const promptPrivacyPolicy = () => {
+  ShowPrivacyPolicy.value = true;
+};
+const promptToSModal = () => {
+  ShowToSModal.value = true;
+};
 
 const props = defineProps({
   open: { type: Boolean, required: true },
@@ -423,17 +434,23 @@ const billingCycle = computed(() => (props.isYearly ? 'Vjetore' : 'Mujore'))
                     </div>
                     <p class="text-xs text-center text-gray-400 mt-2 max-w-md leading-relaxed">
                         Duke vazhduar, ju pranoni 
-                        <a href="/terms" class="text-primary underline hover:text-secondary" target="_blank">Kushtet e Përdorimit</a> 
+                        <a href="" @click.prevent="promptToSModal" class="text-primary underline hover:text-secondary" target="_blank">Kushtet e Përdorimit</a> 
                         dhe 
-                        <a href="/privacy" class="text-primary underline hover:text-secondary" target="_blank">Politikat e Privatësisë</a>.
+                        <a href="" @click.prevent="promptPrivacyPolicy" class="text-primary underline hover:text-secondary" target="_blank">Politikat e Privatësisë</a>.
                     </p>
                 </div>
             </div>
-
         </div>
       </div>
     </div>
   </div>
+
+  <ToSModal
+        v-model:open="ShowToSModal"
+    />
+    <PrivacyPolicyModal
+        v-model:open="ShowPrivacyPolicy"
+    />
 </template>
 
 <style scoped>

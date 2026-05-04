@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="state.show"
-    class="fixed w-screen h-screen bg-black/20 backdrop-blur-xs z-50 flex items-center justify-center"
+    class="fixed w-screen h-screen bg-black/20 backdrop-blur-xs z-100 flex items-center justify-center"
   >
     <div class="relative bg-white border border-[#353535]/70 rounded-lg shadow-lg w-2/5 h-fit">
       
@@ -50,15 +50,14 @@
             class="px-4 py-1 rounded-md border border-[#353535]/70 text-[#353535] hover:bg-[#353535]/10"
             @click="cancel"
           >
-            Anulo
+            {{state.reject}}
           </button>
-
           <button
             class="px-4 py-1 rounded-md text-white"
             :class="state.buttonColor"
             @click="confirm"
           >
-            Prano
+            {{ state.approve }}
           </button>
         </div>
       </div>
@@ -68,6 +67,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import Albcaption_logo_nocolor from '../logos/Albcaption_logo_nocolor.vue'
 import { useConfirm } from '@/stores/useConfirm'
 
